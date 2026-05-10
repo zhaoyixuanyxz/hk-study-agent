@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/plan-input-view.schema.json",
+  "title": "PlanInputView",
+  "type": "object",
+  "required": ["schemaVersion", "academic", "goals", "budget", "timeline", "riskPreference", "readiness"],
+  "properties": {
+    "schemaVersion": { "type": "string", "examples": ["1.0"] },
+    "academic": { "$ref": "#/$defs/dimensionBlock" },
+    "goals": { "$ref": "#/$defs/dimensionBlock" },
+    "budget": { "$ref": "#/$defs/dimensionBlock" },
+    "timeline": { "$ref": "#/$defs/dimensionBlock" },
+    "riskPreference": { "$ref": "#/$defs/dimensionBlock" },
+    "readiness": {
+      "type": "object",
+      "required": ["ready", "missingRequired"],
+      "properties": {
+        "ready": { "type": "boolean" },
+        "missingRequired": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "note": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "dimensionBlock": {
+      "type": "object",
+      "required": ["value", "source"],
+      "properties": {
+        "value": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "source": {
+          "type": "string",
+          "enum": ["confirmed", "candidate", "inferred"]
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

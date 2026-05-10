@@ -1,0 +1,33 @@
+{
+  "name": "study-abroad-agent-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test tests/api.test.js",
+    "verify:p0": "node scripts/verify-v1-p0.mjs",
+    "verify:v1-p1": "node scripts/verify-v1-p1.mjs",
+    "verify:v1-p2": "node scripts/verify-v1-p2.mjs",
+    "verify:v1-p3": "node scripts/verify-v1-p3.mjs",
+    "verify:v1-p5": "node scripts/verify-v1-p5.mjs",
+    "verify:v1-p6": "node scripts/verify-v1-p6.mjs",
+    "test:v1-p0": "node --test tests/api.test.js && node scripts/verify-v1-p0.mjs",
+    "test:v1-p1": "node --test tests/api.test.js tests/v1-p1-chat.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs",
+    "test:v1-p2": "node --test tests/api.test.js tests/v1-p1-chat.test.js tests/v1-p2-profile-plan.test.js tests/profile-full-reset.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs && node scripts/verify-v1-p2.mjs",
+    "test:v1-p3": "node --test tests/api.test.js tests/v1-p1-chat.test.js tests/v1-p2-profile-plan.test.js tests/v1-p3-report-history.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs && node scripts/verify-v1-p2.mjs && node scripts/verify-v1-p3.mjs",
+    "test:v1-p3-pdf-e2e": "node scripts/run-v1p3-pdf-e2e.mjs",
+    "test:v1-p4": "node --test tests/api.test.js tests/v1-p1-chat.test.js tests/v1-p2-profile-plan.test.js tests/v1-p3-report-history.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs && node scripts/verify-v1-p2.mjs && node scripts/verify-v1-p3.mjs && node scripts/verify-v1-p4.mjs",
+    "test:v1-p5": "node --test tests/api.test.js tests/v1-p1-chat.test.js tests/v1-p2-profile-plan.test.js tests/v1-p3-report-history.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs && node scripts/verify-v1-p2.mjs && node scripts/verify-v1-p3.mjs && node scripts/verify-v1-p4.mjs && node scripts/verify-v1-p5.mjs",
+    "test:v1-p6": "node --test tests/api.test.js tests/v1-p1-chat.test.js tests/v1-p2-profile-plan.test.js tests/v1-p3-report-history.test.js tests/v1-p6-fullchain-security.test.js && node scripts/verify-v1-p0.mjs && node scripts/verify-v1-p1.mjs && node scripts/verify-v1-p2.mjs && node scripts/verify-v1-p3.mjs && node scripts/verify-v1-p4.mjs && node scripts/verify-v1-p5.mjs && node scripts/verify-v1-p6.mjs",
+    "data:repair": "node scripts/repair-db.mjs"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.0",
+    "openai": "^4.77.3",
+    "puppeteer": "^24.2.0"
+  }
+}

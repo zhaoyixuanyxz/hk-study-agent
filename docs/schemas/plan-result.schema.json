@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/plan-result.schema.json",
+  "title": "StudyPlanResult",
+  "type": "object",
+  "required": ["schemaVersion", "disclaimer", "risk_summary", "budget_suggestion", "timeline_suggestion", "tiers"],
+  "properties": {
+    "schemaVersion": { "type": "string", "examples": ["1.0"] },
+    "disclaimer": { "type": "string" },
+    "risk_summary": { "type": "string" },
+    "budget_suggestion": { "type": "string" },
+    "timeline_suggestion": { "type": "string" },
+    "tiers": {
+      "type": "object",
+      "required": ["reach", "match", "safety"],
+      "properties": {
+        "reach": { "$ref": "#/$defs/tier" },
+        "match": { "$ref": "#/$defs/tier" },
+        "safety": { "$ref": "#/$defs/tier" }
+      }
+    }
+  },
+  "$defs": {
+    "tier": {
+      "type": "object",
+      "required": ["label", "summary", "rationale"],
+      "properties": {
+        "label": { "type": "string" },
+        "summary": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": true
+}

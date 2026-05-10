@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/v1-draft-share.schema.json",
+  "title": "V1DraftReportShare",
+  "type": "object",
+  "required": ["id", "reportId", "userId", "shareToken", "status"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "reportId": { "type": "string", "minLength": 1 },
+    "userId": { "type": "string", "minLength": 1 },
+    "shareToken": { "type": "string", "minLength": 24 },
+    "status": {
+      "type": "string",
+      "enum": ["active", "revoked"]
+    },
+    "createdAt": { "type": "string" },
+    "revokedAt": { "type": "string" },
+    "viewCount": { "type": "integer", "minimum": 0 },
+    "lastViewedAt": { "type": "string" }
+  },
+  "additionalProperties": true
+}

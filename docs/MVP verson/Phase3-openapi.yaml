@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: Study Agent API — Phase 3（方案生成）
+  version: "1.0.0"
+  description: |
+    方案生成与查询；鉴权 `Authorization: Bearer <token>`。
+servers:
+  - url: http://127.0.0.1:8010
+paths:
+  /api/v1/plans/generate:
+    post:
+      summary: 基于最新 planInputView 生成单套方案并落库
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratePlanSuccess"
+        "400":
+          description: 输入不足或未就绪
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanError"
+        "502":
+          description: 生成失败或超时（见 `code`：`GENERATION_FAILED` / `GENERATION_TIMEOUT`）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanError"
+  /api/v1/internal/plan-generation/metrics:
+    get:
+      summary: 进程内方案生成聚合指标（P3-BE-03）
+      description: |
+        需配置环境变量 `PLAN_METRICS_HTTP_TOKEN`，并携带请求头 `X-Plan-Metrics-Token` 与该值一致；未配置时返回 404。
+      parameters:
+        - name: X-Plan-Metrics-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanGenerateMetrics"
+        "404":
+          description: 未开启或 token 不匹配
+  /api/v1/plans:
+    get:
+      summary: 当前用户的方案列表
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plans:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PlanListItem"
+  /api/v1/plans/{planId}:
+    get:
+      summary: 方案详情
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanDetail"
+        "404":
+          description: 不存在或越权
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    GeneratePlanSuccess:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        plan_id:
+          type: string
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        plan_input_schema_version:
+          type: string
+        plan:
+          description: JSON Schema 见 docs/schemas/plan-result.schema.json
+          type: object
+          additionalProperties: true
+    PlanListItem:
+      type: object
+      properties:
+        plan_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+    PlanDetail:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        plan_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        plan_input_schema_version:
+          type: string
+        plan:
+          type: object
+          additionalProperties: true
+    PlanError:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        code:
+          type: string
+          enum:
+            - READINESS_NOT_MET
+            - INPUT_INCOMPLETE
+            - GENERATION_FAILED
+            - GENERATION_TIMEOUT
+            - UNSUPPORTED_CASE
+        message:
+          type: string
+        retryable:
+          type: boolean
+        suggestion:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+    PlanGenerateMetrics:
+      type: object
+      properties:
+        attempts_total:
+          type: integer
+        success_total:
+          type: integer
+        failure_total:
+          type: integer
+        success_rate:
+          type: number
+          nullable: true
+        failure_by_code:
+          type: object
+          additionalProperties:
+            type: integer
+        avg_duration_ms_all:
+          type: number
+          nullable: true
+        avg_duration_ms_success:
+          type: number
+          nullable: true
+        recent_duration_p95_ms:
+          type: number
+          nullable: true

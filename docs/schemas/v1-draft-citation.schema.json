@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/v1-draft-citation.schema.json",
+  "title": "V1DraftCitation",
+  "type": "object",
+  "required": ["itemId", "url"],
+  "properties": {
+    "itemId": { "type": "string", "minLength": 1 },
+    "sourceTitle": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "publishedAt": { "type": "string" },
+    "quoteOrSummary": { "type": "string" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/profile-snapshot.schema.json",
+  "title": "ProfileSnapshot",
+  "type": "object",
+  "required": ["schemaVersion", "summary", "structuredFacts", "gaps", "insights", "confirmationState", "updatedAt"],
+  "properties": {
+    "schemaVersion": { "type": "string", "examples": ["1.0"] },
+    "summary": { "type": "string" },
+    "structuredFacts": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "insights": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confirmationState": {
+      "type": "object",
+      "required": ["facts"],
+      "properties": {
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "key", "value", "status"],
+            "properties": {
+              "id": { "type": "string", "description": "如 fact_target_region" },
+              "key": { "type": "string" },
+              "value": { "type": "string" },
+              "status": { "type": "string", "enum": ["confirmed", "pending", "conflict"] }
+            }
+          }
+        }
+      }
+    },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}

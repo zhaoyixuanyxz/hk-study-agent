@@ -1,0 +1,241 @@
+openapi: 3.0.3
+info:
+  title: Study Agent API — Phase 4（报告与历史）
+  version: "1.0.0"
+  description: |
+    HTML 报告生成、查询与历史聚合；鉴权 `Authorization: Bearer <token>`。
+    报告生成当前为同步：`POST /api/v1/reports/generate` 在一次请求内完成生成与落库。
+servers:
+  - url: http://127.0.0.1:8010
+paths:
+  /api/v1/reports/generate:
+    post:
+      summary: 基于画像快照与方案生成七章 HTML 报告并落库
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: 可选；缺省取当前用户最新一条方案
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateReportSuccess"
+        "400":
+          description: 无方案、画像缺失或与方案快照不一致等
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportError"
+        "502":
+          description: 模型失败或超时
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportError"
+  /api/v1/reports:
+    get:
+      summary: 当前用户的报告列表（摘要）
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reports:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ReportListItem"
+  /api/v1/reports/{reportId}:
+    get:
+      summary: 报告详情（含 HTML）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportDetail"
+        "404":
+          description: 不存在或越权
+  /api/v1/history:
+    get:
+      summary: 历史聚合（线程、画像快照、方案、报告）
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HistoryAggregate"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    GenerateReportSuccess:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        report_id:
+          type: string
+        plan_id:
+          type: string
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        word_count:
+          type: integer
+        title:
+          type: string
+        html:
+          type: string
+          description: 七章拼接后的 HTML 文档片段（article）
+    ReportListItem:
+      type: object
+      properties:
+        report_id:
+          type: string
+        created_at:
+          type: string
+        plan_id:
+          type: string
+          nullable: true
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        word_count:
+          type: integer
+        chapter_count:
+          type: integer
+    ReportDetail:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        report_id:
+          type: string
+        created_at:
+          type: string
+        plan_id:
+          type: string
+          nullable: true
+        snapshot_id:
+          type: string
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        report_schema_version:
+          type: string
+        word_count:
+          type: integer
+        chapter_count:
+          type: integer
+        html:
+          type: string
+    ReportError:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        code:
+          type: string
+          example: NO_PLAN
+        message:
+          type: string
+        retryable:
+          type: boolean
+        suggestion:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+    HistoryAggregate:
+      type: object
+      properties:
+        threads:
+          type: array
+          items:
+            type: object
+            properties:
+              thread_id:
+                type: string
+              orchestration_state:
+                type: string
+              created_at:
+                type: string
+              updated_at:
+                type: string
+        profile_snapshots:
+          type: array
+          items:
+            type: object
+            properties:
+              snapshot_id:
+                type: string
+              version:
+                type: integer
+              created_at:
+                type: string
+        plans:
+          type: array
+          items:
+            type: object
+            properties:
+              plan_id:
+                type: string
+              created_at:
+                type: string
+              snapshot_id:
+                type: string
+                nullable: true
+              snapshot_version:
+                type: integer
+                nullable: true
+        reports:
+          type: array
+          items:
+            type: object
+            properties:
+              report_id:
+                type: string
+              created_at:
+                type: string
+              plan_id:
+                type: string
+                nullable: true
+              word_count:
+                type: integer

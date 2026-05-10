@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: studyagent
+      POSTGRES_PASSWORD: studyagent
+      POSTGRES_DB: studyagent
+    ports:
+      - "5433:5432"
+    volumes:
+      - studyagent_pgdata:/var/lib/postgresql/data
+
+volumes:
+  studyagent_pgdata:

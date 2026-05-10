@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: Study Agent API — Phase 2（画像与记忆）
+  version: "1.0.0"
+  description: |
+    Phase 2 相关端点；鉴权为 `Authorization: Bearer <token>`（注册见 `POST /api/v1/users/register`）。
+servers:
+  - url: http://127.0.0.1:8010
+paths:
+  /api/v1/profile:
+    get:
+      summary: 聚合画像快照、planInputView 与记忆列表
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileBundle"
+  /api/v1/profile/snapshot:
+    get:
+      summary: 最新版本化画像快照
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotResponse"
+  /api/v1/profile/plan-input:
+    get:
+      summary: 方案输入视图 planInputView
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan_input_view:
+                    $ref: "#/components/schemas/PlanInputView"
+                  snapshot_version:
+                    type: integer
+                    nullable: true
+  /api/v1/profile/memories:
+    get:
+      summary: 用户级记忆项列表
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryItem"
+  /api/v1/profile/confirmations/{factId}:
+    post:
+      summary: 确认或修正某一事实（factId 如 fact_target_region）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: factId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  snapshot:
+                    $ref: "#/components/schemas/ProfileSnapshot"
+                  plan_input_view:
+                    $ref: "#/components/schemas/PlanInputView"
+  /api/v1/threads/{threadId}/messages:
+    post:
+      summary: 发送消息（响应含 Phase 2 画像字段）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    ProfileBundle:
+      type: object
+      properties:
+        snapshot:
+          $ref: "#/components/schemas/ProfileSnapshot"
+          nullable: true
+        plan_input_view:
+          $ref: "#/components/schemas/PlanInputView"
+          nullable: true
+        snapshot_version:
+          type: integer
+          nullable: true
+        snapshot_id:
+          type: string
+          nullable: true
+        memories:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryItem"
+    SnapshotResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        snapshot:
+          $ref: "#/components/schemas/ProfileSnapshot"
+          nullable: true
+    ProfileSnapshot:
+      description: JSON Schema 见 docs/schemas/profile-snapshot.schema.json
+      type: object
+      additionalProperties: true
+    PlanInputView:
+      description: JSON Schema 见 docs/schemas/plan-input-view.schema.json
+      type: object
+      additionalProperties: true
+    MemoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [confirmed, candidate, preference, insight]
+        key:
+          type: string
+        value:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+    SendMessageResponse:
+      type: object
+      properties:
+        user_message:
+          type: object
+        assistant_message:
+          type: object
+        orchestration_state:
+          type: string
+        gaps:
+          type: array
+          items:
+            type: string
+        suggested_followups:
+          type: array
+          items:
+            type: string
+        readiness_for_profile:
+          type: boolean
+        readiness_for_plan:
+          type: boolean
+        profile_snapshot:
+          $ref: "#/components/schemas/ProfileSnapshot"
+          nullable: true
+        plan_input_view:
+          $ref: "#/components/schemas/PlanInputView"
+          nullable: true

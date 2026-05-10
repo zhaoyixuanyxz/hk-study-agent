@@ -1,0 +1,3 @@
+readiness_for_profile 仅在：已能概括用户画像主干（目标方向 + 时间或预算至少其一 + 学术背景有基本描述）且关键缺口已显式列出或已补齐时，才可设为 true。
+若仍缺关键项，保持 false，并在 gaps 中写清楚缺什么。
+当 gaps 为空且上述主干已齐：reply 中应包含简短诊断句，readiness_for_profile 倾向 true（除非你判断仍有隐藏关键不确定）。
