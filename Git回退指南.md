@@ -9,9 +9,9 @@
 | 项目 | 值 |
 |------|-----|
 | **标签（推荐用于回退）** | `baseline-2026-05-11` |
-| **提交 SHA（完整）** | `9f007c1987d418edbfff52da1754fbbae6431246` |
-| **分支** | `master`（初始化时记录的基线等同于该提交的树） |
-| **说明** | 2026-05-11 建立的首个快照：`chore: baseline snapshot before future updates (2026-05-11)` |
+| **提交 SHA（完整）** | `76d87b11c2a762237bc71f818265bc8bd540f7c0` |
+| **分支** | `master` |
+| **说明** | 含本回退文档的稳定基线：`docs: add Git rollback guide for baseline restore`（此前的纯代码首快照为 `9f007c1`，无本文件；回退请以本表 SHA 或标签为准）。 |
 
 回退的目标是：**工作区与 Git 跟踪的文件内容**与该提交一致。
 
@@ -42,7 +42,7 @@ git reset --hard baseline-2026-05-11
 若标签不存在（例如仅克隆了未带 tag 的仓库），可用提交 SHA：
 
 ```powershell
-git reset --hard 9f007c1987d418edbfff52da1754fbbae6431246
+git reset --hard 76d87b11c2a762237bc71f818265bc8bd540f7c0
 ```
 
 ---
