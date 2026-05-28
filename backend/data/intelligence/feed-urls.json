@@ -1,0 +1,509 @@
+{
+  "version": 1,
+  "feeds": [
+    {
+      "id": "hku-policy",
+      "url": "https://www.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "hku-deadline",
+      "url": "https://admissions.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "hku-tuition",
+      "url": "https://admissions.hku.hk/fees",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "hku-admission",
+      "url": "https://admissions.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "hku-program",
+      "url": "https://admissions.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "hku-visa",
+      "url": "https://admissions.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "hku-scholarship",
+      "url": "https://admissions.hku.hk/",
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "cuhk-policy",
+      "url": "https://www.cuhk.edu.hk/english/policies.html",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "cuhk-deadline",
+      "url": "https://www.gs.cuhk.edu.hk/admissions",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "cuhk-tuition",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/fees",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "cuhk-admission",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/requirements",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "cuhk-program",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/programmes",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "cuhk-visa",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/international-students",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "cuhk-scholarship",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/scholarships",
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "hkust-policy",
+      "url": "https://hkust.edu.hk/about/policies",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "hkust-deadline",
+      "url": "https://join.hkust.edu.hk/",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "hkust-tuition",
+      "url": "https://join.hkust.edu.hk/fees",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "hkust-admission",
+      "url": "https://join.hkust.edu.hk/admission-requirements",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "hkust-program",
+      "url": "https://join.hkust.edu.hk/program-list",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "hkust-visa",
+      "url": "https://join.hkust.edu.hk/international-students",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "hkust-scholarship",
+      "url": "https://join.hkust.edu.hk/scholarships",
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "polyu-policy",
+      "url": "https://www.polyu.edu.hk/about-polyu/mission-and-vision/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "polyu-deadline",
+      "url": "https://www.polyu.edu.hk/admissions/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "polyu-tuition",
+      "url": "https://www.polyu.edu.hk/admissions/tuition-fees/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "polyu-admission",
+      "url": "https://www.polyu.edu.hk/admissions/entry-requirements/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "polyu-program",
+      "url": "https://www.polyu.edu.hk/admissions/programmes/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "polyu-visa",
+      "url": "https://www.polyu.edu.hk/admissions/international-students/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "polyu-scholarship",
+      "url": "https://www.polyu.edu.hk/admissions/scholarships/",
+      "sourceId": "polyu-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "cityu-policy",
+      "url": "https://www.cityu.edu.hk/about/policies",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "cityu-deadline",
+      "url": "https://www.cityu.edu.hk/admo/admissions",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "cityu-tuition",
+      "url": "https://www.cityu.edu.hk/admo/fees",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "cityu-admission",
+      "url": "https://www.cityu.edu.hk/admo/entry-requirements",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "cityu-program",
+      "url": "https://www.cityu.edu.hk/admo/programmes",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "cityu-visa",
+      "url": "https://www.cityu.edu.hk/admo/non-local",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "cityu-scholarship",
+      "url": "https://www.cityu.edu.hk/admo/scholarships",
+      "sourceId": "cityu-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "hkbu-policy",
+      "url": "https://www.hkbu.edu.hk/about/policies",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "hkbu-deadline",
+      "url": "https://ar.hkbu.edu.hk/tpg/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "hkbu-tuition",
+      "url": "https://ar.hkbu.edu.hk/tpg/tuition-fees/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "hkbu-admission",
+      "url": "https://ar.hkbu.edu.hk/tpg/admissions-requirements/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "hkbu-program",
+      "url": "https://ar.hkbu.edu.hk/tpg/programmes/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "hkbu-visa",
+      "url": "https://ar.hkbu.edu.hk/tpg/international-students/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "hkbu-scholarship",
+      "url": "https://ar.hkbu.edu.hk/tpg/scholarships/",
+      "sourceId": "hkbu-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "lingnan-policy",
+      "url": "https://www.ln.edu.hk/about/policies",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "lingnan-deadline",
+      "url": "https://www.ln.edu.hk/admissions/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "lingnan-tuition",
+      "url": "https://www.ln.edu.hk/admissions/tuition-fees/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "lingnan-admission",
+      "url": "https://www.ln.edu.hk/admissions/entry-requirements/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "lingnan-program",
+      "url": "https://www.ln.edu.hk/admissions/programmes/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "lingnan-visa",
+      "url": "https://www.ln.edu.hk/admissions/non-local-students/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "lingnan-scholarship",
+      "url": "https://www.ln.edu.hk/admissions/scholarships/",
+      "sourceId": "lingnan-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "scholarship"
+    },
+    {
+      "id": "eduhk-policy",
+      "url": "https://www.eduhk.hk/about/policies",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "policy"
+    },
+    {
+      "id": "eduhk-deadline",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "deadline"
+    },
+    {
+      "id": "eduhk-tuition",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/fees",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "tuition"
+    },
+    {
+      "id": "eduhk-admission",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/admission",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "admission"
+    },
+    {
+      "id": "eduhk-program",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/programme",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "program"
+    },
+    {
+      "id": "eduhk-visa",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/non-local",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "visa"
+    },
+    {
+      "id": "eduhk-scholarship",
+      "url": "https://www.eduhk.hk/acadprog/postgrad/scholarship",
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "scholarship"
+    }
+  ]
+}

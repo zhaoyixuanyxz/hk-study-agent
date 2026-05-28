@@ -1,5 +1,9 @@
 import OpenAI from "openai";
-import { normalizeCitations } from "./citation-utils.js";
+import {
+  citationsToCitationRefs,
+  filterCitationsAgainstIntelligenceItems,
+  normalizeCitations,
+} from "./citation-utils.js";
 
 const PLAN_RESULT_SCHEMA_VERSION = "1.0";
 
@@ -68,7 +72,29 @@ function flattenDim(piv, key) {
 /**
  * @param {object} planInputView
  */
-export function buildMockStructuredPlan(planInputView) {
+function mockPlanCitationsFromIntel(intelItems) {
+  if (!Array.isArray(intelItems) || !intelItems.length) return [];
+  const item = intelItems.find((x) => x.infoType === "deadline" || x.infoType === "policy") || intelItems[0];
+  if (!item?.id || !item.canonicalUrl) return [];
+  return [
+    {
+      itemId: item.id,
+      url: item.canonicalUrl,
+      sourceTitle: item.locale?.titleZh,
+      publishedAt: item.publishedAt,
+    },
+  ];
+}
+
+function applyIntelToPlan(plan, intelItems) {
+  if (!plan || !Array.isArray(intelItems) || !intelItems.length) return plan;
+  const citations = filterCitationsAgainstIntelligenceItems(plan.citations, intelItems);
+  const mockOnly = citations.length === 0;
+  const merged = mockOnly ? filterCitationsAgainstIntelligenceItems(mockPlanCitationsFromIntel(intelItems), intelItems) : citations;
+  return { ...plan, citations: merged, citationRefs: citationsToCitationRefs(merged) };
+}
+
+export function buildMockStructuredPlan(planInputView, intelItems) {
   const g = flattenDim(planInputView, "goals");
   const a = flattenDim(planInputView, "academic");
   const b = flattenDim(planInputView, "budget");
@@ -83,7 +109,7 @@ export function buildMockStructuredPlan(planInputView) {
   const intake = t.intake_or_season || "（未提供）";
   const risk = r.risk_style || "均衡";
 
-  return {
+  const base = {
     schemaVersion: PLAN_RESULT_SCHEMA_VERSION,
     disclaimer: DEFAULT_DISCLAIMER,
     risk_summary: `基于你当前背景（${school}，GPA ${gpa}）与目标（${region} · ${field}），申请仍受当年竞争、名额与材料质量影响；请避免将任何表述理解为录取承诺。`,
@@ -112,6 +138,7 @@ export function buildMockStructuredPlan(planInputView) {
       },
     },
   };
+  return applyIntelToPlan(base, intelItems);
 }
 
 function parsePlanJson(content) {
@@ -158,6 +185,7 @@ export function normalizePlanResult(raw) {
     };
   };
   const citations = normalizeCitations(raw.citations);
+  const citationRefs = citationsToCitationRefs(citations);
   const timeline_urgency = normalizeTimelineUrgency(raw.timeline_urgency);
   /** @type {Record<string, unknown>} */
   const out = {
@@ -172,6 +200,7 @@ export function normalizePlanResult(raw) {
       safety: one(safety, "保底"),
     },
     citations,
+    citationRefs,
   };
   if (timeline_urgency) out.timeline_urgency = timeline_urgency;
   return /** @type {typeof out & { timeline_urgency?: string }} */ (out);
@@ -185,11 +214,13 @@ export function normalizePlanResult(raw) {
  *   deepseekBaseUrl?: string,
  *   deepseekModel?: string,
  *   timeoutMs?: number,
+ *   intelContextText?: string,
+ *   intelItems?: object[],
  * }} opts
  */
 export async function generateStructuredPlan(planInputView, opts) {
   if (opts.useMock) {
-    const plan = buildMockStructuredPlan(planInputView);
+    const plan = buildMockStructuredPlan(planInputView, opts.intelItems);
     return { ok: true, plan };
   }
 
@@ -204,11 +235,14 @@ export async function generateStructuredPlan(planInputView, opts) {
   const system = `你是留学规划助手。只输出一个 JSON 对象，不要输出 markdown。JSON 必须包含：
 schemaVersion, disclaimer, risk_summary, budget_suggestion, timeline_suggestion,
 tiers: { reach, match, safety }，每个 tier 含 label, summary, rationale（中文），以及可选 risk_note（一两句说明该档主要不确定性与非承诺表述）。
-另须包含 citations（数组，可为空）：若引用可核验的外部事实（政策、学费、截止日期等），每项须含 itemId、url（http/https）；可选 sourceTitle、publishedAt、quoteOrSummary。无可靠链接时不要编造条目。
+另须包含 citations（数组，可为空）：若引用可核验的外部事实（政策、学费、截止日期等），每项须含 itemId、url（http/https），且 itemId/url 必须来自下方情报上下文；可选 sourceTitle、publishedAt、quoteOrSummary。无可靠链接时不要编造条目。
 可选 timeline_urgency：relaxed | normal | tight，用于概括当前时间压力。
 禁止承诺录取或给出精确概率；disclaimer 须说明仅供参考、不构成录取承诺。`;
 
   let user = `请仅基于以下 planInputView（JSON）生成结构化方案：\n${JSON.stringify(planInputView, null, 2)}`;
+  if (opts.intelContextText && String(opts.intelContextText).trim()) {
+    user += `\n\n${String(opts.intelContextText).slice(0, 8000)}`;
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -262,5 +296,5 @@ tiers: { reach, match, safety }，每个 tier 含 label, summary, rationale（�
       suggestion: "请重试生成。",
     };
   }
-  return { ok: true, plan: normalized };
+  return { ok: true, plan: applyIntelToPlan(normalized, opts.intelItems) };
 }

@@ -106,9 +106,19 @@
                   <span class="step-index">4</span>
                   <span class="step-copy"><strong>完整报告</strong><small>查看可回看的建议</small></span>
                 </a>
+                <a href="#/history" class="nav-link nav-step" data-panel="history">
+                  <span class="step-glyph icon-history" aria-hidden="true"></span>
+                  <span class="step-index">5</span>
+                  <span class="step-copy"><strong>过往记录</strong><small>会话与交付物</small></span>
+                </a>
+                <a href="#/intelligence" class="nav-link nav-step" data-panel="intelligence">
+                  <span class="step-glyph icon-intel" aria-hidden="true"></span>
+                  <span class="step-index">6</span>
+                  <span class="step-copy"><strong>情报库</strong><small>院校政策与检索</small></span>
+                </a>
               </nav>
-              <a href="#/history" class="nav-link nav-link-history" data-panel="history">
-                <span class="inline-icon icon-history" aria-hidden="true"></span>过往记录
+              <a href="#/admin/intelligence" class="nav-link nav-link-admin-intel hidden" data-panel="admin-intelligence" id="nav-admin-intel">
+                <span class="inline-icon icon-intel" aria-hidden="true"></span>运营审核
               </a>
               <button type="button" id="btn-logout" class="btn btn-ghost btn-logout">退出顾问台</button>
             </div>
@@ -244,6 +254,81 @@
             <section id="report-meta" class="report-meta hidden"></section>
             <div id="report-content" class="report-content report-sheet">
               <p class="placeholder">顾问正在准备报告内容…</p>
+            </div>
+          </main>
+
+          <main id="panel-intelligence" class="panel intelligence hidden">
+            <div id="intel-dashboard-view">
+              <div class="page-intro page-intro--row">
+                <div>
+                  <h2 class="page-title"><span class="title-icon icon-intel" aria-hidden="true"></span>香港留学情报库</h2>
+                  <p class="page-lede">按院校浏览已上线政策与截止信息，支持关键词检索；所有卡片均附来源链接。</p>
+                </div>
+                <button type="button" id="refresh-intelligence" class="btn btn-secondary">刷新情报</button>
+              </div>
+              <form id="intel-search-form" class="intel-search-bar">
+                <input type="search" id="intel-search-q" placeholder="搜索院校、专业、政策关键词…" autocomplete="off" />
+                <select id="intel-search-info-type" aria-label="信息类型">
+                  <option value="">全部类型</option>
+                  <option value="policy">政策</option>
+                  <option value="deadline">截止日期</option>
+                  <option value="tuition">学费</option>
+                  <option value="admission">录取</option>
+                  <option value="program">专业</option>
+                </select>
+                <button type="submit" class="btn btn-primary">搜索</button>
+              </form>
+              <p id="intel-status" class="meta meta-line"></p>
+              <section class="intel-section">
+                <h3 class="intel-section-title">院校入口</h3>
+                <div id="intel-school-grid" class="intel-school-grid"></div>
+              </section>
+              <section class="intel-section">
+                <h3 class="intel-section-title">检索结果</h3>
+                <div id="intel-search-results" class="intel-item-list"></div>
+              </section>
+            </div>
+            <div id="intel-school-view" class="hidden">
+              <div class="page-intro page-intro--row">
+                <div>
+                  <a href="#/intelligence" class="btn btn-ghost btn-tiny">← 返回情报库</a>
+                  <h2 class="page-title" id="intel-school-title">院校详情</h2>
+                  <p class="page-lede" id="intel-school-lede"></p>
+                </div>
+              </div>
+              <section class="intel-section">
+                <h3 class="intel-section-title">最新情报</h3>
+                <div id="intel-school-items" class="intel-item-list"></div>
+              </section>
+              <section class="intel-section">
+                <h3 class="intel-section-title">变化时间线</h3>
+                <ul id="intel-school-timeline" class="intel-timeline"></ul>
+              </section>
+            </div>
+          </main>
+
+          <main id="panel-admin-intelligence" class="panel admin-intel hidden">
+            <div class="page-intro page-intro--row">
+              <div>
+                <h2 class="page-title">情报运营后台</h2>
+                <p class="page-lede">审核待发布条目、查看来源与采集配置（仅审核员可访问）。</p>
+              </div>
+              <button type="button" id="refresh-admin-intel" class="btn btn-secondary">刷新队列</button>
+            </div>
+            <p id="admin-intel-status" class="meta meta-line"></p>
+            <div class="card-grid">
+              <section class="card card--wide">
+                <h3 class="card-title">待审核队列</h3>
+                <div id="admin-intel-queue" class="admin-intel-queue"></div>
+              </section>
+              <section class="card">
+                <h3 class="card-title">工作台统计</h3>
+                <div id="admin-intel-stats" class="profile-body"></div>
+              </section>
+              <section class="card card--wide">
+                <h3 class="card-title">来源与采集源</h3>
+                <div id="admin-intel-sources" class="profile-body"></div>
+              </section>
             </div>
           </main>
 

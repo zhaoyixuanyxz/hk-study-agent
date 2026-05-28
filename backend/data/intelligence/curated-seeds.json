@@ -1,0 +1,845 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/policy/2026",
+      "locale": {
+        "titleZh": "香港大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/deadline/2026",
+      "locale": {
+        "titleZh": "香港大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/tuition/2026",
+      "locale": {
+        "titleZh": "香港大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/admission/2026",
+      "locale": {
+        "titleZh": "香港大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/program/2026",
+      "locale": {
+        "titleZh": "香港大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/visa/2026",
+      "locale": {
+        "titleZh": "香港大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "hku"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hku/scholarship/2026",
+      "locale": {
+        "titleZh": "香港大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/policy/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/deadline/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/tuition/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/admission/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/program/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/visa/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cuhk/scholarship/2026",
+      "locale": {
+        "titleZh": "香港中文大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港中文大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/policy/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/deadline/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/tuition/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/admission/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/program/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/visa/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hkust-official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkust/scholarship/2026",
+      "locale": {
+        "titleZh": "香港科技大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港科技大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/policy/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/deadline/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/tuition/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/admission/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/program/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/visa/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "hku-official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/polyu/scholarship/2026",
+      "locale": {
+        "titleZh": "香港理工大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港理工大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/policy/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/deadline/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/tuition/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/admission/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/program/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/visa/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/cityu/scholarship/2026",
+      "locale": {
+        "titleZh": "香港城市大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港城市大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/policy/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/deadline/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/tuition/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/admission/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/program/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/visa/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/hkbu/scholarship/2026",
+      "locale": {
+        "titleZh": "香港浸会大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港浸会大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/policy/2026",
+      "locale": {
+        "titleZh": "岭南大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/deadline/2026",
+      "locale": {
+        "titleZh": "岭南大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/tuition/2026",
+      "locale": {
+        "titleZh": "岭南大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/admission/2026",
+      "locale": {
+        "titleZh": "岭南大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/program/2026",
+      "locale": {
+        "titleZh": "岭南大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/visa/2026",
+      "locale": {
+        "titleZh": "岭南大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "cuhk-official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/lingnan/scholarship/2026",
+      "locale": {
+        "titleZh": "岭南大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 岭南大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "policy",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/policy/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — policy 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：policy。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "deadline",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/deadline/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — deadline 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：deadline。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "tuition",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/tuition/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — tuition 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：tuition。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "admission",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/admission/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — admission 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：admission。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "program",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/program/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — program 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：program。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "visa",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/visa/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — visa 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：visa。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    },
+    {
+      "sourceId": "eduhk-official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "infoType": "scholarship",
+      "reviewStatus": "approved",
+      "canonicalUrl": "https://seed.study-agent.local/eduhk/scholarship/2026",
+      "locale": {
+        "titleZh": "香港教育大学 — scholarship 要点（精选）",
+        "summaryZh": "适用于关注 香港教育大学 的申请人；信息类型：scholarship。此为 Sprint2 预置种子，供检索与审核链路验收。"
+      },
+      "publishedAt": "2026-04-15T08:00:00.000Z",
+      "productCurated": true
+    }
+  ]
+}

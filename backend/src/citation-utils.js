@@ -61,7 +61,52 @@ export function assertCitationsAgainstItems(citations, itemsById) {
     const want = canonicalUrlKey(meta.canonicalUrl);
     const got = canonicalUrlKey(c.url);
     if (!want || !got || want !== got) continue;
-    out.push(c);
+    const entry = { ...c };
+    if (meta.sourceTitle && !entry.sourceTitle) entry.sourceTitle = meta.sourceTitle;
+    if (meta.publishedAt && !entry.publishedAt) entry.publishedAt = meta.publishedAt;
+    out.push(entry);
   }
   return out;
+}
+
+/**
+ * @param {object[]} items published intelligence rows
+ * @returns {Map<string, { canonicalUrl: string, sourceTitle?: string, publishedAt?: string }>}
+ */
+export function intelligenceItemsToAllowlistMap(items) {
+  const map = new Map();
+  for (const item of items || []) {
+    const id = String(item?.id || "").trim();
+    if (!id) continue;
+    const url = safeHttpUrl(item.canonicalUrl);
+    if (!url) continue;
+    map.set(id, {
+      canonicalUrl: url,
+      sourceTitle: item.locale?.titleZh || item.title_zh,
+      publishedAt: item.publishedAt,
+    });
+  }
+  return map;
+}
+
+/**
+ * @param {unknown} citations
+ * @param {object[]} items
+ */
+export function filterCitationsAgainstIntelligenceItems(citations, items) {
+  const normalized = normalizeCitations(citations);
+  const map = intelligenceItemsToAllowlistMap(items);
+  return assertCitationsAgainstItems(normalized, map);
+}
+
+/**
+ * @param {{ itemId: string, url: string, sourceTitle?: string, publishedAt?: string }[]} citations
+ */
+export function citationsToCitationRefs(citations) {
+  return (citations || []).map((c) => ({
+    itemId: c.itemId,
+    title: c.sourceTitle || c.itemId,
+    url: c.url,
+    ...(c.publishedAt ? { publishedAt: c.publishedAt } : {}),
+  }));
 }

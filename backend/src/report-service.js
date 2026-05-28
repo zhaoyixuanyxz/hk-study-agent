@@ -1,5 +1,8 @@
 import OpenAI from "openai";
-import { normalizeCitations } from "./citation-utils.js";
+import {
+  filterCitationsAgainstIntelligenceItems,
+  normalizeCitations,
+} from "./citation-utils.js";
 
 export const REPORT_RESULT_SCHEMA_VERSION = "2.0";
 
@@ -261,6 +264,8 @@ function parseReportJson(content) {
  *   deepseekBaseUrl?: string,
  *   deepseekModel?: string,
  *   timeoutMs?: number,
+ *   intelContextText?: string,
+ *   intelItems?: object[],
  * }} opts
  */
 export async function generateHtmlReport(snapshot, plan, opts) {
@@ -268,7 +273,26 @@ export async function generateHtmlReport(snapshot, plan, opts) {
 
   if (opts.useMock) {
     const report = buildMockHtmlReport(snapshot, plan);
-    const cites = normalizeCitations(report.citations || []);
+    let cites = normalizeCitations([...(report.citations || []), ...baseCites]);
+    if (opts.intelItems?.length) {
+      cites = filterCitationsAgainstIntelligenceItems(cites, opts.intelItems);
+      if (!cites.length) {
+        const fromIntel = filterCitationsAgainstIntelligenceItems(
+          (opts.intelItems[0]
+            ? [
+                {
+                  itemId: opts.intelItems[0].id,
+                  url: opts.intelItems[0].canonicalUrl,
+                  sourceTitle: opts.intelItems[0].locale?.titleZh,
+                  publishedAt: opts.intelItems[0].publishedAt,
+                },
+              ]
+            : []),
+          opts.intelItems
+        );
+        cites = fromIntel;
+      }
+    }
     report.citations = cites;
     return { ok: true, report };
   }
@@ -303,7 +327,10 @@ disclaimer：免责声明段落。
 6 材料准备与执行建议
 7 免责声明与后续行动`;
 
-  let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组（可补充同主题的其它合法 http(s) 链接，不要编造失效链接）。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
+  let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组；补充引用时 itemId 与 url 须来自下方情报上下文，不要编造失效链接。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
+  if (opts.intelContextText && String(opts.intelContextText).trim()) {
+    user += `\n\n${String(opts.intelContextText).slice(0, 8000)}`;
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -359,7 +386,10 @@ disclaimer：免责声明段落。
   }
 
   const modelCites = normalizeCitations(parsed.citations);
-  const mergedCitations = normalizeCitations([...baseCites, ...modelCites]);
+  let mergedCitations = normalizeCitations([...baseCites, ...modelCites]);
+  if (opts.intelItems?.length) {
+    mergedCitations = filterCitationsAgainstIntelligenceItems(mergedCitations, opts.intelItems);
+  }
 
   const deliveryHtml = buildDeliverySectionsHtml(parsed, mergedCitations);
 

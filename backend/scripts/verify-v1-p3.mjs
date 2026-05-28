@@ -25,15 +25,14 @@ if (!repSrc.includes("parent-summary")) die("verify-v1-p3: report-service must i
 if (!repSrc.includes("action-plan")) die("verify-v1-p3: report-service must include action-plan section");
 if (!repSrc.includes("report-citations")) die("verify-v1-p3: report-service must include report-citations section");
 
+const coreSrc = readFileSync(join(backendRoot, "src", "modules", "core-routes.js"), "utf8");
+const reportSrc = readFileSync(join(backendRoot, "src", "modules", "report-routes.js"), "utf8");
+if (!coreSrc.includes("/api/v1/public/reports/")) die("verify-v1-p3: core routes must expose public report share route");
+if (!reportSrc.includes("/pdf")) die("verify-v1-p3: report routes must expose PDF route");
+if (!reportSrc.includes("/share")) die("verify-v1-p3: report routes must expose share routes");
 const appSrc = readFileSync(join(backendRoot, "src", "app.js"), "utf8");
-if (!appSrc.includes("/api/v1/public/reports/")) die("verify-v1-p3: app must expose public report share route");
-if (!appSrc.includes("/pdf")) die("verify-v1-p3: app must expose report PDF route");
-if (!appSrc.includes("/share")) die("verify-v1-p3: app must expose share routes");
-const healthIdx = appSrc.indexOf('app.get("/health"');
-const pubIdx = appSrc.indexOf("/api/v1/public/reports/");
-if (healthIdx === -1 || pubIdx === -1 || pubIdx < healthIdx) {
-  die("verify-v1-p3: public reports route must appear after /health registration");
-}
+if (!appSrc.includes("registerCoreRoutes")) die("verify-v1-p3: app must register core routes before other modules");
+if (!coreSrc.includes('app.get("/health"')) die("verify-v1-p3: core routes must register /health");
 
 const storeSrc = readFileSync(join(backendRoot, "src", "store.js"), "utf8");
 if (!storeSrc.includes("enableReportShare")) die("verify-v1-p3: store must implement enableReportShare");

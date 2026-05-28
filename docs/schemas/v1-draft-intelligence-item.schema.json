@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/v1-draft-intelligence-item.schema.json",
+  "title": "V1DraftIntelligenceItem",
+  "type": "object",
+  "required": ["id", "sourceId", "reviewStatus", "canonicalUrl", "publishedAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "reviewStatus": {
+      "type": "string",
+      "enum": ["auto_published", "pending_review", "approved", "rejected"]
+    },
+    "locale": {
+      "type": "object",
+      "properties": {
+        "titleZh": { "type": "string" },
+        "summaryZh": { "type": "string" },
+        "titleOriginal": { "type": "string" },
+        "snippetOriginal": { "type": "string" },
+        "contentText": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "feedId": { "type": "string" },
+    "structured": { "type": "object", "additionalProperties": true },
+    "contentHash": { "type": "string" },
+    "lastSnapshotId": { "type": "string" },
+    "canonicalUrl": { "type": "string", "format": "uri" },
+    "publishedAt": { "type": "string" },
+    "fetchedAt": { "type": "string" },
+    "schoolIds": { "type": "array", "items": { "type": "string" } },
+    "programTags": { "type": "array", "items": { "type": "string" } },
+    "infoType": { "type": "string" },
+    "dedupeHash": { "type": "string" },
+    "sensitiveHint": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

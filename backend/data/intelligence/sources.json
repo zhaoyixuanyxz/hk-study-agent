@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "hku-official",
+      "name": "hku 官网",
+      "baseUrl": "https://www.hku.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "cuhk-official",
+      "name": "cuhk 官网",
+      "baseUrl": "https://www.cuhk.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "hkust-official",
+      "name": "hkust 官网",
+      "baseUrl": "https://hkust.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "polyu-official",
+      "name": "polyu 官网",
+      "baseUrl": "https://www.polyu.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "cityu-official",
+      "name": "cityu 官网",
+      "baseUrl": "https://www.cityu.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "hkbu-official",
+      "name": "hkbu 官网",
+      "baseUrl": "https://www.hkbu.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "lingnan-official",
+      "name": "lingnan 官网",
+      "baseUrl": "https://www.ln.edu.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    },
+    {
+      "id": "eduhk-official",
+      "name": "eduhk 官网",
+      "baseUrl": "https://www.eduhk.hk",
+      "tier": "official",
+      "trustRules": {
+        "autoPublish": true
+      }
+    }
+  ]
+}

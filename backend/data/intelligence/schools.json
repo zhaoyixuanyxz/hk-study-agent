@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "schools": [
+    {
+      "id": "hku",
+      "slug": "hku",
+      "nameZh": "香港大学",
+      "nameEn": "The University of Hong Kong",
+      "coverage": "deep"
+    },
+    {
+      "id": "cuhk",
+      "slug": "cuhk",
+      "nameZh": "香港中文大学",
+      "nameEn": "The Chinese University of Hong Kong",
+      "coverage": "deep"
+    },
+    {
+      "id": "hkust",
+      "slug": "hkust",
+      "nameZh": "香港科技大学",
+      "nameEn": "The Hong Kong University of Science and Technology",
+      "coverage": "deep"
+    },
+    {
+      "id": "polyu",
+      "slug": "polyu",
+      "nameZh": "香港理工大学",
+      "nameEn": "The Hong Kong Polytechnic University",
+      "coverage": "deep"
+    },
+    {
+      "id": "cityu",
+      "slug": "cityu",
+      "nameZh": "香港城市大学",
+      "nameEn": "City University of Hong Kong",
+      "coverage": "deep"
+    },
+    {
+      "id": "hkbu",
+      "slug": "hkbu",
+      "nameZh": "香港浸会大学",
+      "nameEn": "Hong Kong Baptist University",
+      "coverage": "deep"
+    },
+    {
+      "id": "lingnan",
+      "slug": "lingnan",
+      "nameZh": "岭南大学",
+      "nameEn": "Lingnan University",
+      "coverage": "deep"
+    },
+    {
+      "id": "eduhk",
+      "slug": "eduhk",
+      "nameZh": "香港教育大学",
+      "nameEn": "The Education University of Hong Kong",
+      "coverage": "deep"
+    }
+  ]
+}

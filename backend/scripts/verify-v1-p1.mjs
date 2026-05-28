@@ -34,15 +34,19 @@ for (const rel of ["src/profile-progress.js", "src/report-readiness.js"]) {
   if (!existsSync(p)) die(`verify-v1-p1: missing ${rel}`);
 }
 
-const appPath = join(backendRoot, "src", "app.js");
-const appSrc = readFileSync(appPath, "utf8");
-if (!appSrc.includes("profile_progress")) die("verify-v1-p1: app.js must expose profile_progress on chat");
-if (!appSrc.includes("report_readiness")) die("verify-v1-p1: app.js must expose report_readiness on chat");
+const chatRoutes = join(backendRoot, "src", "modules", "chat-routes.js");
+if (!existsSync(chatRoutes)) die("verify-v1-p1: missing modules/chat-routes.js");
+const chatSrc = readFileSync(chatRoutes, "utf8");
+if (!chatSrc.includes("profile_progress")) die("verify-v1-p1: chat routes must expose profile_progress");
+if (!chatSrc.includes("report_readiness")) die("verify-v1-p1: chat routes must expose report_readiness");
 
 const feMain = join(repoRoot, "frontend", "src", "main.js");
 if (!existsSync(feMain)) die("verify-v1-p1: missing frontend/src/main.js");
 const feSrc = readFileSync(feMain, "utf8");
-if (!feSrc.includes("renderChatAdvisoryPanels")) die("verify-v1-p1: frontend main.js must render Chat advisory panels");
+const feChat = join(repoRoot, "frontend", "src", "pages", "chat.js");
+if (!existsSync(feChat)) die("verify-v1-p1: missing frontend/src/pages/chat.js");
+const chatFe = readFileSync(feChat, "utf8");
+if (!chatFe.includes("renderChatAdvisoryPanels")) die("verify-v1-p1: chat page must render advisory panels");
 
 console.error(
   "verify-v1-p1: OK (advisor prompt, OUTPUT_FORMAT fields, agent normalize, BE/FE wiring)"

@@ -1,6 +1,6 @@
 # 留学规划智能体（MVP）
 
-文档位于 `docs/`。当前可运行代码：**对话建档 API + Phase 2 动态画像与记忆（快照 / planInputView）+ 对话与画像前端**。
+文档位于 `docs/`。当前可运行代码：**6 Tab 留学规划试点**（Chat / Profile / Plan / Report / History / Intelligence）+ Docker 云试点栈。
 
 ## 快速开始
 
@@ -47,7 +47,29 @@ npm run test:v1-p4
 npm run test:v1-p5
 # V1 回归（含 P6 全链路安全与文档守门）
 npm run test:v1-p6
+# Sprint 7 部署资产守门
+npm run test:v1-sprint7
 ```
+
+### 5. Docker 云试点（可选）
+
+```bash
+cp .env.production.example .env.production
+# 填写 DEEPSEEK_API_KEY、CORS_ORIGINS、INTELLIGENCE_REVIEWER_EMAILS 等
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+详见 [docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md)。
+
+### 6. 情报每日真爬（港八大）
+
+```bash
+cd backend
+npm run intelligence:sync-feeds   # 生成 56 条官方 feed 配置
+npm run intelligence:daily        # 需 INTELLIGENCE_FETCH=1
+```
+
+说明见 [docs/v1.verson/V1-Intelligence技术附录.md](docs/v1.verson/V1-Intelligence技术附录.md)。
 
 使用临时数据文件与 Mock LLM，**无需**外网。CI 可对 job 设置 `PDF_DISABLED=1`；若流水线需验证 PDF 二进制，在可运行 Puppeteer 的 runner 上**勿**设 `PDF_DISABLED` 并执行 `cd backend && npm run test:v1-p3-pdf-e2e`。
 

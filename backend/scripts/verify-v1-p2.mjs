@@ -24,10 +24,14 @@ if (!planSrc.includes("risk_note")) die("verify-v1-p2: planning-service must inc
 if (!planSrc.includes("normalizeCitations")) die("verify-v1-p2: planning-service must use normalizeCitations");
 if (!planSrc.includes("citations")) die("verify-v1-p2: planning-service must handle citations");
 
-const appSrc = readFileSync(join(backendRoot, "src", "app.js"), "utf8");
-if (!appSrc.includes("profile_view")) die("verify-v1-p2: app.js GET profile must include profile_view");
-if (!appSrc.includes("buildProfileViewModel")) die("verify-v1-p2: app.js must import buildProfileViewModel");
-if (!appSrc.includes("getProfileSnapshot")) die("verify-v1-p2: store/getProfileSnapshot wiring expected via app.js snapshot lookup");
+const profileRoutes = join(backendRoot, "src", "modules", "profile-routes.js");
+if (!existsSync(profileRoutes)) die("verify-v1-p2: missing modules/profile-routes.js");
+const profileSrc = readFileSync(profileRoutes, "utf8");
+if (!profileSrc.includes("profile_view")) die("verify-v1-p2: profile routes must include profile_view");
+const ctxSrc = readFileSync(join(backendRoot, "src", "modules", "context.js"), "utf8");
+if (!ctxSrc.includes("buildProfileViewModel")) die("verify-v1-p2: context must use buildProfileViewModel");
+const planRoutesSrc = readFileSync(join(backendRoot, "src", "modules", "plan-routes.js"), "utf8");
+if (!planRoutesSrc.includes("getProfileSnapshot")) die("verify-v1-p2: plan routes must resolve snapshot via getProfileSnapshot");
 
 const storeSrc = readFileSync(join(backendRoot, "src", "store.js"), "utf8");
 if (!storeSrc.includes("getProfileSnapshot")) die("verify-v1-p2: store.js must define getProfileSnapshot");
@@ -35,7 +39,9 @@ if (!storeSrc.includes("getProfileSnapshot")) die("verify-v1-p2: store.js must d
 const feMain = join(repoRoot, "frontend", "src", "main.js");
 if (!existsSync(feMain)) die("verify-v1-p2: missing frontend/src/main.js");
 const feSrc = readFileSync(feMain, "utf8");
-if (!feSrc.includes("renderPlanReportGate")) die("verify-v1-p2: frontend must render plan report readiness gate");
-if (!feSrc.includes("profile-sections")) die("verify-v1-p2: frontend must render profile sections");
+const fePlan = readFileSync(join(repoRoot, "frontend", "src", "pages", "plan.js"), "utf8");
+const feProfile = readFileSync(join(repoRoot, "frontend", "src", "pages", "profile.js"), "utf8");
+if (!fePlan.includes("renderPlanReportGate")) die("verify-v1-p2: plan page must render report readiness gate");
+if (!feProfile.includes("profile-sections")) die("verify-v1-p2: profile page must render profile sections");
 
 console.error("verify-v1-p2: OK (profile_view, citations utils, plan schema + gates)");

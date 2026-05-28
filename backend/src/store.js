@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { hashPassword, verifyPassword } from "./password.js";
 import { ALL_STRUCTURED_FACT_KEYS, buildPlanInputView } from "./plan-input-service.js";
 import { buildProfileSnapshot } from "./profile-service.js";
@@ -152,7 +152,7 @@ function migrateDb(raw) {
   if (!Array.isArray(db.planResults)) db.planResults = [];
   if (!Array.isArray(db.reportResults)) db.reportResults = [];
   if (!Array.isArray(db.analyticsEvents)) db.analyticsEvents = [];
-  stripLegacyIntelligenceData(db);
+  ensureIntelligenceCollections(db);
   for (const r of db.reportResults) {
     normalizeReportResultInPlace(r);
   }
@@ -177,35 +177,33 @@ function migrateDb(raw) {
   return db;
 }
 
-/** Remove deprecated Hong Kong study-intelligence module keys from persisted DB. */
-function stripLegacyIntelligenceData(db) {
-  const keys = [
-    "intelligenceSources",
-    "intelligenceItems",
-    "intelligenceRawSnapshots",
-    "intelligenceTimelineEvents",
-    "intelligenceCollectionRuns",
-    "intelligenceFollows",
-    "intelligenceReviewerEmails",
-    "intelligenceFeedUrls",
-    "intelligenceDiscoveryPolicy",
-    "intelligenceDiscoveryJobs",
-    "intelligenceAuditSamples",
-  ];
-  let stripped = false;
-  for (const k of keys) {
-    if (Object.prototype.hasOwnProperty.call(db, k)) {
-      delete db[k];
-      stripped = true;
-    }
+/** V1 Intelligence 顶层集合（JSON db 扩展）。 */
+export const INTELLIGENCE_COLLECTION_KEYS = [
+  "intelligenceSources",
+  "intelligenceItems",
+  "intelligenceRawSnapshots",
+  "intelligenceTimelineEvents",
+  "intelligenceCollectionRuns",
+  "intelligenceFeedUrls",
+  "intelligenceReviewerEmails",
+];
+
+/**
+ * 确保情报相关集合存在（不再 strip 删除）。
+ * @param {object} db
+ */
+export function ensureIntelligenceCollections(db) {
+  for (const k of INTELLIGENCE_COLLECTION_KEYS) {
+    if (!Array.isArray(db[k])) db[k] = [];
   }
-  for (const u of db.users || []) {
-    if (u && typeof u === "object" && Object.prototype.hasOwnProperty.call(u, "intelligenceLastOpenedAt")) {
-      delete u.intelligenceLastOpenedAt;
-      stripped = true;
-    }
-  }
-  if (stripped) db.__persistAfterMigrate = true;
+}
+
+/**
+ * @param {object} item
+ */
+function isPublishedIntelligenceItem(item) {
+  if (!item || typeof item !== "object") return false;
+  return item.reviewStatus === "auto_published" || item.reviewStatus === "approved";
 }
 
 function defaultReportShare() {
@@ -277,6 +275,13 @@ export function createStore(dataFile) {
             planResults: [],
             reportResults: [],
             analyticsEvents: [],
+            intelligenceSources: [],
+            intelligenceItems: [],
+            intelligenceRawSnapshots: [],
+            intelligenceTimelineEvents: [],
+            intelligenceCollectionRuns: [],
+            intelligenceFeedUrls: [],
+            intelligenceReviewerEmails: [],
           }),
           null,
           2
@@ -1093,6 +1098,303 @@ export function createStore(dataFile) {
         .filter((r) => r.userId === userId)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((r) => normalizeReportResultInPlace(r));
+    },
+
+    /**
+     * @param {object[]} sources from sources.json
+     * @returns {{ inserted: number, updated: number }}
+     */
+    syncIntelligenceSources(sources) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      let inserted = 0;
+      let updated = 0;
+      for (const s of sources || []) {
+        if (!s || !s.id) continue;
+        const idx = db.intelligenceSources.findIndex((x) => x.id === s.id);
+        const row = {
+          id: String(s.id),
+          name: String(s.name || ""),
+          baseUrl: String(s.baseUrl || ""),
+          tier: String(s.tier || "platform"),
+          trustRules: s.trustRules && typeof s.trustRules === "object" ? s.trustRules : {},
+          updatedAt: new Date().toISOString(),
+        };
+        if (idx >= 0) {
+          db.intelligenceSources[idx] = { ...db.intelligenceSources[idx], ...row };
+          updated += 1;
+        } else {
+          db.intelligenceSources.push({ ...row, createdAt: row.updatedAt });
+          inserted += 1;
+        }
+      }
+      save(db);
+      return { inserted, updated };
+    },
+
+    /**
+     * @param {{ feedId?: string, canonicalUrl: string, fetchedAt: string, htmlLength: number, contentHash?: string }} snap
+     */
+    appendIntelligenceRawSnapshot(snap) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const now = new Date().toISOString();
+      const row = {
+        id: cryptoRandomId(),
+        feedId: String(snap.feedId || "").slice(0, 80),
+        canonicalUrl: String(snap.canonicalUrl || "").slice(0, 2000),
+        fetchedAt: String(snap.fetchedAt || now),
+        htmlLength: Number(snap.htmlLength) || 0,
+        contentHash: String(snap.contentHash || "").slice(0, 64),
+        createdAt: now,
+      };
+      db.intelligenceRawSnapshots.push(row);
+      if (db.intelligenceRawSnapshots.length > 2000) {
+        db.intelligenceRawSnapshots = db.intelligenceRawSnapshots.slice(-2000);
+      }
+      save(db);
+      return row;
+    },
+
+    /**
+     * Crawl upsert: match feedId or dedupeHash; update when contentHash changes.
+     * @param {object} normalized
+     * @returns {{ row: object, created: boolean, updated: boolean }}
+     */
+    upsertIntelligenceItemCrawl(normalized) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const now = new Date().toISOString();
+      const feedId = String(normalized.feedId || "").trim();
+      const dedupe = String(normalized.dedupeHash || "").trim();
+      let idx = -1;
+      if (feedId) idx = db.intelligenceItems.findIndex((x) => x.feedId === feedId);
+      if (idx < 0 && dedupe) idx = db.intelligenceItems.findIndex((x) => x.dedupeHash === dedupe);
+      if (idx < 0) {
+        const url = String(normalized.canonicalUrl || "").trim().toLowerCase();
+        idx = db.intelligenceItems.findIndex((x) => String(x.canonicalUrl || "").trim().toLowerCase() === url);
+      }
+      if (idx >= 0) {
+        const prev = db.intelligenceItems[idx];
+        const sameContent =
+          normalized.contentHash && prev.contentHash && normalized.contentHash === prev.contentHash;
+        if (sameContent) {
+          return { row: prev, created: false, updated: false };
+        }
+        const row = {
+          ...prev,
+          ...normalized,
+          id: prev.id,
+          createdAt: prev.createdAt,
+          updatedAt: now,
+          publishedAt: normalized.publishedAt || now,
+        };
+        db.intelligenceItems[idx] = row;
+        save(db);
+        return { row, created: false, updated: true };
+      }
+      const id = normalized.id || cryptoRandomId();
+      const row = { ...normalized, id, createdAt: now, updatedAt: now };
+      db.intelligenceItems.push(row);
+      save(db);
+      return { row, created: true, updated: false };
+    },
+
+    /**
+     * Fix intelligence rows still pointing at demo host seed.study-agent.local.
+     * @param {(item: object) => string} resolveUrl
+     * @returns {number} rows updated
+     */
+    repairIntelligenceDemoCanonicalUrls(resolveUrl) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      let fixed = 0;
+      for (const item of db.intelligenceItems) {
+        const url = String(item.canonicalUrl || "");
+        if (!url.includes("seed.study-agent.local")) continue;
+        const title = item.titleZh || item.locale?.titleZh || "";
+        const newUrl = resolveUrl(item);
+        item.canonicalUrl = newUrl;
+        item.dedupeHash = createHash("sha256")
+          .update(`${String(newUrl).trim().toLowerCase()}|${String(title).trim().toLowerCase()}`)
+          .digest("hex")
+          .slice(0, 32);
+        item.updatedAt = new Date().toISOString();
+        fixed += 1;
+      }
+      if (fixed) save(db);
+      return fixed;
+    },
+
+    upsertIntelligenceItem(normalized) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const dedupe = String(normalized.dedupeHash || "").trim();
+      if (dedupe) {
+        const dup = db.intelligenceItems.find((x) => x.dedupeHash === dedupe);
+        if (dup && (!normalized.id || dup.id !== normalized.id)) return dup;
+      }
+      const now = new Date().toISOString();
+      let row;
+      if (normalized.id) {
+        const idx = db.intelligenceItems.findIndex((x) => x.id === normalized.id);
+        if (idx >= 0) {
+          row = { ...db.intelligenceItems[idx], ...normalized, updatedAt: now };
+          db.intelligenceItems[idx] = row;
+          save(db);
+          return row;
+        }
+      }
+      const id = normalized.id || cryptoRandomId();
+      row = { ...normalized, id, createdAt: now, updatedAt: now };
+      db.intelligenceItems.push(row);
+      save(db);
+      return row;
+    },
+
+    /**
+     * @param {string} itemId
+     */
+    getIntelligenceItem(itemId) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      return db.intelligenceItems.find((x) => x.id === itemId) || null;
+    },
+
+    /**
+     * @param {{ publishedOnly?: boolean, schoolId?: string, limit?: number }} [opts]
+     */
+    listIntelligenceItems(opts = {}) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const limit = Math.min(500, Math.max(1, Number(opts.limit) || 100));
+      const schoolId = opts.schoolId ? String(opts.schoolId).trim() : "";
+      let list = db.intelligenceItems.slice();
+      if (opts.publishedOnly) list = list.filter(isPublishedIntelligenceItem);
+      if (schoolId) {
+        list = list.filter((x) => Array.isArray(x.schoolIds) && x.schoolIds.includes(schoolId));
+      }
+      return list
+        .sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0))
+        .slice(0, limit);
+    },
+
+    /**
+     * @param {object} run
+     */
+    appendIntelligenceCollectionRun(run) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const id = cryptoRandomId();
+      const now = new Date().toISOString();
+      const row = {
+        id,
+        status: String(run.status || "completed").slice(0, 40),
+        itemsIngested: Number(run.itemsIngested) || 0,
+        errorMessage: run.errorMessage != null ? String(run.errorMessage).slice(0, 500) : null,
+        startedAt: String(run.startedAt || now),
+        finishedAt: String(run.finishedAt || now),
+        createdAt: now,
+      };
+      db.intelligenceCollectionRuns.push(row);
+      save(db);
+      return row;
+    },
+
+    /**
+     * @param {{ reviewStatus?: string, limit?: number }} [opts]
+     */
+    listIntelligenceItemsByReviewStatus(opts = {}) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const status = opts.reviewStatus ? String(opts.reviewStatus).trim() : "";
+      const limit = Math.min(500, Math.max(1, Number(opts.limit) || 100));
+      let list = db.intelligenceItems.slice();
+      if (status) list = list.filter((x) => x.reviewStatus === status);
+      return list
+        .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+        .slice(0, limit);
+    },
+
+    /**
+     * @param {string} itemId
+     * @param {{ decision: string, reviewerEmail?: string, rejectionReason?: string }} patch
+     */
+    decideIntelligenceItemReview(itemId, patch) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const row = db.intelligenceItems.find((x) => x.id === itemId);
+      if (!row) return null;
+      const decision = String(patch.decision || "").trim();
+      const now = new Date().toISOString();
+      if (decision === "approve") {
+        row.reviewStatus = "approved";
+        row.rejectionReason = null;
+      } else if (decision === "reject") {
+        row.reviewStatus = "rejected";
+        row.rejectionReason = String(patch.rejectionReason || "").slice(0, 500) || null;
+      } else {
+        return null;
+      }
+      row.reviewedBy = patch.reviewerEmail ? String(patch.reviewerEmail).slice(0, 200) : null;
+      row.reviewedAt = now;
+      row.updatedAt = now;
+      save(db);
+      return row;
+    },
+
+    listIntelligenceReviewerEmails() {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      return db.intelligenceReviewerEmails.map((r) => String(r.email || r).trim()).filter(Boolean);
+    },
+
+    /**
+     * @param {string} email
+     */
+    addIntelligenceReviewerEmail(email) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const n = normEmail(email);
+      if (!n) return false;
+      if (db.intelligenceReviewerEmails.some((r) => normEmail(r.email || r) === n)) return true;
+      db.intelligenceReviewerEmails.push({ email: n, createdAt: new Date().toISOString() });
+      save(db);
+      return true;
+    },
+
+    /**
+     * @param {object[]} feeds
+     */
+    syncIntelligenceFeedUrls(feeds) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      let n = 0;
+      for (const f of feeds || []) {
+        if (!f || !f.id) continue;
+        const idx = db.intelligenceFeedUrls.findIndex((x) => x.id === f.id);
+        const row = {
+          id: String(f.id),
+          url: String(f.url || ""),
+          sourceId: String(f.sourceId || ""),
+          schoolIds: Array.isArray(f.schoolIds) ? f.schoolIds.map(String) : [],
+          infoType: String(f.infoType || "policy"),
+          updatedAt: new Date().toISOString(),
+        };
+        if (idx >= 0) db.intelligenceFeedUrls[idx] = { ...db.intelligenceFeedUrls[idx], ...row };
+        else {
+          db.intelligenceFeedUrls.push({ ...row, createdAt: row.updatedAt });
+          n += 1;
+        }
+      }
+      save(db);
+      return { synced: (feeds || []).length, inserted: n };
+    },
+
+    listIntelligenceFeedUrls() {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      return db.intelligenceFeedUrls.slice();
     },
   };
 }

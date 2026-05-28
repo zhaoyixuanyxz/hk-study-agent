@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { normalizeCitations } from "./citation-utils.js";
+import { filterCitationsAgainstIntelligenceItems, normalizeCitations } from "./citation-utils.js";
 import { composeSystemPrompt } from "./promptLayer.js";
 
 const REPLY_MAX_CHARS = 1000;
@@ -226,6 +226,31 @@ export function normalizeAgentOutput(data) {
   };
 }
 
+function mockCitationsFromIntel(userMessage, intelItems) {
+  if (!Array.isArray(intelItems) || !intelItems.length) return [];
+  if (!POLICY_HINT.test(userMessage) && !/香港|港大|学费|截止|招生|院校官网|hku|cuhk/i.test(userMessage)) {
+    return [];
+  }
+  const item = intelItems[0];
+  if (!item?.id || !item.canonicalUrl) return [];
+  return [
+    {
+      itemId: item.id,
+      url: item.canonicalUrl,
+      sourceTitle: item.locale?.titleZh,
+      publishedAt: item.publishedAt,
+      quoteOrSummary: String(item.locale?.summaryZh || "").slice(0, 200),
+    },
+  ];
+}
+
+function applyIntelCitationAllowlist(out, intelItems) {
+  if (!Array.isArray(intelItems) || !intelItems.length) return out;
+  const citations = filterCitationsAgainstIntelligenceItems(out.citations, intelItems);
+  const reply = maybeDisclaimPolicyFacts(out.reply, citations);
+  return { ...out, citations, reply: capReply(reply) };
+}
+
 export async function runProfileAgent({
   userMessage,
   historyOpenai,
@@ -234,7 +259,14 @@ export async function runProfileAgent({
   deepseekBaseUrl,
   deepseekModel,
   memoryContext,
+  intelContextText,
+  intelItems,
 }) {
+  const intelBlock =
+    intelContextText && String(intelContextText).trim()
+      ? [{ role: "system", content: String(intelContextText).slice(0, 8000) }]
+      : [];
+
   if (useMock) {
     const turns = 1 + historyOpenai.filter((m) => m.role === "user").length;
     let gaps = [];
@@ -255,14 +287,24 @@ export async function runProfileAgent({
     const memHint = memoryContext
       ? `\n\n（系统已检索到与你相关的历史记忆片段，可适当承接，但不要重复追问已覆盖的信息。）`
       : "";
-    return normalizeAgentOutput({
-      reply: reply + memHint,
-      gaps,
-      gap_items: [],
-      suggested_followups: ["方便说说目前语言成绩或考试计划吗？"],
-      readiness_for_profile: readiness,
-      citations: [],
-    });
+    const rawCites = mockCitationsFromIntel(userMessage, intelItems);
+    let mockReply = reply;
+    if (rawCites.length && POLICY_HINT.test(userMessage) === false && /学费|截止|政策|录取要求/i.test(userMessage)) {
+      mockReply =
+        reply +
+        "\n\n根据情报库检索，可参考下方已上线条目的官方摘要（链接见引用区）；具体数字与截止日期请以院校官网为准。";
+    }
+    return applyIntelCitationAllowlist(
+      normalizeAgentOutput({
+        reply: mockReply + memHint,
+        gaps,
+        gap_items: [],
+        suggested_followups: ["方便说说目前语言成绩或考试计划吗？"],
+        readiness_for_profile: readiness,
+        citations: rawCites,
+      }),
+      intelItems
+    );
   }
 
   const client = new OpenAI({
@@ -276,6 +318,7 @@ export async function runProfileAgent({
       : [];
   const messages = [
     { role: "system", content: system },
+    ...intelBlock,
     ...mem,
     ...historyOpenai.slice(-24),
     { role: "user", content: userMessage },
@@ -288,5 +331,5 @@ export async function runProfileAgent({
     max_tokens: 900,
   });
   const raw = completion.choices[0]?.message?.content || "";
-  return normalizeAgentOutput(parseJson(raw));
+  return applyIntelCitationAllowlist(normalizeAgentOutput(parseJson(raw)), intelItems);
 }
