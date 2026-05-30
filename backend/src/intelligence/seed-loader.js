@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createKnowledgeStore } from "./knowledge-store.js";
 import { loadSchoolsRegistry } from "./source-registry.js";
 import { normalizeCuratedSeedRow, resolveCuratedCanonicalUrl } from "./curated-urls.js";
+import { loadAdmissionBenchmarksIntoStore } from "./benchmark-loader.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "..", "data", "intelligence");
@@ -78,8 +79,9 @@ export function loadCuratedSeedsIntoStore(store, opts = {}) {
   const ks = createKnowledgeStore(store);
   ks.syncSourcesFromRegistry();
   const published = store.listIntelligenceItems({ publishedOnly: true, limit: 5000 });
+  const benchmarks = loadAdmissionBenchmarksIntoStore(store, { force: opts.force });
   if (!opts.force && published.length >= 50) {
-    return { skipped: true, count: published.length };
+    return { skipped: true, count: published.length, benchmarks };
   }
   const { items } = loadCuratedSeedsFile();
   let inserted = 0;
@@ -91,5 +93,5 @@ export function loadCuratedSeedsIntoStore(store, opts = {}) {
     });
     inserted += 1;
   }
-  return { skipped: false, inserted, total: items.length };
+  return { skipped: false, inserted, total: items.length, benchmarks };
 }

@@ -2,6 +2,8 @@
  * Chat / Plan 共用的引用链接校验与规范化（http/https）。
  */
 
+import { externalKbToAllowlistMap } from "./intelligence/external-kb-loader.js";
+
 export function safeHttpUrl(u) {
   try {
     const x = new URL(String(u).trim());
@@ -14,8 +16,10 @@ export function safeHttpUrl(u) {
 
 /**
  * @param {unknown} raw
+ * @param {number} [max=12]
  */
-export function normalizeCitations(raw) {
+export function normalizeCitations(raw, max = 12) {
+  const cap = Math.min(12, Math.max(1, Number(max) || 12));
   if (!Array.isArray(raw)) return [];
   const out = [];
   for (const c of raw) {
@@ -31,7 +35,7 @@ export function normalizeCitations(raw) {
     if (c.publishedAt) entry.publishedAt = String(c.publishedAt).slice(0, 80);
     if (c.quoteOrSummary) entry.quoteOrSummary = String(c.quoteOrSummary).slice(0, 2000);
     out.push(entry);
-    if (out.length >= 8) break;
+    if (out.length >= cap) break;
   }
   return out;
 }
@@ -90,13 +94,45 @@ export function intelligenceItemsToAllowlistMap(items) {
 }
 
 /**
+ * @param {Map<string, { canonicalUrl: string, sourceTitle?: string, publishedAt?: string }>[]} maps
+ */
+export function mergeAllowlistMaps(...maps) {
+  const out = new Map();
+  for (const m of maps) {
+    if (!(m instanceof Map)) continue;
+    for (const [k, v] of m) out.set(k, v);
+  }
+  return out;
+}
+
+/**
+ * @param {unknown} citations
+ * @param {Map<string, { canonicalUrl: string, sourceTitle?: string, publishedAt?: string }>} allowlistMap
+ */
+export function filterCitationsAgainstAllowlist(citations, allowlistMap) {
+  const normalized = normalizeCitations(citations, 12);
+  return assertCitationsAgainstItems(normalized, allowlistMap);
+}
+
+/**
  * @param {unknown} citations
  * @param {object[]} items
  */
 export function filterCitationsAgainstIntelligenceItems(citations, items) {
-  const normalized = normalizeCitations(citations);
-  const map = intelligenceItemsToAllowlistMap(items);
-  return assertCitationsAgainstItems(normalized, map);
+  return filterCitationsAgainstAllowlist(citations, intelligenceItemsToAllowlistMap(items));
+}
+
+/**
+ * @param {unknown} citations
+ * @param {object[]} intelItems
+ * @param {object[]} extKbEntries
+ */
+export function filterCitationsAgainstCombinedSources(citations, intelItems, extKbEntries) {
+  const map = mergeAllowlistMaps(
+    intelligenceItemsToAllowlistMap(intelItems),
+    externalKbToAllowlistMap(extKbEntries)
+  );
+  return filterCitationsAgainstAllowlist(citations, map);
 }
 
 /**

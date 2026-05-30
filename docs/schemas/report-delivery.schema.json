@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://study-agent.local/schemas/report-delivery.schema.json",
+  "title": "ReportDeliveryBlock",
+  "description": "报告 delivery 块结构化字段（parent_summary、action_plan、risk_items），供 Report 生成与前端交互消费。",
+  "type": "object",
+  "properties": {
+    "parent_summary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "maxItems": 8,
+      "description": "面向家长的决策摘要短句"
+    },
+    "action_plan": {
+      "type": "object",
+      "required": ["days_30", "days_60", "days_90"],
+      "properties": {
+        "days_30": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "maxItems": 12,
+          "description": "未来 30 天可执行步骤"
+        },
+        "days_60": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "maxItems": 12,
+          "description": "第 31–60 天可执行步骤"
+        },
+        "days_90": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "maxItems": 12,
+          "description": "第 61–90 天可执行步骤"
+        }
+      },
+      "additionalProperties": false
+    },
+    "risk_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["level", "label"],
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "label": { "type": "string", "minLength": 1 },
+          "detail": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 12,
+      "description": "风险仪表盘条目（可选，CQ-B 前端消费）"
+    },
+    "plain_language_notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 6
+    },
+    "visuals": {
+      "type": "object",
+      "description": "报告可视化（非录取概率）",
+      "properties": {
+        "riskMatrix": {
+          "type": "object",
+          "properties": {
+            "quadrants": {
+              "type": "object",
+              "properties": {
+                "high_high": { "type": "array", "items": { "type": "string" } },
+                "high_low": { "type": "array", "items": { "type": "string" } },
+                "low_high": { "type": "array", "items": { "type": "string" } },
+                "low_low": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "budgetBands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "minHkd", "maxHkd"],
+            "properties": {
+              "label": { "type": "string" },
+              "minHkd": { "type": "number", "minimum": 0 },
+              "maxHkd": { "type": "number", "minimum": 0 }
+            }
+          },
+          "maxItems": 8
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

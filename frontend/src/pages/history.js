@@ -26,6 +26,8 @@ import {
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
 import { navigateTo } from "../shell/navigation.js";
+import { loadThread } from "./chat.js";
+import { loadProfile } from "./profile.js";
 
 export async function loadHistoryPage() {
   const content = el("history-content");

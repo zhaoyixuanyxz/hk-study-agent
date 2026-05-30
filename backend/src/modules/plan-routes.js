@@ -5,7 +5,7 @@ import {
 } from "../planning-service.js";
 import { recordPlanGenerateRequest, getPlanGenerateMetricsSnapshot } from "../plan-generation-metrics.js";
 import { buildReportReadiness } from "../report-readiness.js";
-import { buildIntelContextPack } from "../intelligence/intelContextPack.js";
+import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
 import { logPlanGenerationFailure } from "./context.js";
 
 /**
@@ -41,10 +41,11 @@ export function registerPlanRoutes(app, ctx) {
     const piv = latest.planInputView;
     const timeoutMs = getPlanGenerationTimeoutMs();
 
-    const intelPack = buildIntelContextPack(store, {
+    const intelPack = buildCombinedIntelContext(store, {
       snapshot: latest.snapshot,
       planInputView: piv,
-      limit: 8,
+      forPlanOrReport: true,
+      limit: 12,
     });
 
     const gen = await generateStructuredPlan(piv, {
@@ -55,6 +56,7 @@ export function registerPlanRoutes(app, ctx) {
       timeoutMs,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
+      extKbEntries: intelPack.extKbEntries,
     });
 
     if (!gen.ok) {

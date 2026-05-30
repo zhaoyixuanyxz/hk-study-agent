@@ -7,7 +7,6 @@ import {
   formatReadinessCopy,
   formatSourceHintLabel,
   formatThreadMeta,
-  formatTimelineUrgencyLine,
   formatTruthStatusLabel,
   truthStatusTagClass,
 } from "../copy.js";
@@ -25,7 +24,21 @@ import {
 } from "../api/client.js";
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
-import * as appState from "../app-state.js";
+import {
+  buildPlanExecutionActions,
+  renderPlanCitationListHtml,
+  renderPlanExecutionPathHtml,
+  renderTierFitNoteHtml,
+  renderTimelineUrgencyBarHtml,
+} from "../lib/plan-ui.js";
+import {
+  destroyPlanCharts,
+  hasPlanVisuals,
+  mountPlanCharts,
+  renderPlanChartsHostHtml,
+} from "../lib/plan-charts.js";
+import { lastPlanReportReadiness, setLastPlanReportReadiness } from "../app-state.js";
+import { renderPlanReportGate } from "./profile.js";
 
 export function hidePlanError() {
   const box = el("plan-error");
@@ -63,20 +76,27 @@ export function renderPlan(plan) {
     const risk = (x.risk_note || "").trim()
       ? `<p class="tier-risk">${escapeHtml(x.risk_note)}</p>`
       : "";
+    const fit = renderTierFitNoteHtml(x.fit_note);
     return `<section class="card tier-card">
       <h3>${escapeHtml(label)}</h3>
       <p>${escapeHtml(x.summary || "")}</p>
       <p class="rationale">${escapeHtml(x.rationale || "")}</p>
+      ${fit}
       ${risk}
     </section>`;
   };
 
-  const tuLine = formatTimelineUrgencyLine(plan.timeline_urgency);
+  const urgencyBlock = renderTimelineUrgencyBarHtml(plan.timeline_urgency);
+  const execPath = renderPlanExecutionPathHtml(buildPlanExecutionActions(plan));
+  const chartsBlock = hasPlanVisuals(plan.visuals) ? renderPlanChartsHostHtml() : "";
 
+  destroyPlanCharts();
   container.innerHTML = `
+    ${chartsBlock}
     ${tierHtml(reach, "冲刺建议")}
     ${tierHtml(match, "匹配建议")}
     ${tierHtml(safety, "保底建议")}
+    ${execPath}
     <section class="card plan-budget-card">
       <h3>整体风险与预算</h3>
       <p>${escapeHtml(plan.risk_summary || "")}</p>
@@ -84,12 +104,17 @@ export function renderPlan(plan) {
     </section>
     <section class="card plan-timeline-card">
       <h3>时间线与节奏</h3>
-      ${tuLine ? `<p class="timeline-urgency">${escapeHtml(tuLine)}</p>` : ""}
+      ${urgencyBlock}
       <p>${escapeHtml(plan.timeline_suggestion || "")}</p>
     </section>
   `;
 
   appendPlanCitationSection(container, plan);
+
+  if (hasPlanVisuals(plan.visuals)) {
+    const host = container.querySelector("#plan-visuals");
+    void mountPlanCharts(host, plan.visuals);
+  }
 
   const disc = document.createElement("p");
   disc.className = "disclaimer";
@@ -112,20 +137,7 @@ export function appendPlanCitationSection(container, plan) {
   } else {
     const ul = document.createElement("ul");
     ul.className = "plan-citation-list";
-    for (const c of cites) {
-      const li = document.createElement("li");
-      const a = document.createElement("a");
-      const url = String(c.url || "").trim();
-      a.href = url || "#";
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.textContent = c.sourceTitle || url || "来源链接";
-      li.appendChild(a);
-      if (c.publishedAt) {
-        li.appendChild(document.createTextNode(` · ${String(c.publishedAt)}`));
-      }
-      ul.appendChild(li);
-    }
+    ul.innerHTML = renderPlanCitationListHtml(cites);
     sec.appendChild(ul);
   }
   container.appendChild(sec);
@@ -144,7 +156,7 @@ export async function loadPlanPage() {
       targetId = list.plans[0].plan_id;
     }
     if (!targetId) {
-      appState.lastPlanReportReadiness = null;
+      setLastPlanReportReadiness(null);
       renderPlanReportGate(null);
       setPlanStatus("");
       if (container) {
@@ -153,15 +165,15 @@ export async function loadPlanPage() {
       return;
     }
     const detail = await api(`/api/v1/plans/${targetId}`);
-    appState.lastPlanReportReadiness = detail.report_readiness || null;
-    renderPlanReportGate(appState.lastPlanReportReadiness);
+    setLastPlanReportReadiness(detail.report_readiness || null);
+    renderPlanReportGate(lastPlanReportReadiness);
     if (detail.plan) {
       renderPlan(detail.plan);
       localStorage.setItem(LS_LAST_PLAN, detail.plan_id);
       setPlanStatus(`已加载 · ${String(detail.plan_id).slice(0, 8)}…`);
     }
   } catch (e) {
-    appState.lastPlanReportReadiness = null;
+    setLastPlanReportReadiness(null);
     renderPlanReportGate(null);
     setPlanStatus(String(e.message || e), true);
     if (container) {
@@ -183,8 +195,8 @@ el("btn-generate-plan")?.addEventListener("click", async () => {
     const detail = res.plan_id
       ? await api(`/api/v1/plans/${res.plan_id}`)
       : { plan: res.plan, report_readiness: null };
-    appState.lastPlanReportReadiness = detail.report_readiness || null;
-    renderPlanReportGate(appState.lastPlanReportReadiness);
+    setLastPlanReportReadiness(detail.report_readiness || null);
+    renderPlanReportGate(lastPlanReportReadiness);
     if (detail.plan) renderPlan(detail.plan);
     else if (res.plan) renderPlan(res.plan);
     setPlanStatus(`已生成 · ${String(res.plan_id || "").slice(0, 8)}…`);

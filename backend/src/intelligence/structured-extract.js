@@ -41,6 +41,17 @@ export function extractStructuredFields(infoType, text, tableRows = [], meta = {
         ...base,
         requirements: extractBulletLines(t, /requirement|入学|GPA|IELTS|TOEFL|学位|学历/i).slice(0, 15),
         language_scores: extractLanguageHints(t),
+        benchmarkGpa: extractBenchmarkGpa(t),
+        subjectWeights: extractSubjectWeightHints(t),
+      };
+    case "benchmark":
+      return {
+        ...base,
+        benchmarkGpa: extractBenchmarkGpa(t),
+        subjectWeights: extractSubjectWeightHints(t),
+        language: extractLanguageScoreHints(t),
+        competitionTag: extractCompetitionTag(t),
+        requirements: extractBulletLines(t, /requirement|入学|GPA|IELTS|TOEFL|学位|学历/i).slice(0, 10),
       };
     case "program":
       return {
@@ -109,6 +120,41 @@ function extractLanguageHints(text) {
   return hints;
 }
 
+function extractLanguageScoreHints(text) {
+  const ieltsMatch = text.match(/IELTS[^0-9]{0,12}([56]\.?[05]?)/i);
+  const toeflMatch = text.match(/TOEFL[^0-9]{0,12}(\d{2,3})/i);
+  /** @type {{ ielts?: number, toefl?: number }} */
+  const out = {};
+  if (ieltsMatch) out.ielts = Number(ieltsMatch[1]);
+  if (toeflMatch) out.toefl = Number(toeflMatch[1]);
+  return Object.keys(out).length ? out : undefined;
+}
+
+function extractBenchmarkGpa(text) {
+  const gpaMatch = text.match(/GPA[^0-9]{0,12}([23]\.?[0-9]{1,2})/i);
+  if (!gpaMatch) return undefined;
+  const typical = Number(gpaMatch[1]);
+  if (!Number.isFinite(typical)) return undefined;
+  return { typical, minimum: Math.max(2.5, typical - 0.3), scale: "4.0" };
+}
+
+function extractSubjectWeightHints(text) {
+  const lines = extractBulletLines(text, /math|mathematics|statistics|programming|computer|finance|weight|权重|科目/i);
+  return lines.slice(0, 6).map((line, i) => ({
+    subject: `hint_${i + 1}`,
+    weight: /high|高|strong|important/i.test(line) ? "high" : "medium",
+    note: line.slice(0, 120),
+  }));
+}
+
+function extractCompetitionTag(text) {
+  if (/very competitive|极难|very_high/i.test(text)) return "very_high";
+  if (/competitive|竞争|high demand|high/i.test(text)) return "high";
+  if (/moderate|中等|medium/i.test(text)) return "medium";
+  if (/accessible|友好|low/i.test(text)) return "low";
+  return undefined;
+}
+
 function extractBulletLines(text, topicRe) {
   const lines = text
     .split(/\n|\.|；|。/)
@@ -138,6 +184,11 @@ export function buildChineseSummary(infoType, text, structured) {
       .map((d) => d.date)
       .join("、");
     return `${school}申请截止（官网采集）：${ds}。${snippet.slice(0, 120)}`;
+  }
+  if (infoType === "benchmark" && structured?.benchmarkGpa) {
+    const gpa = structured.benchmarkGpa;
+    const tag = structured.competitionTag ? `竞争度 ${structured.competitionTag}` : "";
+    return `${school}录取参考基准：典型 GPA ${gpa.typical}/${gpa.scale || "4.0"}${tag ? `；${tag}` : ""}。${snippet.slice(0, 100)}`;
   }
   return `${school}${infoType} 信息（官网采集，可溯源）：${snippet}`;
 }

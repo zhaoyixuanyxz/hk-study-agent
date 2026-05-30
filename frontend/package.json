@@ -6,7 +6,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/copy.test.js src/assistant-text.test.js"
+    "test": "node --test src/copy.test.js src/assistant-text.test.js src/module-wiring.test.js src/lib/plan-ui.test.js src/lib/action-plan-ui.test.js src/lib/plan-charts.test.js",
+    "test:cq-b": "node --test src/copy.test.js src/lib/plan-ui.test.js src/lib/action-plan-ui.test.js src/lib/plan-charts.test.js && npm run build",
+    "test:wiring": "node --test src/module-wiring.test.js",
+    "audit:imports": "node scripts/audit-module-imports.mjs"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.8"
   },
   "devDependencies": {
     "vite": "^6.0.3"

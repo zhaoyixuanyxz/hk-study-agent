@@ -144,8 +144,66 @@ export function formatTimelineUrgencyLine(u) {
   return "";
 }
 
+/**
+ * @param {string | undefined | null} u
+ * @returns {{ level: string, label: string, line: string, barWidth: string, barClass: string } | null}
+ */
+export function timelineUrgencyMeta(u) {
+  if (u === "tight") {
+    return {
+      level: "tight",
+      label: "偏紧",
+      line: formatTimelineUrgencyLine(u),
+      barWidth: "100%",
+      barClass: "urgency-bar--tight",
+    };
+  }
+  if (u === "relaxed") {
+    return {
+      level: "relaxed",
+      label: "从容",
+      line: formatTimelineUrgencyLine(u),
+      barWidth: "33%",
+      barClass: "urgency-bar--relaxed",
+    };
+  }
+  if (u === "normal") {
+    return {
+      level: "normal",
+      label: "中等",
+      line: formatTimelineUrgencyLine(u),
+      barWidth: "66%",
+      barClass: "urgency-bar--normal",
+    };
+  }
+  return null;
+}
+
 /** Plan 页引用区空态说明 */
 export function formatPlanCitationsHint() {
   return "此处仅展示方案中显式给出的可追溯外链；若无条目，表示当前结论主要依据档案内信息与通用规划逻辑。";
+}
+
+/** 用户情报 Tab：仅重新加载已上线列表，不触发后台爬取 */
+export const INTEL_USER_REFRESH_LABEL = "刷新列表";
+
+/**
+ * @param {{ items_ingested?: number, items_updated?: number, skipped_preflight?: number, items_skipped_quality?: number, errors?: string[] }} r
+ */
+export function formatAdminCollectResult(r) {
+  const ingested = Number(r?.items_ingested ?? 0);
+  const updated = Number(r?.items_updated ?? 0);
+  const skippedPf = Number(r?.skipped_preflight ?? 0);
+  const skippedQ = Number(r?.items_skipped_quality ?? 0);
+  const errN = Array.isArray(r?.errors) ? r.errors.length : 0;
+  return `采集完成：新增 ${ingested}，更新 ${updated}；跳过坏链 ${skippedPf}，质量保护跳过 ${skippedQ}${errN ? `；错误 ${errN} 条` : ""}`;
+}
+
+/**
+ * @param {{ ran_at?: string, total?: number, failed_count?: number, ok_count?: number }} s
+ */
+export function formatAdminPreflightSummary(s) {
+  if (!s?.ran_at) return "尚未执行链接检测。";
+  return `上次检测 ${s.ran_at}：共 ${s.total ?? 0} 条，可用 ${s.ok_count ?? 0}，失败 ${s.failed_count ?? 0}`;
 }
 

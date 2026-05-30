@@ -1,9 +1,10 @@
 import { runProfileAgent } from "../agent.js";
+import { assessChatScope } from "../chat-scope.js";
 import { nextOrchestrationState } from "../orchestrator.js";
 import { runPhase2Pipeline } from "../phase2-pipeline.js";
 import { buildProfileProgress } from "../profile-progress.js";
 import { buildReportReadiness } from "../report-readiness.js";
-import { buildIntelContextPack } from "../intelligence/intelContextPack.js";
+import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -139,13 +140,14 @@ export function registerChatRoutes(app, ctx) {
     const useMock = !key;
     const memCtx = memoryContextForTurn(user.id, content);
     const latestSnap = store.getLatestProfileSnapshot(user.id);
-    const intelPack = buildIntelContextPack(store, {
+    const intelPack = buildCombinedIntelContext(store, {
       userMessage: content,
       snapshot: latestSnap?.snapshot,
       planInputView: latestSnap?.planInputView,
-      limit: 6,
+      limit: 8,
     });
 
+    const scope = assessChatScope({ userMessage: content, snapshot: latestSnap?.snapshot });
     const agentOut = await runProfileAgent({
       userMessage: content,
       historyOpenai: historyBefore,
@@ -156,6 +158,8 @@ export function registerChatRoutes(app, ctx) {
       memoryContext: memCtx,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
+      extKbEntries: intelPack.extKbEntries,
+      profileSnapshot: latestSnap?.snapshot,
     });
 
     const filteredCitations = agentOut.citations || [];
@@ -171,20 +175,22 @@ export function registerChatRoutes(app, ctx) {
     store.updateThreadState(t.id, newState);
 
     let phase2 = null;
-    try {
-      phase2 = await runPhase2Pipeline(store, {
-        userId: user.id,
-        threadId: t.id,
-        userMessage: content,
-        assistantReply: agentOut.reply,
-        gapsFromAgent: agentOut.gaps || [],
-        useMock,
-        deepseekApiKey: key,
-        deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
-        deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
-      });
-    } catch (e) {
-      request.log.error(e);
+    if (!agentOut.scope_redirect) {
+      try {
+        phase2 = await runPhase2Pipeline(store, {
+          userId: user.id,
+          threadId: t.id,
+          userMessage: content,
+          assistantReply: agentOut.reply,
+          gapsFromAgent: agentOut.gaps || [],
+          useMock,
+          deepseekApiKey: key,
+          deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
+          deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+        });
+      } catch (e) {
+        request.log.error(e);
+      }
     }
 
     const planReady = phase2?.planInputView?.readiness?.ready === true;
@@ -206,6 +212,7 @@ export function registerChatRoutes(app, ctx) {
       readiness_for_plan,
       profile_progress,
       report_readiness,
+      scope_redirect: Boolean(agentOut.scope_redirect),
     };
     const assistant = store.appendAssistantMessage(t.id, agentOut.reply, assistantMeta);
 
@@ -237,6 +244,7 @@ export function registerChatRoutes(app, ctx) {
       profile_snapshot: phase2?.snapshot || null,
       plan_input_view: phase2?.planInputView || null,
       replacement_edit: Boolean(replaceUserMessageId),
+      scope_redirect: Boolean(agentOut.scope_redirect),
     };
   });
 }

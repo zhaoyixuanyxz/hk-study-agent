@@ -21,7 +21,7 @@
     },
     {
       "id": "hku-tuition",
-      "url": "https://admissions.hku.hk/fees",
+      "url": "https://admissions.hku.hk/tpg/fees",
       "sourceId": "hku-official",
       "schoolIds": [
         "hku"
@@ -66,7 +66,7 @@
     },
     {
       "id": "cuhk-policy",
-      "url": "https://www.cuhk.edu.hk/english/policies.html",
+      "url": "https://www.cuhk.edu.hk/english/",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -75,7 +75,7 @@
     },
     {
       "id": "cuhk-deadline",
-      "url": "https://www.gs.cuhk.edu.hk/admissions",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/application-deadline",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -84,7 +84,7 @@
     },
     {
       "id": "cuhk-tuition",
-      "url": "https://www.gs.cuhk.edu.hk/admissions/fees",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/scholarships-fees/fees",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -93,7 +93,7 @@
     },
     {
       "id": "cuhk-admission",
-      "url": "https://www.gs.cuhk.edu.hk/admissions/requirements",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/how-to-apply",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -102,7 +102,7 @@
     },
     {
       "id": "cuhk-program",
-      "url": "https://www.gs.cuhk.edu.hk/admissions/programmes",
+      "url": "https://www.gs.cuhk.edu.hk/programmes",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -111,7 +111,7 @@
     },
     {
       "id": "cuhk-visa",
-      "url": "https://www.gs.cuhk.edu.hk/admissions/international-students",
+      "url": "https://www.gs.cuhk.edu.hk/registration/visa-application",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -120,7 +120,7 @@
     },
     {
       "id": "cuhk-scholarship",
-      "url": "https://www.gs.cuhk.edu.hk/admissions/scholarships",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/scholarships-fees/scholarships",
       "sourceId": "cuhk-official",
       "schoolIds": [
         "cuhk"
@@ -129,7 +129,7 @@
     },
     {
       "id": "hkust-policy",
-      "url": "https://hkust.edu.hk/about/policies",
+      "url": "https://hkust.edu.hk/about",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -147,7 +147,7 @@
     },
     {
       "id": "hkust-tuition",
-      "url": "https://join.hkust.edu.hk/fees",
+      "url": "https://join.hkust.edu.hk/fees-and-scholarships",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -156,7 +156,7 @@
     },
     {
       "id": "hkust-admission",
-      "url": "https://join.hkust.edu.hk/admission-requirements",
+      "url": "https://join.hkust.edu.hk/admissions",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -165,7 +165,7 @@
     },
     {
       "id": "hkust-program",
-      "url": "https://join.hkust.edu.hk/program-list",
+      "url": "https://pg.ust.hk/programs",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -174,7 +174,7 @@
     },
     {
       "id": "hkust-visa",
-      "url": "https://join.hkust.edu.hk/international-students",
+      "url": "https://fytgs.hkust.edu.hk/admissions/Admission-to-Hong-Kong-Campus/after-getting-an-offer/applying-student-visa",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -183,7 +183,7 @@
     },
     {
       "id": "hkust-scholarship",
-      "url": "https://join.hkust.edu.hk/scholarships",
+      "url": "https://join.hkust.edu.hk/fees-and-scholarships",
       "sourceId": "hkust-official",
       "schoolIds": [
         "hkust"
@@ -192,7 +192,7 @@
     },
     {
       "id": "polyu-policy",
-      "url": "https://www.polyu.edu.hk/about-polyu/mission-and-vision/",
+      "url": "https://www.polyu.edu.hk/about-polyu/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -210,7 +210,7 @@
     },
     {
       "id": "polyu-tuition",
-      "url": "https://www.polyu.edu.hk/admissions/tuition-fees/",
+      "url": "https://www.polyu.edu.hk/admissions/tuition-fees-and-scholarships/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -219,7 +219,7 @@
     },
     {
       "id": "polyu-admission",
-      "url": "https://www.polyu.edu.hk/admissions/entry-requirements/",
+      "url": "https://www.polyu.edu.hk/admissions/postgraduate/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -228,7 +228,7 @@
     },
     {
       "id": "polyu-program",
-      "url": "https://www.polyu.edu.hk/admissions/programmes/",
+      "url": "https://www.polyu.edu.hk/admissions/postgraduate/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -237,7 +237,7 @@
     },
     {
       "id": "polyu-visa",
-      "url": "https://www.polyu.edu.hk/admissions/international-students/",
+      "url": "https://www.polyu.edu.hk/admissions/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -246,7 +246,7 @@
     },
     {
       "id": "polyu-scholarship",
-      "url": "https://www.polyu.edu.hk/admissions/scholarships/",
+      "url": "https://www.polyu.edu.hk/admissions/tuition-fees-and-scholarships/",
       "sourceId": "polyu-official",
       "schoolIds": [
         "polyu"
@@ -318,7 +318,7 @@
     },
     {
       "id": "hkbu-policy",
-      "url": "https://www.hkbu.edu.hk/about/policies",
+      "url": "https://www.hkbu.edu.hk/en/about.html",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -327,7 +327,7 @@
     },
     {
       "id": "hkbu-deadline",
-      "url": "https://ar.hkbu.edu.hk/tpg/",
+      "url": "https://gs.hkbu.edu.hk/admission/research-postgraduate-programmes/application/admission-timeline",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -336,7 +336,7 @@
     },
     {
       "id": "hkbu-tuition",
-      "url": "https://ar.hkbu.edu.hk/tpg/tuition-fees/",
+      "url": "https://gs.hkbu.edu.hk/fees-scholarships-and-financial-aid",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -345,7 +345,7 @@
     },
     {
       "id": "hkbu-admission",
-      "url": "https://ar.hkbu.edu.hk/tpg/admissions-requirements/",
+      "url": "https://gs.hkbu.edu.hk/admission/research-postgraduate-programmes/application/admission-requirements",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -354,7 +354,7 @@
     },
     {
       "id": "hkbu-program",
-      "url": "https://ar.hkbu.edu.hk/tpg/programmes/",
+      "url": "https://gs.hkbu.edu.hk/programmes",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -363,7 +363,7 @@
     },
     {
       "id": "hkbu-visa",
-      "url": "https://ar.hkbu.edu.hk/tpg/international-students/",
+      "url": "https://gs.hkbu.edu.hk/admission/research-postgraduate-programmes/application/after-getting-an-offer/apply-for-student-visa",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -372,7 +372,7 @@
     },
     {
       "id": "hkbu-scholarship",
-      "url": "https://ar.hkbu.edu.hk/tpg/scholarships/",
+      "url": "https://gs.hkbu.edu.hk/fees-scholarships-and-financial-aid/scholarship-for-admission",
       "sourceId": "hkbu-official",
       "schoolIds": [
         "hkbu"
@@ -381,7 +381,7 @@
     },
     {
       "id": "lingnan-policy",
-      "url": "https://www.ln.edu.hk/about/policies",
+      "url": "https://www.ln.edu.hk/en/",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -390,7 +390,7 @@
     },
     {
       "id": "lingnan-deadline",
-      "url": "https://www.ln.edu.hk/admissions/",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -399,7 +399,7 @@
     },
     {
       "id": "lingnan-tuition",
-      "url": "https://www.ln.edu.hk/admissions/tuition-fees/",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -408,7 +408,7 @@
     },
     {
       "id": "lingnan-admission",
-      "url": "https://www.ln.edu.hk/admissions/entry-requirements/",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -417,7 +417,7 @@
     },
     {
       "id": "lingnan-program",
-      "url": "https://www.ln.edu.hk/admissions/programmes/",
+      "url": "https://www.ln.edu.hk/sgs/programmes-on-offer",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -426,7 +426,7 @@
     },
     {
       "id": "lingnan-visa",
-      "url": "https://www.ln.edu.hk/admissions/non-local-students/",
+      "url": "https://www.ln.edu.hk/rpg/admission",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -435,7 +435,7 @@
     },
     {
       "id": "lingnan-scholarship",
-      "url": "https://www.ln.edu.hk/admissions/scholarships/",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/ftss",
       "sourceId": "lingnan-official",
       "schoolIds": [
         "lingnan"
@@ -444,7 +444,7 @@
     },
     {
       "id": "eduhk-policy",
-      "url": "https://www.eduhk.hk/about/policies",
+      "url": "https://gs.eduhk.hk/",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -453,7 +453,7 @@
     },
     {
       "id": "eduhk-deadline",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/application-admission.html",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -462,7 +462,7 @@
     },
     {
       "id": "eduhk-tuition",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/fees",
+      "url": "https://gs.eduhk.hk/prospective/med/tuition-fee-scholarships/",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -471,7 +471,7 @@
     },
     {
       "id": "eduhk-admission",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/admission",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/application-admission.html",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -480,7 +480,7 @@
     },
     {
       "id": "eduhk-program",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/programme",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -489,7 +489,7 @@
     },
     {
       "id": "eduhk-visa",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/non-local",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/application-admission.html",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"
@@ -498,7 +498,7 @@
     },
     {
       "id": "eduhk-scholarship",
-      "url": "https://www.eduhk.hk/acadprog/postgrad/scholarship",
+      "url": "https://gs.eduhk.hk/prospective/med/tuition-fee-scholarships/",
       "sourceId": "eduhk-official",
       "schoolIds": [
         "eduhk"

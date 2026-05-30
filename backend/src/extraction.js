@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { composeSystemPrompt } from "./promptLayer.js";
+import { assessChatScope, sanitizeExtractionForHkMaster } from "./chat-scope.js";
 
 function parseJson(content) {
   const s = String(content || "").trim();
@@ -47,7 +48,8 @@ const EXTRACTION_SYSTEM = `你是留学建档信息抽取器。根据用户与�
 - insights：简短洞察句，格式同上，key 可用 insight_1
 - summary_delta：一句话补充到用户画像摘要（中文）
 
-键名建议：target_region, field, intent_degree, school_background, gpa, language, budget_range, intake_or_season, risk_style, career_goal`;
+键名建议：target_region（仅当用户明确香港时填「香港」）, field, intent_degree（授课型硕士）, school_background, gpa, language, budget_range, intake_or_season, risk_style, career_goal。
+若用户讨论美国/英国/博士/副学士等非香港授课型硕士主线，不要写入 target_region 或其它事实字段。`;
 
 /**
  * @param {object} opts
@@ -64,9 +66,13 @@ export async function runProfileExtraction({
   deepseekBaseUrl,
   deepseekModel,
   memoryContext,
+  profileSnapshot,
 }) {
+  if (!assessChatScope({ userMessage, snapshot: profileSnapshot }).inScope) {
+    return normalizeExtraction({ confirmed: [], candidate: [], preference: [], insights: [], summary_delta: "" });
+  }
   if (useMock) {
-    return normalizeExtraction(mockExtraction(userMessage, assistantReply));
+    return sanitizeExtractionForHkMaster(normalizeExtraction(mockExtraction(userMessage, assistantReply)));
   }
 
   const client = new OpenAI({
@@ -88,7 +94,7 @@ export async function runProfileExtraction({
     max_tokens: 1200,
   });
   const raw = completion.choices[0]?.message?.content || "";
-  return normalizeExtraction(parseJson(raw));
+  return sanitizeExtractionForHkMaster(normalizeExtraction(parseJson(raw)));
 }
 
 function mockExtraction(userMessage, assistantReply) {

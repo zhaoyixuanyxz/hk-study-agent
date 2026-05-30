@@ -47,9 +47,33 @@ npm run test:v1-p4
 npm run test:v1-p5
 # V1 回归（含 P6 全链路安全与文档守门）
 npm run test:v1-p6
+# V2 CQ-A（Plan/Report 数据契约与 fit_note）
+npm run test:v1-cq-a
+# V2 CQ-B（Plan/Report 前端可视化）
+cd ../frontend && npm test && npm run build && cd ../backend && npm run test:v1-cq-b
+# V2 CQ-C（Plan/Report 内容 QA 与回归）
+npm run test:v1-cq-regression
+# V2 CQ-D（录取 benchmark 种子 + intel 加权）
+npm run test:v1-cq-d
+# V3 聚合门禁（INTEL + CHAT + KB + VIS + CQ 回归）
+npm run test:v1-v3
+# V3 子阶段（按需）
+npm run test:v1-intel-safe-merge
+npm run test:v1-chat-scope
+npm run test:v1-v3-kb
+npm run test:v1-v3-vis
 # Sprint 7 部署资产守门
 npm run test:v1-sprint7
 ```
+
+**V3 里程碑总验收**（发布前建议）：
+
+```bash
+cd backend && npm run test:v1-v3 && npm run test:v1-p6
+cd ../frontend && npm test && npm run build
+```
+
+详见 [docs/v1.verson/V1-迭代路线图V3-详细任务清单.md](docs/v1.verson/V1-迭代路线图V3-详细任务清单.md) 与 [V1-V3-Sprint-QA-归档-2026-05-30.md](docs/v1.verson/V1-V3-Sprint-QA-归档-2026-05-30.md)。
 
 ### 5. Docker 云试点（可选）
 
@@ -61,7 +85,21 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 详见 [docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md)。
 
-### 6. 情报每日真爬（港八大）
+### 6. 一键启动 / 关闭（Windows）
+
+| 文件 | 作用 |
+|------|------|
+| `启动项.bat` | 启动前预检：Postgres（Docker）、依赖、同步 feed、修复链接、按需 `intelligence:daily`，再开 API + 前端 |
+| `启动项-保持窗口.bat` | 同上，但用 `cmd /k` 包住；若主 bat 仍闪退可改双击这个 |
+| `关闭项.bat` | 关闭 API/Web 窗口、释放 8010/5180 端口、停止 Postgres 容器 |
+
+**双击闪退**：多半是 bat 被存成 **UTF-8 带 BOM**。请用 VS Code 右下角编码改为「UTF-8」（无 BOM）或「GBK」后保存；文件首行必须是 `@echo off`，不能有不可见字符。
+
+强制全量重爬：在 cmd 中运行 `启动项.bat --force-crawl`。
+
+`.env` 可调：`STARTUP_INTEL_CRAWL=1`、`STARTUP_INTEL_CRAWL_MAX_AGE_HOURS=12`（小时内不重复爬）、`STARTUP_INTEL_CRAWL_FORCE=1`（每次启动都爬）、`STARTUP_OPEN_BROWSER=1`（启动后自动打开 http://127.0.0.1:5180/）。情报爬取在**浏览器打开之后**于后台窗口执行，避免长时间等待。
+
+### 7. 情报每日真爬（港八大）
 
 ```bash
 cd backend

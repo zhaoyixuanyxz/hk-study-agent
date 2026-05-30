@@ -63,6 +63,27 @@ function renderStructuredBlock(item) {
         .join("")}</ul>`
     );
   }
+  if (s.benchmarkGpa && typeof s.benchmarkGpa === "object") {
+    const g = s.benchmarkGpa;
+    const lang =
+      s.language && typeof s.language === "object"
+        ? ` · IELTS ${escapeHtml(String(s.language.ielts ?? "—"))}`
+        : "";
+    parts.push(
+      `<div class="intel-benchmark-block"><strong>参考基准</strong> · 典型 GPA ${escapeHtml(String(g.typical ?? "—"))}/${escapeHtml(String(g.scale || "4.0"))}${lang}${s.competitionTag ? ` · 竞争度 ${escapeHtml(String(s.competitionTag))}` : ""}</div>`
+    );
+  }
+  if (Array.isArray(s.subjectWeights) && s.subjectWeights.length) {
+    parts.push(
+      `<ul class="intel-struct-list intel-subject-weights">${s.subjectWeights
+        .slice(0, 5)
+        .map(
+          (sw) =>
+            `<li><strong>${escapeHtml(sw.subject || "科目")}</strong> · ${escapeHtml(sw.weight || "")}${sw.note ? ` — ${escapeHtml(sw.note)}` : ""}</li>`
+        )
+        .join("")}</ul>`
+    );
+  }
   if (!parts.length) return "";
   return `<div class="intel-structured">${parts.join("")}</div>`;
 }
@@ -182,6 +203,94 @@ export async function runIntelligenceSearch() {
   }
 }
 
+function renderPreflightSummary(data) {
+  const box = el("admin-intel-preflight-summary");
+  if (!box) return;
+  if (!data || data.empty) {
+    box.innerHTML = '<p class="placeholder">尚未执行检测。请先点击「检测链接」，再执行「安全采集」。</p>';
+    return;
+  }
+  const failures = data.failures || [];
+  const failLines = failures.length
+    ? `<ul class="admin-preflight-failures">${failures
+        .slice(0, 12)
+        .map(
+          (f) =>
+            `<li><code>${escapeHtml(f.feedId || "")}</code> — ${escapeHtml(f.url || "")} <span class="meta">(${escapeHtml(String(f.status || f.error || ""))}${f.soft404 ? ", soft-404" : ""})</span></li>`
+        )
+        .join("")}${failures.length > 12 ? `<li class="meta">…另有 ${failures.length - 12} 条</li>` : ""}</ul>`
+    : "<p>全部链接探活通过。</p>";
+  box.innerHTML = `<p><strong>上次检测</strong>：${escapeHtml(data.ran_at || "")}</p>
+    <p>共 ${data.total ?? 0} 条 · 可用 ${data.ok_count ?? 0} · 失败 ${data.failed_count ?? 0} · 慢响应 ${data.slow_count ?? 0}</p>
+    ${failLines}`;
+}
+
+export async function loadAdminPreflightSummary() {
+  try {
+    const data = await api("/api/v1/intelligence/admin/preflight-last");
+    renderPreflightSummary(data);
+    return data;
+  } catch {
+    renderPreflightSummary({ empty: true });
+    return null;
+  }
+}
+
+export async function runAdminPreflightUrls() {
+  const status = el("admin-intel-status");
+  const btn = el("admin-intel-preflight");
+  if (status) status.textContent = "正在检测全部采集链接…";
+  if (btn) btn.disabled = true;
+  try {
+    const data = await api("/api/v1/intelligence/admin/preflight-urls", { method: "POST", body: {} });
+    renderPreflightSummary({
+      empty: false,
+      ran_at: data.ran_at,
+      total: data.total,
+      ok_count: data.ok_count,
+      failed_count: data.failed_count,
+      slow_count: data.slow_count,
+      failures: data.failures,
+    });
+    if (status) {
+      status.textContent = `链接检测完成：${data.ok_count ?? 0}/${data.total ?? 0} 可用，${data.failed_count ?? 0} 失败`;
+    }
+    track("admin_intel_preflight", { failed: data.failed_count, total: data.total });
+    return data;
+  } catch (e) {
+    if (status) status.textContent = String(e.message || e);
+    throw e;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+export async function runAdminSafeCollect() {
+  const status = el("admin-intel-status");
+  const btn = el("admin-intel-collect");
+  if (status) status.textContent = "安全采集中（跳过探活失败链接，不覆盖劣质正文）…";
+  if (btn) btn.disabled = true;
+  try {
+    const data = await api("/api/v1/intelligence/admin/collect", {
+      method: "POST",
+      body: { respect_preflight: true },
+    });
+    const { formatAdminCollectResult } = await import("../copy.js");
+    if (status) status.textContent = formatAdminCollectResult(data);
+    track("admin_intel_collect", {
+      ingested: data.items_ingested,
+      skipped_preflight: data.skipped_preflight,
+    });
+    await loadAdminIntelligencePage();
+    return data;
+  } catch (e) {
+    if (status) status.textContent = String(e.message || e);
+    throw e;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 export async function loadAdminIntelligencePage() {
   const status = el("admin-intel-status");
   const queueBox = el("admin-intel-queue");
@@ -189,6 +298,7 @@ export async function loadAdminIntelligencePage() {
   const sourcesBox = el("admin-intel-sources");
   if (status) status.textContent = "加载运营后台…";
   try {
+    await loadAdminPreflightSummary();
     const ws = await api("/api/v1/intelligence/admin/workspace");
     if (statsBox) {
       statsBox.innerHTML = `<p>待审核：<strong>${ws.stats?.pending_review ?? 0}</strong></p>

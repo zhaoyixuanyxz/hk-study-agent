@@ -4,6 +4,13 @@ import { isIntelligenceItemPublished } from "./normalization-service.js";
 import { userCanReview, assertReviewer } from "./reviewer-auth.js";
 import { searchIntelligenceItems } from "./searchItems.js";
 import { getSchoolDetail, listSchoolCards } from "./schoolDashboard.js";
+import {
+  loadPreflightLast,
+  runFeedPreflight,
+  savePreflightLast,
+} from "./url-preflight.js";
+import { buildCrawlFeeds } from "./crawl-registry.js";
+import { loadFeedUrlsFile } from "./ingestion-service.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -137,15 +144,59 @@ export function registerIntelligenceRoutes(app, deps) {
     };
   });
 
+  app.get("/api/v1/intelligence/admin/preflight-last", async (request) => {
+    const user = await auth(request);
+    assertReviewer(store, user);
+    const last = loadPreflightLast();
+    if (!last) {
+      return { ok: true, empty: true, ran_at: null, total: 0, failed_count: 0, failures: [] };
+    }
+    return {
+      ok: true,
+      empty: false,
+      ran_at: last.ranAt,
+      total: last.total,
+      ok_count: last.okCount,
+      failed_count: last.failedCount,
+      slow_count: last.slowCount,
+      failures: last.failures || [],
+    };
+  });
+
+  app.post("/api/v1/intelligence/admin/preflight-urls", async (request) => {
+    const user = await auth(request);
+    assertReviewer(store, user);
+    const fileFeeds = loadFeedUrlsFile().feeds;
+    const feeds = fileFeeds.length ? fileFeeds : buildCrawlFeeds();
+    const summary = await runFeedPreflight({ feeds, concurrency: 4 });
+    savePreflightLast(summary);
+    return {
+      ok: true,
+      ran_at: summary.ranAt,
+      total: summary.total,
+      ok_count: summary.okCount,
+      failed_count: summary.failedCount,
+      slow_count: summary.slowCount,
+      failures: summary.failures,
+    };
+  });
+
   app.post("/api/v1/intelligence/admin/collect", async (request) => {
     const user = await auth(request);
     assertReviewer(store, user);
-    const result = await runIngestion(store, {});
+    const body = request.body && typeof request.body === "object" ? request.body : {};
+    const respectPreflight = body.respect_preflight !== false && body.respectPreflight !== false;
+    const result = await runIngestion(store, { respectPreflight });
     return {
       ok: true,
       items_ingested: result.itemsIngested,
+      items_updated: result.itemsUpdated ?? 0,
+      items_skipped_quality: result.itemsSkippedQuality ?? 0,
+      skipped_preflight: result.skippedPreflight ?? 0,
+      skipped_feeds: result.skippedFeeds ?? [],
       run_id: result.run?.id,
       fetch_enabled: result.fetchEnabled,
+      errors: (result.errors || []).slice(0, 10),
     };
   });
 

@@ -5,6 +5,7 @@ import { createHash, randomBytes } from "crypto";
 import { hashPassword, verifyPassword } from "./password.js";
 import { ALL_STRUCTURED_FACT_KEYS, buildPlanInputView } from "./plan-input-service.js";
 import { buildProfileSnapshot } from "./profile-service.js";
+import { passesExtractionQuality } from "./intelligence/structured-extract.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -995,6 +996,7 @@ export function createStore(dataFile) {
         title: row.title != null ? String(row.title).slice(0, 500) : "",
         html: row.html,
         citations: Array.isArray(row.citations) ? row.citations : [],
+        visuals: row.visuals && typeof row.visuals === "object" ? row.visuals : null,
         chapterCount: row.chapterCount ?? 7,
         wordCount: row.wordCount ?? 0,
         createdAt: now,
@@ -1158,8 +1160,9 @@ export function createStore(dataFile) {
 
     /**
      * Crawl upsert: match feedId or dedupeHash; update when contentHash changes.
+     * Skips update when new extraction fails quality (keeps published good content).
      * @param {object} normalized
-     * @returns {{ row: object, created: boolean, updated: boolean }}
+     * @returns {{ row: object, created: boolean, updated: boolean, skippedReason?: string }}
      */
     upsertIntelligenceItemCrawl(normalized) {
       const db = load();
@@ -1181,14 +1184,26 @@ export function createStore(dataFile) {
         if (sameContent) {
           return { row: prev, created: false, updated: false };
         }
+        const newText = normalized.locale?.contentText || "";
+        const newStructured = normalized.structured || {};
+        const newQualityOk = passesExtractionQuality(newText, newStructured);
+        if (!newQualityOk) {
+          return { row: prev, created: false, updated: false, skippedReason: "quality_degraded" };
+        }
+        const preserveReview = ["approved", "auto_published"].includes(String(prev.reviewStatus || ""));
         const row = {
           ...prev,
           ...normalized,
           id: prev.id,
           createdAt: prev.createdAt,
           updatedAt: now,
-          publishedAt: normalized.publishedAt || now,
+          publishedAt: normalized.publishedAt || prev.publishedAt || now,
         };
+        if (preserveReview) {
+          row.reviewStatus = prev.reviewStatus;
+          row.reviewedBy = prev.reviewedBy;
+          row.productCurated = prev.productCurated;
+        }
         db.intelligenceItems[idx] = row;
         save(db);
         return { row, created: false, updated: true };

@@ -8,9 +8,11 @@ import { loadCuratedSeedsIntoStore } from "../src/intelligence/seed-loader.js";
 import { buildIntelContextPack } from "../src/intelligence/intelContextPack.js";
 import {
   filterCitationsAgainstIntelligenceItems,
+  filterCitationsAgainstCombinedSources,
   intelligenceItemsToAllowlistMap,
   normalizeCitations,
 } from "../src/citation-utils.js";
+import { selectExternalKbForProfile } from "../src/intelligence/external-kb-loader.js";
 import { normalizeAgentOutput } from "../src/agent.js";
 import { buildMockStructuredPlan } from "../src/planning-service.js";
 import { generateHtmlReport } from "../src/report-service.js";
@@ -140,11 +142,19 @@ test("mock plan includes citationRefs aligned with intelligence allowlist", () =
   );
   assert.ok(Array.isArray(plan.citations));
   assert.ok(Array.isArray(plan.citationRefs));
-  if (plan.citations.length) {
-    const ok = filterCitationsAgainstIntelligenceItems(plan.citations, pack.items);
-    assert.equal(ok.length, plan.citations.length);
-    assert.equal(plan.citationRefs[0].itemId, plan.citations[0].itemId);
-  }
+  assert.ok(plan.citations.length >= 6);
+  const piv = {
+    goals: { value: { target_region: "香港", field: "CS" } },
+    academic: { value: { gpa: "3.2", school_background: "211" } },
+    budget: { value: { budget_range: "30-40万" } },
+    timeline: { value: { intake_or_season: "2026 Fall" } },
+    riskPreference: { value: { risk_style: "均衡" } },
+    readiness: { ready: true, missingRequired: [] },
+  };
+  const ext = selectExternalKbForProfile({ planInputView: piv, limit: 8 });
+  const ok = filterCitationsAgainstCombinedSources(plan.citations, pack.items, ext);
+  assert.equal(ok.length, plan.citations.length);
+  assert.equal(plan.citationRefs[0].itemId, plan.citations[0].itemId);
 });
 
 test("mock report merges plan citations through intelligence filter", async () => {

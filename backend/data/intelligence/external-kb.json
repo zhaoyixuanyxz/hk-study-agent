@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "ext_hku-deadline",
+      "title": "HKU 申请截止日期",
+      "url": "https://admissions.hku.hk/",
+      "trustTier": "official",
+      "schoolIds": [
+        "hku"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hku-tuition",
+      "title": "HKU 学费与费用",
+      "url": "https://admissions.hku.hk/tpg/fees",
+      "trustTier": "official",
+      "schoolIds": [
+        "hku"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hku-admission",
+      "title": "HKU 研究生院录取要求",
+      "url": "https://admissions.hku.hk/",
+      "trustTier": "official",
+      "schoolIds": [
+        "hku"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hku-program",
+      "title": "HKU 授课型硕士项目页",
+      "url": "https://admissions.hku.hk/",
+      "trustTier": "official",
+      "schoolIds": [
+        "hku"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cuhk-deadline",
+      "title": "CUHK 申请截止日期",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/application-deadline",
+      "trustTier": "official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cuhk-tuition",
+      "title": "CUHK 学费与费用",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/scholarships-fees/fees",
+      "trustTier": "official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cuhk-admission",
+      "title": "CUHK 研究生院录取要求",
+      "url": "https://www.gs.cuhk.edu.hk/admissions/how-to-apply",
+      "trustTier": "official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cuhk-program",
+      "title": "CUHK 授课型硕士项目页",
+      "url": "https://www.gs.cuhk.edu.hk/programmes",
+      "trustTier": "official",
+      "schoolIds": [
+        "cuhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkust-deadline",
+      "title": "HKUST 申请截止日期",
+      "url": "https://join.hkust.edu.hk/",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkust-tuition",
+      "title": "HKUST 学费与费用",
+      "url": "https://join.hkust.edu.hk/fees-and-scholarships",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkust-admission",
+      "title": "HKUST 研究生院录取要求",
+      "url": "https://join.hkust.edu.hk/admissions",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkust-program",
+      "title": "HKUST 授课型硕士项目页",
+      "url": "https://pg.ust.hk/programs",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkust"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_polyu-deadline",
+      "title": "POLYU 申请截止日期",
+      "url": "https://www.polyu.edu.hk/admissions/",
+      "trustTier": "official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_polyu-tuition",
+      "title": "POLYU 学费与费用",
+      "url": "https://www.polyu.edu.hk/admissions/tuition-fees-and-scholarships/",
+      "trustTier": "official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_polyu-admission",
+      "title": "POLYU 研究生院录取要求",
+      "url": "https://www.polyu.edu.hk/admissions/postgraduate/",
+      "trustTier": "official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_polyu-program",
+      "title": "POLYU 授课型硕士项目页",
+      "url": "https://www.polyu.edu.hk/admissions/postgraduate/",
+      "trustTier": "official",
+      "schoolIds": [
+        "polyu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cityu-deadline",
+      "title": "CITYU 申请截止日期",
+      "url": "https://www.cityu.edu.hk/admo/admissions",
+      "trustTier": "official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cityu-tuition",
+      "title": "CITYU 学费与费用",
+      "url": "https://www.cityu.edu.hk/admo/fees",
+      "trustTier": "official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cityu-admission",
+      "title": "CITYU 研究生院录取要求",
+      "url": "https://www.cityu.edu.hk/admo/entry-requirements",
+      "trustTier": "official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_cityu-program",
+      "title": "CITYU 授课型硕士项目页",
+      "url": "https://www.cityu.edu.hk/admo/programmes",
+      "trustTier": "official",
+      "schoolIds": [
+        "cityu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkbu-deadline",
+      "title": "HKBU 申请截止日期",
+      "url": "https://gs.hkbu.edu.hk/admission/research-postgraduate-programmes/application/admission-timeline",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkbu-tuition",
+      "title": "HKBU 学费与费用",
+      "url": "https://gs.hkbu.edu.hk/fees-scholarships-and-financial-aid",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkbu-admission",
+      "title": "HKBU 研究生院录取要求",
+      "url": "https://gs.hkbu.edu.hk/admission/research-postgraduate-programmes/application/admission-requirements",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_hkbu-program",
+      "title": "HKBU 授课型硕士项目页",
+      "url": "https://gs.hkbu.edu.hk/programmes",
+      "trustTier": "official",
+      "schoolIds": [
+        "hkbu"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_lingnan-deadline",
+      "title": "LINGNAN 申请截止日期",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
+      "trustTier": "official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_lingnan-tuition",
+      "title": "LINGNAN 学费与费用",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
+      "trustTier": "official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_lingnan-admission",
+      "title": "LINGNAN 研究生院录取要求",
+      "url": "https://www.ln.edu.hk/sgs/for-prospective-students/taught-postgraduate-programmes/admission-information",
+      "trustTier": "official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_lingnan-program",
+      "title": "LINGNAN 授课型硕士项目页",
+      "url": "https://www.ln.edu.hk/sgs/programmes-on-offer",
+      "trustTier": "official",
+      "schoolIds": [
+        "lingnan"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_eduhk-deadline",
+      "title": "EDUHK 申请截止日期",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/application-admission.html",
+      "trustTier": "official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "deadline"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_eduhk-tuition",
+      "title": "EDUHK 学费与费用",
+      "url": "https://gs.eduhk.hk/prospective/med/tuition-fee-scholarships/",
+      "trustTier": "official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "tuition"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_eduhk-admission",
+      "title": "EDUHK 研究生院录取要求",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/application-admission.html",
+      "trustTier": "official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "admission_req"
+      ],
+      "publishedAt": "2026-01-01"
+    },
+    {
+      "id": "ext_eduhk-program",
+      "title": "EDUHK 授课型硕士项目页",
+      "url": "https://gs.eduhk.hk/pg-programmes-2026/",
+      "trustTier": "official",
+      "schoolIds": [
+        "eduhk"
+      ],
+      "programTags": [
+        "数据科学",
+        "金融",
+        "计算机",
+        "商科",
+        "工程"
+      ],
+      "infoTypes": [
+        "program_page"
+      ],
+      "publishedAt": "2026-01-01"
+    }
+  ]
+}

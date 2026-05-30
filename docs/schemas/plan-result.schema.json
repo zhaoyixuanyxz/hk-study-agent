@@ -10,6 +10,69 @@
     "risk_summary": { "type": "string" },
     "budget_suggestion": { "type": "string" },
     "timeline_suggestion": { "type": "string" },
+    "timeline_urgency": {
+      "type": "string",
+      "enum": ["relaxed", "normal", "tight"],
+      "description": "时间压力等级"
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["itemId", "url"],
+        "properties": {
+          "itemId": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "sourceTitle": { "type": "string" },
+          "publishedAt": { "type": "string" },
+          "quoteOrSummary": { "type": "string" }
+        }
+      },
+      "maxItems": 12
+    },
+    "visuals": {
+      "type": "object",
+      "description": "可选图表数据（非录取概率）",
+      "properties": {
+        "tierComparison": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "scores": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 } },
+            "note": { "type": "string" }
+          }
+        },
+        "timelineMilestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "monthsFromNow"],
+            "properties": {
+              "label": { "type": "string" },
+              "monthsFromNow": { "type": "number", "minimum": 0, "maximum": 36 }
+            }
+          }
+        },
+        "benchmarkBars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "value", "max"],
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "number", "minimum": 0, "maximum": 100 },
+              "max": { "type": "number", "minimum": 1, "maximum": 100 }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "citationRefs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "citations 中 itemId 列表"
+    },
     "tiers": {
       "type": "object",
       "required": ["reach", "match", "safety"],
@@ -27,8 +90,17 @@
       "properties": {
         "label": { "type": "string" },
         "summary": { "type": "string" },
-        "rationale": { "type": "string" }
-      }
+        "rationale": { "type": "string" },
+        "risk_note": {
+          "type": "string",
+          "description": "该档主要不确定性与非承诺表述"
+        },
+        "fit_note": {
+          "type": "string",
+          "description": "程序特定权重/匹配度说明（JUPAS subject weighting 等）"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

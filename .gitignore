@@ -1,5 +1,8 @@
 .env
 .env.local
+.cursor/
+backend/data/.startup-state.json
+backend/data/.intel-preflight-last.json
 __pycache__/
 *.py[cod]
 .pytest_cache/

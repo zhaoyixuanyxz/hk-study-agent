@@ -25,8 +25,14 @@ import {
 } from "../api/client.js";
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
+import { enhanceReportPage, parseReportVisualsFromHtml } from "../lib/action-plan-ui.js";
+import { destroyReportCharts, injectReportVisuals } from "../lib/report-charts.js";
 import { navigateTo, parseHash } from "../shell/navigation.js";
-import * as appState from "../app-state.js";
+import {
+  currentReportDetail,
+  lastPlanReportReadiness,
+  setCurrentReportDetail,
+} from "../app-state.js";
 
 export function hideReportError() {
   const box = el("report-error");
@@ -52,12 +58,16 @@ export function setReportStatus(text, isErr) {
 }
 
 export function renderReport(detail) {
-  appState.currentReportDetail = detail && typeof detail === "object" ? detail : null;
+  setCurrentReportDetail(detail && typeof detail === "object" ? detail : null);
   const container = el("report-content");
   const meta = el("report-meta");
   if (!container) return;
   if (detail && detail.html) {
+    destroyReportCharts();
     container.innerHTML = detail.html;
+    enhanceReportPage(container, detail);
+    const visuals = detail.visuals || parseReportVisualsFromHtml(container);
+    void injectReportVisuals(container, visuals);
   } else {
     container.innerHTML = `<p class="placeholder">报告内容为空。</p>`;
   }
@@ -97,7 +107,7 @@ export async function loadReportPage(routeReportId) {
     }
     if (!targetId) {
       setReportStatus("");
-      appState.currentReportDetail = null;
+      setCurrentReportDetail(null);
       setupReportDeliveryUi();
       if (meta) {
         meta.classList.add("hidden");
@@ -115,7 +125,7 @@ export async function loadReportPage(routeReportId) {
     track("report_view", { report_id: detail.report_id || targetId });
   } catch (e) {
     setReportStatus(String(e.message || e), true);
-    appState.currentReportDetail = null;
+    setCurrentReportDetail(null);
     setupReportDeliveryUi();
     if (meta) meta.classList.add("hidden");
     if (container) {
@@ -131,22 +141,22 @@ el("refresh-report")?.addEventListener("click", () => {
 });
 
 el("btn-report-pdf")?.addEventListener("click", async () => {
-  if (!appState.currentReportDetail?.report_id) return;
+  if (!currentReportDetail?.report_id) return;
   hideReportError();
   try {
-    await downloadReportPdf(appState.currentReportDetail.report_id);
-    track("report_pdf_download", { report_id: appState.currentReportDetail.report_id });
+    await downloadReportPdf(currentReportDetail.report_id);
+    track("report_pdf_download", { report_id: currentReportDetail.report_id });
   } catch (e) {
     showReportError(String(e.message || e), "");
   }
 });
 
 el("btn-report-share-on")?.addEventListener("click", async () => {
-  if (!appState.currentReportDetail?.report_id) return;
+  if (!currentReportDetail?.report_id) return;
   hideReportError();
   try {
-    await api(`/api/v1/reports/${appState.currentReportDetail.report_id}/share`, { method: "POST", body: {} });
-    const detail = await api(`/api/v1/reports/${appState.currentReportDetail.report_id}`);
+    await api(`/api/v1/reports/${currentReportDetail.report_id}/share`, { method: "POST", body: {} });
+    const detail = await api(`/api/v1/reports/${currentReportDetail.report_id}`);
     renderReport(detail);
     track("report_share_enable", { report_id: detail.report_id });
   } catch (e) {
@@ -155,7 +165,7 @@ el("btn-report-share-on")?.addEventListener("click", async () => {
 });
 
 el("btn-report-share-copy")?.addEventListener("click", async () => {
-  const path = appState.currentReportDetail && typeof appState.currentReportDetail.share_url_path === "string" ? appState.currentReportDetail.share_url_path : "";
+  const path = currentReportDetail && typeof currentReportDetail.share_url_path === "string" ? currentReportDetail.share_url_path : "";
   if (!path) return;
   const url = fullUrlFromApiPath(path);
   try {
@@ -167,17 +177,17 @@ el("btn-report-share-copy")?.addEventListener("click", async () => {
 });
 
 el("btn-report-share-open")?.addEventListener("click", () => {
-  const path = appState.currentReportDetail && typeof appState.currentReportDetail.share_url_path === "string" ? appState.currentReportDetail.share_url_path : "";
+  const path = currentReportDetail && typeof currentReportDetail.share_url_path === "string" ? currentReportDetail.share_url_path : "";
   if (!path) return;
   window.open(fullUrlFromApiPath(path), "_blank", "noopener,noreferrer");
 });
 
 el("btn-report-share-off")?.addEventListener("click", async () => {
-  if (!appState.currentReportDetail?.report_id) return;
+  if (!currentReportDetail?.report_id) return;
   hideReportError();
   try {
-    await api(`/api/v1/reports/${appState.currentReportDetail.report_id}/share`, { method: "DELETE", body: {} });
-    const detail = await api(`/api/v1/reports/${appState.currentReportDetail.report_id}`);
+    await api(`/api/v1/reports/${currentReportDetail.report_id}/share`, { method: "DELETE", body: {} });
+    const detail = await api(`/api/v1/reports/${currentReportDetail.report_id}`);
     renderReport(detail);
     track("report_share_disable", { report_id: detail.report_id });
   } catch (e) {
@@ -189,7 +199,7 @@ el("btn-generate-report")?.addEventListener("click", async () => {
   const btn = el("btn-generate-report");
   hideReportError();
   track("report_generate_click", {});
-  if (appState.lastPlanReportReadiness && appState.lastPlanReportReadiness.ok === false) {
+  if (lastPlanReportReadiness && lastPlanReportReadiness.ok === false) {
     const go = window.confirm(
       "交付报告就绪检查未全部通过，报告论据可能不完整。是否仍要继续生成？"
     );

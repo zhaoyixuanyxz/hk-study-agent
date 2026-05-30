@@ -1,5 +1,5 @@
 import { track } from "../track.js";
-import { extractAssistantDisplayText } from "../assistant-text.js";
+import { extractAssistantDisplayText, formatAssistantHtml } from "../assistant-text.js";
 import {
   formatFactLabel,
   formatFlowState,
@@ -13,7 +13,15 @@ import {
 } from "../copy.js";
 import { api, LS_THREAD, LS_TOKEN } from "../api/client.js";
 import { el, setStatus, prettyTime, shortId } from "../lib/dom.js";
-import * as appState from "../app-state.js";
+import {
+  composerReplacementUserMessageId,
+  composerCorrectionBackfill,
+  composerCorrectionThreadId,
+  setComposerReplacementUserMessageId,
+  setComposerCorrectionBackfill,
+  setComposerCorrectionThreadId,
+  resetComposerCorrectionDraftState,
+} from "../app-state.js";
 
 export function renderMessages(container, items) {
   container.innerHTML = "";
@@ -267,18 +275,16 @@ export function syncComposerReplaceBanner() {
   if (box)
     box.classList.toggle(
       "hidden",
-      appState.composerReplacementUserMessageId == null || appState.composerReplacementUserMessageId === "",
+      composerReplacementUserMessageId == null || composerReplacementUserMessageId === "",
     );
   if (sendBtn) {
-    const active = appState.composerReplacementUserMessageId != null && String(appState.composerReplacementUserMessageId).trim() !== "";
+    const active = composerReplacementUserMessageId != null && String(composerReplacementUserMessageId).trim() !== "";
     sendBtn.textContent = active ? "重新发给助手（覆盖上条回复）" : "提交给顾问助手";
   }
 }
 
 export function resetComposerReplaceDraftQuiet() {
-  appState.composerReplacementUserMessageId = null;
-  appState.composerCorrectionBackfill = "";
-  appState.composerCorrectionThreadId = null;
+  resetComposerCorrectionDraftState();
   syncComposerReplaceBanner();
 }
 
@@ -286,9 +292,9 @@ export function enterComposerCorrectionDraft(messageId, userTextBody) {
   const mid = messageId != null ? String(messageId) : "";
   if (!mid) return;
   const inp = el("input");
-  appState.composerCorrectionBackfill = inp?.value ?? "";
-  appState.composerReplacementUserMessageId = mid;
-  appState.composerCorrectionThreadId = localStorage.getItem(LS_THREAD);
+  setComposerCorrectionBackfill(inp?.value ?? "");
+  setComposerReplacementUserMessageId(mid);
+  setComposerCorrectionThreadId(localStorage.getItem(LS_THREAD));
   if (inp) inp.value = String(userTextBody ?? "").trimEnd();
   syncComposerReplaceBanner();
   inp?.focus();
@@ -296,9 +302,9 @@ export function enterComposerCorrectionDraft(messageId, userTextBody) {
 }
 
 export function clearComposerCorrectionDraft() {
-  if (appState.composerReplacementUserMessageId) {
+  if (composerReplacementUserMessageId) {
     const inp = el("input");
-    if (inp) inp.value = appState.composerCorrectionBackfill;
+    if (inp) inp.value = composerCorrectionBackfill;
   }
   resetComposerReplaceDraftQuiet();
 }
@@ -329,10 +335,10 @@ export async function refreshReviewerNav() {
 export async function loadThread(threadId) {
   const tidStr = threadId != null ? String(threadId) : "";
   if (
-    appState.composerReplacementUserMessageId &&
-    appState.composerCorrectionThreadId &&
+    composerReplacementUserMessageId &&
+    composerCorrectionThreadId &&
     tidStr &&
-    appState.composerCorrectionThreadId !== tidStr
+    composerCorrectionThreadId !== tidStr
   ) {
     resetComposerReplaceDraftQuiet();
     setStatus("已切换会话，未发送的纠错草稿已收起。", false);

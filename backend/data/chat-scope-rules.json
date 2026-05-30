@@ -1,0 +1,39 @@
+{
+  "serviceScope": "香港高校授课型硕士（Taught Master）申请规划",
+  "excludedScopes": [
+    "副学士、高级文凭为主路径",
+    "研究型硕士、MPhil、博士（PhD）申请",
+    "本科/JUPAS 为主申请（非授课型硕士主线）",
+    "美国、英国、加拿大、澳洲、新加坡等国家/地区长期留学（非香港）"
+  ],
+  "violationPatterns": [
+    { "id": "region_us", "pattern": "(美国|usa|u\\.?s\\.?)(?!.*香港).*(留学|申请|硕士|master|研究生)" },
+    { "id": "region_us_alt", "pattern": "(留学|申请|硕士|master).*(美国|usa|u\\.?s\\.?)(?!.*香港)" },
+    { "id": "region_uk", "pattern": "(英国|uk|伦敦)(?!.*香港).*(留学|申请|硕士|master|研究生)" },
+    { "id": "region_au_ca", "pattern": "(澳洲|澳大利亚|加拿大|新加坡|欧洲)(?!.*香港).*(留学|申请|硕士|master|读研)" },
+    { "id": "region_ca_short", "pattern": "(加拿大|澳洲|澳大利亚).*(读研|留学)" },
+    { "id": "overseas_taught", "pattern": "(美国|英国|uk|加拿大|澳洲|澳大利亚|新加坡|欧洲).{0,40}(taught|授课|硕士|master|programme)" },
+    { "id": "phd", "pattern": "(博士|ph\\.?d|phd|研究型硕士|mphil|博导|读博)" },
+    { "id": "associate", "pattern": "(副学士|associate\\s*degree|高级文凭升读学士(?!.*授课型硕士))" },
+    { "id": "ug_only", "pattern": "(只申请|只想|仅).*(本科|jupas|学士学位)" },
+    { "id": "ug_reject_master", "pattern": "(本科|jupas|学士学位).*(不要|不想|无需|不考虑).*(硕士|master|授课型)" },
+    { "id": "exclude_hk", "pattern": "(不去|不考虑|不想).*(香港|港校)" }
+  ],
+  "hkAnchorPatterns": [
+    "香港",
+    "港校",
+    "港八大",
+    "hong\\s*kong",
+    "\\bhk\\b",
+    "hku|cuhk|hkust|polyu|cityu|hkbu|lingnan|eduhk",
+    "港大|港中文|港科大|理大|城大|浸大|教大|岭南"
+  ],
+  "taughtMasterPatterns": [
+    "授课型硕士",
+    "taught\\s*master",
+    "授课硕士",
+    "修课式硕士"
+  ],
+  "defaultRedirectReply": "判断：该问题超出本顾问服务范围。原因：本助手仅支持香港高校授课型硕士（Taught Master）申请规划，不包含副学士、研究型硕士/博士、本科 JUPAS 主线，也不覆盖其他国家/地区长期留学。下一步：若你计划申请香港授课型硕士，请补充目标港校/专业、计划入学季与语言成绩概况。",
+  "defaultGaps": ["目标港校与授课型硕士专业方向", "计划入学季", "语言成绩或考试计划"]
+}

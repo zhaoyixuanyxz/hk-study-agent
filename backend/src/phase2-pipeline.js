@@ -17,6 +17,7 @@ import { buildPlanInputView } from "./plan-input-service.js";
  */
 export async function runPhase2Pipeline(store, ctx) {
   const memCtx = buildMemoryContext(store, ctx.userId, ctx.userMessage);
+  const latestSnap = store.getLatestProfileSnapshot(ctx.userId);
 
   const extracted = await runProfileExtraction({
     userMessage: ctx.userMessage,
@@ -26,6 +27,7 @@ export async function runPhase2Pipeline(store, ctx) {
     deepseekBaseUrl: ctx.deepseekBaseUrl,
     deepseekModel: ctx.deepseekModel,
     memoryContext: memCtx,
+    profileSnapshot: latestSnap?.snapshot,
   });
 
   mergeExtractionIntoStore(store, ctx.userId, ctx.threadId, extracted);

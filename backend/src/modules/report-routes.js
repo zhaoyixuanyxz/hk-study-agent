@@ -5,7 +5,7 @@ import {
   getReportGenerationTimeoutMs,
 } from "../report-service.js";
 import { renderHtmlToPdf } from "../pdf-service.js";
-import { buildIntelContextPack } from "../intelligence/intelContextPack.js";
+import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -44,7 +44,7 @@ export function registerReportRoutes(app, ctx) {
     const useMock = !key;
     const timeoutMs = getReportGenerationTimeoutMs();
 
-    const intelPack = buildIntelContextPack(store, {
+    const intelPack = buildCombinedIntelContext(store, {
       snapshot: latest.snapshot,
       planInputView: latest.planInputView,
       userMessage: [
@@ -54,7 +54,8 @@ export function registerReportRoutes(app, ctx) {
       ]
         .filter(Boolean)
         .join(" "),
-      limit: 8,
+      forPlanOrReport: true,
+      limit: 12,
     });
 
     const gen = await generateHtmlReport(latest.snapshot, planRow.plan, {
@@ -65,6 +66,7 @@ export function registerReportRoutes(app, ctx) {
       timeoutMs,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
+      extKbEntries: intelPack.extKbEntries,
     });
 
     if (!gen.ok) {
@@ -86,6 +88,7 @@ export function registerReportRoutes(app, ctx) {
       title: gen.report.title || "",
       html: gen.report.html,
       citations: Array.isArray(gen.report.citations) ? gen.report.citations : [],
+      visuals: gen.report.visuals || null,
       chapterCount: 7,
       wordCount: gen.report.wordCount,
     });
@@ -207,6 +210,7 @@ export function registerReportRoutes(app, ctx) {
       chapter_count: r.chapterCount,
       title: r.title || "",
       citation_count: Array.isArray(r.citations) ? r.citations.length : 0,
+      citations: Array.isArray(r.citations) ? r.citations : [],
       share_status: reportShareStatus(r),
       share_view_count: r.share?.viewCount ?? 0,
       share_last_viewed_at: r.share?.lastViewedAt || null,
@@ -215,6 +219,7 @@ export function registerReportRoutes(app, ctx) {
           ? `/api/v1/public/reports/${encodeURIComponent(r.share.token)}`
           : null,
       html: r.html,
+      visuals: r.visuals || null,
     };
   });
 }

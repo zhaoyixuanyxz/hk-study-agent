@@ -4,6 +4,17 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * @param {string} file 相对 prompts/{version}/ 的文件名，如 plan.txt
+ * @param {string} [version]
+ * @returns {string}
+ */
+export function loadPromptText(file, version = "v1") {
+  const p = join(__dirname, "..", "prompts", version, file);
+  if (!existsSync(p)) return "";
+  return readFileSync(p, "utf8").trim();
+}
+
 export function composeSystemPrompt(version = "v1") {
   const base = join(__dirname, "..", "prompts", version);
   const layers = [

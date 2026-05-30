@@ -11,6 +11,7 @@ import { computeContentHash, computeFeedDedupeHash } from "./content-hash.js";
 import { normalizeIntelligenceItem } from "./normalization-service.js";
 import { getSourceById } from "./source-registry.js";
 import { loadSchoolsRegistry } from "./source-registry.js";
+import { getFailedFeedIdSet, loadPreflightLast } from "./url-preflight.js";
 
 const FETCH_TIMEOUT_MS = 20_000;
 
@@ -94,19 +95,34 @@ export async function runRealCrawl(store, opts = {}) {
     Math.max(1, Number(opts.maxFetch || process.env.INTELLIGENCE_FETCH_MAX || 56))
   );
   const feeds = opts.feeds || buildCrawlFeeds();
+  const respectPreflight = opts.respectPreflight !== false;
+  const skipFeedIds =
+    opts.skipFeedIds instanceof Set
+      ? opts.skipFeedIds
+      : respectPreflight
+        ? getFailedFeedIdSet(opts.preflightLast ?? loadPreflightLast())
+        : new Set();
   const ks = createKnowledgeStore(store);
   ks.syncSourcesFromRegistry();
 
   const startedAt = new Date().toISOString();
   let itemsIngested = 0;
   let itemsUpdated = 0;
+  let itemsSkippedQuality = 0;
+  let skippedPreflight = 0;
   let fetchCount = 0;
   const errors = [];
+  const skippedFeeds = [];
 
   for (const feed of feeds) {
     if (!fetchEnabled || fetchCount >= maxFetch) break;
     const url = String(feed.url || "").trim();
     if (!url) continue;
+    if (skipFeedIds.has(feed.id)) {
+      skippedPreflight += 1;
+      skippedFeeds.push(feed.id);
+      continue;
+    }
     try {
       const allowed = await respectRobotsForUrl(url);
       if (!allowed) {
@@ -124,9 +140,10 @@ export async function runRealCrawl(store, opts = {}) {
         contentHash: normalized.contentHash,
       });
       normalized.lastSnapshotId = snap?.id;
-      const { created, updated } = store.upsertIntelligenceItemCrawl(normalized);
-      if (created) itemsIngested += 1;
-      if (updated) itemsUpdated += 1;
+      const upsert = store.upsertIntelligenceItemCrawl(normalized);
+      if (upsert.created) itemsIngested += 1;
+      if (upsert.updated) itemsUpdated += 1;
+      if (upsert.skippedReason === "quality_degraded") itemsSkippedQuality += 1;
     } catch (e) {
       errors.push(`${feed.id}: ${e?.message || e}`);
     }
@@ -145,6 +162,9 @@ export async function runRealCrawl(store, opts = {}) {
     run,
     itemsIngested,
     itemsUpdated,
+    itemsSkippedQuality,
+    skippedPreflight,
+    skippedFeeds,
     fetchEnabled,
     fetchCount,
     errors,

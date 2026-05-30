@@ -1,8 +1,10 @@
 import OpenAI from "openai";
 import {
-  filterCitationsAgainstIntelligenceItems,
+  filterCitationsAgainstCombinedSources,
   normalizeCitations,
 } from "./citation-utils.js";
+import { loadPromptText } from "./promptLayer.js";
+import { buildMockReportVisuals, normalizeReportVisuals } from "./visuals-normalize.js";
 
 export const REPORT_RESULT_SCHEMA_VERSION = "2.0";
 
@@ -97,6 +99,49 @@ function asStringList(x, max = 8) {
     .slice(0, max);
 }
 
+const RISK_LEVELS = new Set(["high", "medium", "low"]);
+
+/**
+ * 规范化报告 delivery 块（parent_summary、action_plan、risk_items）。
+ * @param {unknown} raw
+ */
+export function normalizeReportDelivery(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const o = /** @type {Record<string, unknown>} */ (raw);
+  const ap = o.action_plan && typeof o.action_plan === "object" ? o.action_plan : {};
+  const apObj = /** @type {Record<string, unknown>} */ (ap);
+  const action_plan = {
+    days_30: asStringList(apObj.days_30 ?? apObj["30"], 12),
+    days_60: asStringList(apObj.days_60 ?? apObj["60"], 12),
+    days_90: asStringList(apObj.days_90 ?? apObj["90"], 12),
+  };
+  const risk_items = [];
+  if (Array.isArray(o.risk_items)) {
+    for (const item of o.risk_items) {
+      if (!item || typeof item !== "object") continue;
+      const level = String(item.level || "")
+        .trim()
+        .toLowerCase();
+      const label = String(item.label || "").trim();
+      if (!RISK_LEVELS.has(level) || !label) continue;
+      const entry = { level, label };
+      const detail = String(item.detail || "").trim();
+      if (detail) entry.detail = detail;
+      risk_items.push(entry);
+      if (risk_items.length >= 12) break;
+    }
+  }
+  const visuals = normalizeReportVisuals(o.visuals);
+  const delivery = {
+    parent_summary: asStringList(o.parent_summary, 8),
+    action_plan,
+    risk_items,
+    plain_language_notes: asStringList(o.plain_language_notes, 6),
+  };
+  if (visuals) delivery.visuals = visuals;
+  return delivery;
+}
+
 /**
  * @param {object} plan
  */
@@ -121,12 +166,17 @@ function listHtml(items, ordered) {
  * @param {object} mergedCitations normalized citations (plan + model)
  */
 export function buildDeliverySectionsHtml(parsed, mergedCitations) {
-  const parentLines = asStringList(parsed.parent_summary, 8);
-  const ap = parsed.action_plan && typeof parsed.action_plan === "object" ? parsed.action_plan : {};
-  const d30 = asStringList(asStringList(ap.days_30 || ap["30"], 12), 12);
-  const d60 = asStringList(asStringList(ap.days_60 || ap["60"], 12), 12);
-  const d90 = asStringList(asStringList(ap.days_90 || ap["90"], 12), 12);
-  const gloss = asStringList(parsed.plain_language_notes, 6);
+  const delivery = normalizeReportDelivery(parsed) || {
+    parent_summary: [],
+    action_plan: { days_30: [], days_60: [], days_90: [] },
+    risk_items: [],
+    plain_language_notes: [],
+  };
+  const parentLines = delivery.parent_summary;
+  const d30 = delivery.action_plan.days_30;
+  const d60 = delivery.action_plan.days_60;
+  const d90 = delivery.action_plan.days_90;
+  const gloss = delivery.plain_language_notes;
 
   const parentBlock = `<section class="report-chapter" id="parent-summary"><h2>家长决策摘要</h2><p class="report-lede">以下为面向家庭决策者的结论速览（预算、风险与方向）。</p>${listHtml(
     parentLines,
@@ -160,7 +210,35 @@ export function buildDeliverySectionsHtml(parsed, mergedCitations) {
       ? `<section class="report-chapter" id="plain-language"><h2>术语短解</h2>${listHtml(gloss, false)}</section>`
       : "";
 
-  return `\n${parentBlock}\n${actionBlock}\n${citeBlock}\n${glossBlock}\n`;
+  const riskBlock = buildRiskItemsSectionHtml(delivery.risk_items);
+
+  return `\n${parentBlock}\n${riskBlock}\n${actionBlock}\n${citeBlock}\n${glossBlock}\n`;
+}
+
+const RISK_LEVEL_ZH = { high: "高", medium: "中", low: "低" };
+
+/**
+ * @param {{ level: string, label: string, detail?: string }[]} riskItems
+ */
+export function buildRiskItemsSectionHtml(riskItems) {
+  if (!Array.isArray(riskItems) || !riskItems.length) return "";
+  const cards = riskItems
+    .map((r) => {
+      const lvl = RISK_LEVEL_ZH[r.level] || "中";
+      const detail = r.detail
+        ? `<p class="risk-item-detail">${escapeHtmlText(r.detail)}</p>`
+        : "";
+      return `<div class="risk-card risk-card--${escapeHtmlText(r.level)}" data-risk-level="${escapeHtmlText(r.level)}">
+        <span class="risk-level">${escapeHtmlText(lvl)}</span>
+        <span class="risk-label">${escapeHtmlText(r.label)}</span>${detail}
+      </div>`;
+    })
+    .join("");
+  return `<section class="report-chapter report-risk-items" id="report-risk-items">
+    <h2>风险仪表盘</h2>
+    <p class="report-lede">结构化风险条目（由报告生成，非录取承诺）。</p>
+    <div class="risk-dashboard-grid">${cards}</div>
+  </section>`;
 }
 
 /**
@@ -184,13 +262,43 @@ export function buildMockHtmlReport(snapshot, plan) {
       `风险：请关注语言节点、材料认证周期与轮次截止，避免「卡点」导致被动。`,
     ],
     action_plan: {
-      days_30: ["核对成绩单与在读证明是否与系统画像一致。", "列出目标项目清单并标注截止日期与考试要求。", "与父母对齐预算上限与地区偏好。"],
-      days_60: ["完成语言/标化安排或确认免语言条件。", "起草简历与个人陈述主线，按项目差异列表迭代。", "落实推荐人并预留沟通时间。"],
-      days_90: ["按轮次提交网申并核对附件与支付状态。", "准备面试常见问题与项目特定问题。", "对梯度组合做一次「最坏情况」推演（时间表与备选）。"],
+      days_30: [
+        "【核对+Checklist】成绩单/在读证明与画像一致性自检（高优先，风险：材料不符导致拒审）",
+        "【时间线】列出 3-5 目标项目 + 官方截止/考试要求（引用 intel 日期）",
+        "【预算对齐】与父母确认上限与自费/奖学金偏好（量化：学费+生活+考试预留 15% 浮动）",
+      ],
+      days_60: [
+        "【语言/标化】安排或豁免确认 + 成绩目标（中风险：晚考卡 rolling）",
+        "【文书】主 PS/简历 draft，按项目权重（JUPAS Math 等）迭代差异版",
+        "【推荐人】确认 2-3 位 + 沟通 timeline（低风险但需 buffer）",
+      ],
+      days_90: [
+        "【提交】按轮次网申 + 附件/支付 checklist（高风险：截止前 48h 卡点）",
+        "【面试】项目特定问题准备 + mock（含香港本地政策问答）",
+        "【 contingency】最坏情况推演：全拒备选 + gap year / 其他地区 plan",
+      ],
     },
     plain_language_notes: [
       "冲刺/匹配/保底：分别指录取把握较低的主攻、把握中等的重心、用于托底的组合，不代表官方分类。",
     ],
+    risk_items: [
+      {
+        level: "high",
+        label: "轮次截止前材料/语言未齐",
+        detail: "高风险：卡点提交可能导致当轮失效，请倒排 30 天清单。",
+      },
+      {
+        level: "medium",
+        label: "预算与汇率波动",
+        detail: "中风险：学费与生活费请以官网与当年汇率为准，预留 10–15% buffer。",
+      },
+      {
+        level: "low",
+        label: "推荐人沟通档期",
+        detail: "低风险：提前 4–6 周联系推荐人并确认提交路径。",
+      },
+    ],
+    visuals: buildMockReportVisuals(plan),
   };
 
   const deliveryHtml = buildDeliverySectionsHtml(parsed, merged);
@@ -221,7 +329,12 @@ export function buildMockHtmlReport(snapshot, plan) {
   });
 
   const coreHtml = sections.join("\n");
-  const html = `<article class="study-report">${deliveryHtml}\n${coreHtml}\n</article>`;
+  const delivery = normalizeReportDelivery(parsed);
+  const visualsJson = delivery?.visuals ? JSON.stringify(delivery.visuals) : "";
+  const visualsScript = visualsJson
+    ? `<script type="application/json" id="report-visuals-data">${visualsJson.replace(/</g, "\\u003c")}</script>`
+    : "";
+  const html = `<article class="study-report">${deliveryHtml}\n${coreHtml}\n${visualsScript}\n</article>`;
 
   return {
     schemaVersion: REPORT_RESULT_SCHEMA_VERSION,
@@ -235,6 +348,7 @@ export function buildMockHtmlReport(snapshot, plan) {
     wordCount: countReportTextChars(html),
     disclaimer: plan.disclaimer || DEFAULT_REPORT_DISCLAIMER,
     citations: merged,
+    visuals: delivery?.visuals || null,
   };
 }
 
@@ -266,33 +380,18 @@ function parseReportJson(content) {
  *   timeoutMs?: number,
  *   intelContextText?: string,
  *   intelItems?: object[],
+ *   extKbEntries?: object[],
  * }} opts
  */
 export async function generateHtmlReport(snapshot, plan, opts) {
   const baseCites = planCitations(plan);
+  const intelItems = opts.intelItems || [];
+  const extKbEntries = opts.extKbEntries || [];
 
   if (opts.useMock) {
     const report = buildMockHtmlReport(snapshot, plan);
-    let cites = normalizeCitations([...(report.citations || []), ...baseCites]);
-    if (opts.intelItems?.length) {
-      cites = filterCitationsAgainstIntelligenceItems(cites, opts.intelItems);
-      if (!cites.length) {
-        const fromIntel = filterCitationsAgainstIntelligenceItems(
-          (opts.intelItems[0]
-            ? [
-                {
-                  itemId: opts.intelItems[0].id,
-                  url: opts.intelItems[0].canonicalUrl,
-                  sourceTitle: opts.intelItems[0].locale?.titleZh,
-                  publishedAt: opts.intelItems[0].publishedAt,
-                },
-              ]
-            : []),
-          opts.intelItems
-        );
-        cites = fromIntel;
-      }
-    }
+    let cites = normalizeCitations([...(report.citations || []), ...baseCites], 12);
+    cites = filterCitationsAgainstCombinedSources(cites, intelItems, extKbEntries);
     report.citations = cites;
     return { ok: true, report };
   }
@@ -305,27 +404,9 @@ export async function generateHtmlReport(snapshot, plan, opts) {
     maxRetries: 0,
   });
 
-  const system = `你是留学规划顾问写作助手。只输出一个 JSON 对象，不要 markdown。
-JSON 必须包含：
-schemaVersion（字符串，建议 "2.0"）,
-title（报告标题）,
-parent_summary：3–6 条短句，面向家长：结论方向、预算区间感知、主要风险与须拍板的点,
-action_plan 对象，含 days_30、days_60、days_90（各为 2–5 条可执行短句）,
-plain_language_notes：0–4 条，对专业术语用「术语 → 白话」或括号释义,
-chapters：长度恰好为 7 的数组，每项含 title 与 body（正文纯文本，可换行）,
-citations：0–8 条，对象含 url（http/https）、可选 sourceTitle、publishedAt、quoteOrSummary；须优先覆盖方案中关键事实所依据的来源，可无外链则留空数组,
-disclaimer：免责声明段落。
-
-写作要求：宁短勿冗；不要用套话堆字数；禁止承诺录取或精确概率；专业词首次出现尽量带短解释；最后一章 body 须含免责。
-
-七章标题建议顺序（可微调）：
-1 概述与执行摘要
-2 申请人画像与关键事实
-3 申请目标与策略框架
-4 方案梯度说明（冲刺/匹配/保底）
-5 风险、预算与时间线
-6 材料准备与执行建议
-7 免责声明与后续行动`;
+  const system =
+    loadPromptText("report.txt") ||
+    "你是留学规划顾问写作助手。只输出一个 JSON 对象，不要 markdown。";
 
   let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组；补充引用时 itemId 与 url 须来自下方情报上下文，不要编造失效链接。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
   if (opts.intelContextText && String(opts.intelContextText).trim()) {
@@ -387,8 +468,8 @@ disclaimer：免责声明段落。
 
   const modelCites = normalizeCitations(parsed.citations);
   let mergedCitations = normalizeCitations([...baseCites, ...modelCites]);
-  if (opts.intelItems?.length) {
-    mergedCitations = filterCitationsAgainstIntelligenceItems(mergedCitations, opts.intelItems);
+  if (intelItems.length || extKbEntries.length) {
+    mergedCitations = filterCitationsAgainstCombinedSources(mergedCitations, intelItems, extKbEntries);
   }
 
   const deliveryHtml = buildDeliverySectionsHtml(parsed, mergedCitations);
@@ -411,7 +492,12 @@ disclaimer：免责声明段落。
     chapters.push({ id, title, html: sec });
   }
 
-  const html = `<article class="study-report">${deliveryHtml}\n${sectionHtmls.join("\n")}\n</article>`;
+  const deliveryNorm = normalizeReportDelivery(parsed);
+  const visualsJson = deliveryNorm?.visuals ? JSON.stringify(deliveryNorm.visuals) : "";
+  const visualsScript = visualsJson
+    ? `<script type="application/json" id="report-visuals-data">${visualsJson.replace(/</g, "\\u003c")}</script>`
+    : "";
+  const html = `<article class="study-report">${deliveryHtml}\n${sectionHtmls.join("\n")}\n${visualsScript}\n</article>`;
   const wordCount = countReportTextChars(html);
 
   const disclaimer =
@@ -427,6 +513,7 @@ disclaimer：免责声明段落。
       wordCount,
       disclaimer,
       citations: mergedCitations,
+      visuals: deliveryNorm?.visuals || null,
     },
   };
 }

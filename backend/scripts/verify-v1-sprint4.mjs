@@ -29,7 +29,9 @@ for (const fn of [
 
 const chatSrc = readFileSync(join(backendRoot, "src", "modules", "chat-routes.js"), "utf8");
 const planRoutesSrc = readFileSync(join(backendRoot, "src", "modules", "plan-routes.js"), "utf8");
-if (!chatSrc.includes("buildIntelContextPack")) die("verify-v1-sprint4: chat routes must use buildIntelContextPack");
+if (!chatSrc.includes("buildCombinedIntelContext") && !chatSrc.includes("buildIntelContextPack")) {
+  die("verify-v1-sprint4: chat routes must use buildCombinedIntelContext or buildIntelContextPack");
+}
 if (!chatSrc.includes("intelContextText")) die("verify-v1-sprint4: chat routes must pass intelContextText");
 if (!planRoutesSrc.includes("intelContextText")) die("verify-v1-sprint4: plan routes must pass intelContextText");
 

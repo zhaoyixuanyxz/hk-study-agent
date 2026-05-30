@@ -1,9 +1,15 @@
 import OpenAI from "openai";
 import {
   citationsToCitationRefs,
-  filterCitationsAgainstIntelligenceItems,
+  filterCitationsAgainstCombinedSources,
   normalizeCitations,
 } from "./citation-utils.js";
+import {
+  externalKbCitationId,
+  selectExternalKbForProfile,
+} from "./intelligence/external-kb-loader.js";
+import { loadPromptText } from "./promptLayer.js";
+import { buildMockPlanVisuals, normalizePlanVisuals } from "./visuals-normalize.js";
 
 const PLAN_RESULT_SCHEMA_VERSION = "1.0";
 
@@ -70,31 +76,69 @@ function flattenDim(piv, key) {
 }
 
 /**
+ * @param {object[]} intelItems
+ * @param {object[]} extKbEntries
  * @param {object} planInputView
  */
-function mockPlanCitationsFromIntel(intelItems) {
-  if (!Array.isArray(intelItems) || !intelItems.length) return [];
-  const item = intelItems.find((x) => x.infoType === "deadline" || x.infoType === "policy") || intelItems[0];
-  if (!item?.id || !item.canonicalUrl) return [];
-  return [
-    {
+function mockRichCitations(intelItems, extKbEntries, planInputView) {
+  const field = String(planInputView?.goals?.value?.field || "目标专业").trim();
+  const intake = String(planInputView?.timeline?.value?.intake_or_season || "").trim();
+  const out = [];
+  const intelPool = Array.isArray(intelItems) ? intelItems : [];
+  const extPool = Array.isArray(extKbEntries) ? extKbEntries : [];
+
+  const intelOrder = [
+    ...intelPool.filter((x) => x.infoType === "benchmark"),
+    ...intelPool.filter((x) => x.infoType === "deadline" || x.infoType === "policy"),
+    ...intelPool,
+  ];
+  for (const item of intelOrder) {
+    if (!item?.id || !item.canonicalUrl || out.length >= 8) break;
+    if (out.some((c) => c.itemId === item.id)) continue;
+    out.push({
       itemId: item.id,
       url: item.canonicalUrl,
       sourceTitle: item.locale?.titleZh,
       publishedAt: item.publishedAt,
-    },
-  ];
+      quoteOrSummary: `与 ${field}、${intake || "申请季"} 相关的已发布情报：${(item.locale?.summaryZh || "").slice(0, 120)}`,
+    });
+  }
+
+  for (const entry of extPool) {
+    if (out.length >= 12) break;
+    const id = externalKbCitationId(entry);
+    if (!id || !entry.url || out.some((c) => c.itemId === id)) continue;
+    out.push({
+      itemId: id,
+      url: entry.url,
+      sourceTitle: entry.title,
+      publishedAt: entry.publishedAt,
+      quoteOrSummary: `官方知识库：${entry.title || id}（${field}）`,
+    });
+  }
+
+  return out.slice(0, 12);
 }
 
-function applyIntelToPlan(plan, intelItems) {
-  if (!plan || !Array.isArray(intelItems) || !intelItems.length) return plan;
-  const citations = filterCitationsAgainstIntelligenceItems(plan.citations, intelItems);
-  const mockOnly = citations.length === 0;
-  const merged = mockOnly ? filterCitationsAgainstIntelligenceItems(mockPlanCitationsFromIntel(intelItems), intelItems) : citations;
-  return { ...plan, citations: merged, citationRefs: citationsToCitationRefs(merged) };
+function applyIntelToPlan(plan, intelItems, extKbEntries = []) {
+  if (!plan) return plan;
+  const citations = filterCitationsAgainstCombinedSources(plan.citations, intelItems || [], extKbEntries || []);
+  const mockOnly = citations.length < 6;
+  const merged = mockOnly
+    ? filterCitationsAgainstCombinedSources(
+        mockRichCitations(intelItems, extKbEntries, plan._planInputView),
+        intelItems || [],
+        extKbEntries || []
+      )
+    : citations;
+  const { _planInputView, ...rest } = plan;
+  return { ...rest, citations: merged, citationRefs: citationsToCitationRefs(merged) };
 }
 
-export function buildMockStructuredPlan(planInputView, intelItems) {
+export function buildMockStructuredPlan(planInputView, intelItems, extKbEntries) {
+  const ext =
+    extKbEntries ||
+    selectExternalKbForProfile({ planInputView, limit: 8 });
   const g = flattenDim(planInputView, "goals");
   const a = flattenDim(planInputView, "academic");
   const b = flattenDim(planInputView, "budget");
@@ -123,22 +167,29 @@ export function buildMockStructuredPlan(planInputView, intelItems) {
         summary: `在 ${region} 方向尝试更 competitive 的项目组合（${field}），以匹配你的长期目标。`,
         rationale: `在风险偏好为「${risk}」时，冲刺档用于探索上限；请结合 GPA/语言与项目先修要求，优先选择与你叙事一致的项目。`,
         risk_note: `冲刺档不确定性更高：竞争激烈与当年名额波动可能导致结果偏离预期，不代表录取概率承诺。`,
+        fit_note: `程序匹配度：Math M1/M2 与核心科学选修对 DS/AI 等港校项目权重较高；若科目成绩未达 typical admitted profile，冲刺档匹配度偏低（基于历史趋势，非官方概率）。`,
       },
       match: {
         label: "匹配",
         summary: `主申路径：与 ${school} 背景、${field} 目标较一致的项目组合。`,
         rationale: `该档强调可行性与目标匹配；建议把主要精力与文书材料放在这一档的项目上。`,
         risk_note: `匹配档仍需满足语言、先修与材料完整性；「匹配」不等于自动录取。`,
+        fit_note: `程序匹配度：本科背景与 ${field} 主线一致；GPA ${gpa} 接近港校授课型硕士常见 admitted 区间（基于历史趋势，请以当年官网为准）。`,
       },
       safety: {
         label: "保底",
         summary: `更稳妥的备选路径：降低「全拒」风险，但仍需满足项目最低要求与材料完整性。`,
         rationale: `保底不等于「一定录取」，用于平衡风险；建议仍认真完成材料与面试准备。`,
         risk_note: `保底院校仍有最低门槛与材料审核；懈怠准备仍可能导致意外失利。`,
+        fit_note: `程序匹配度：保底档通常对应门槛低于主申组合的项目；仍须满足官网公示的语言与先修底线，rolling round 自费路径相对可行。`,
       },
     },
   };
-  return applyIntelToPlan(base, intelItems);
+  base._planInputView = planInputView;
+  const withIntel = applyIntelToPlan(base, intelItems, ext);
+  const visuals = normalizePlanVisuals(withIntel.visuals) || buildMockPlanVisuals(planInputView, withIntel);
+  const { _planInputView, ...planOut } = withIntel;
+  return { ...planOut, visuals };
 }
 
 function parsePlanJson(content) {
@@ -177,12 +228,16 @@ export function normalizePlanResult(raw) {
   if (!reach || !match || !safety) return null;
   const one = (t, label) => {
     const o = t && typeof t === "object" ? t : {};
-    return {
+    /** @type {{ label: string, summary: string, rationale: string, risk_note: string, fit_note?: string }} */
+    const tier = {
       label: String(o.label || label),
       summary: String(o.summary || "").trim() || "（未生成）",
       rationale: String(o.rationale || "").trim() || "（未生成）",
       risk_note: String(o.risk_note || o.risk || "").trim(),
     };
+    const fitNote = String(o.fit_note || "").trim();
+    if (fitNote) tier.fit_note = fitNote;
+    return tier;
   };
   const citations = normalizeCitations(raw.citations);
   const citationRefs = citationsToCitationRefs(citations);
@@ -203,7 +258,9 @@ export function normalizePlanResult(raw) {
     citationRefs,
   };
   if (timeline_urgency) out.timeline_urgency = timeline_urgency;
-  return /** @type {typeof out & { timeline_urgency?: string }} */ (out);
+  const visuals = normalizePlanVisuals(raw.visuals);
+  if (visuals) out.visuals = visuals;
+  return /** @type {typeof out & { timeline_urgency?: string; visuals?: object }} */ (out);
 }
 
 /**
@@ -216,11 +273,12 @@ export function normalizePlanResult(raw) {
  *   timeoutMs?: number,
  *   intelContextText?: string,
  *   intelItems?: object[],
+ *   extKbEntries?: object[],
  * }} opts
  */
 export async function generateStructuredPlan(planInputView, opts) {
   if (opts.useMock) {
-    const plan = buildMockStructuredPlan(planInputView, opts.intelItems);
+    const plan = buildMockStructuredPlan(planInputView, opts.intelItems, opts.extKbEntries);
     return { ok: true, plan };
   }
 
@@ -232,12 +290,9 @@ export async function generateStructuredPlan(planInputView, opts) {
     maxRetries: 0,
   });
 
-  const system = `你是留学规划助手。只输出一个 JSON 对象，不要输出 markdown。JSON 必须包含：
-schemaVersion, disclaimer, risk_summary, budget_suggestion, timeline_suggestion,
-tiers: { reach, match, safety }，每个 tier 含 label, summary, rationale（中文），以及可选 risk_note（一两句说明该档主要不确定性与非承诺表述）。
-另须包含 citations（数组，可为空）：若引用可核验的外部事实（政策、学费、截止日期等），每项须含 itemId、url（http/https），且 itemId/url 必须来自下方情报上下文；可选 sourceTitle、publishedAt、quoteOrSummary。无可靠链接时不要编造条目。
-可选 timeline_urgency：relaxed | normal | tight，用于概括当前时间压力。
-禁止承诺录取或给出精确概率；disclaimer 须说明仅供参考、不构成录取承诺。`;
+  const system =
+    loadPromptText("plan.txt") ||
+    "你是留学规划助手。只输出一个 JSON 对象，不要输出 markdown。";
 
   let user = `请仅基于以下 planInputView（JSON）生成结构化方案：\n${JSON.stringify(planInputView, null, 2)}`;
   if (opts.intelContextText && String(opts.intelContextText).trim()) {
@@ -296,5 +351,12 @@ tiers: { reach, match, safety }，每个 tier 含 label, summary, rationale（�
       suggestion: "请重试生成。",
     };
   }
-  return { ok: true, plan: applyIntelToPlan(normalized, opts.intelItems) };
+  const applied = applyIntelToPlan(
+    { ...normalized, _planInputView: planInputView },
+    opts.intelItems,
+    opts.extKbEntries
+  );
+  const { _planInputView, ...rest } = applied;
+  const visuals = normalizePlanVisuals(rest.visuals) || buildMockPlanVisuals(planInputView, rest);
+  return { ok: true, plan: { ...rest, visuals } };
 }

@@ -5,8 +5,10 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { buildApp } from "../src/app.js";
-import { normalizePlanResult } from "../src/planning-service.js";
-import { reportShareStatus } from "../src/store.js";
+import { buildMockStructuredPlan } from "../src/planning-service.js";
+import { reportShareStatus, createStore } from "../src/store.js";
+import { loadCuratedSeedsIntoStore } from "../src/intelligence/seed-loader.js";
+import { buildCombinedIntelContext } from "../src/intelligence/intelContextPack.js";
 
 function headers(token) {
   return { authorization: `Bearer ${token}` };
@@ -59,6 +61,7 @@ test("V1-P3 share public view increments count; revoke blocks public", async () 
 
   const reg = JSON.parse((await app.inject({ method: "POST", url: "/api/v1/users/register" })).body);
   const { user_id: userId, token } = reg;
+  loadCuratedSeedsIntoStore(createStore(db), { force: true });
 
   const raw = JSON.parse(readFileSync(db, "utf8"));
   raw.profileSnapshots = [
@@ -92,17 +95,12 @@ test("V1-P3 share public view increments count; revoke blocks public", async () 
       snapshotId: "snap_p3",
       snapshotVersion: 1,
       planInputSchemaVersion: "1.0",
-      plan: normalizePlanResult({
-        tiers: {
-          reach: { summary: "a", rationale: "b", risk_note: "r1" },
-          match: { summary: "a", rationale: "b", risk_note: "r2" },
-          safety: { summary: "a", rationale: "b", risk_note: "r3" },
-        },
-        risk_summary: "r",
-        budget_suggestion: "bu",
-        timeline_suggestion: "ti",
-        citations: [{ url: "https://example.com/policy", itemId: "c1", sourceTitle: "示例政策" }],
-      }),
+      plan: (() => {
+        const piv = raw.profileSnapshots[0].planInputView;
+        const store = createStore(db);
+        const pack = buildCombinedIntelContext(store, { planInputView: piv, forPlanOrReport: true });
+        return buildMockStructuredPlan(piv, pack.items, pack.extKbEntries);
+      })(),
       createdAt: new Date().toISOString(),
     },
   ];
@@ -121,7 +119,7 @@ test("V1-P3 share public view increments count; revoke blocks public", async () 
   assert.equal(gen.ok, true, gen.message || JSON.stringify(gen));
   const reportId = gen.report_id;
   assert.ok(reportId);
-  assert.ok(gen.citation_count >= 1);
+  assert.ok(gen.citation_count >= 6);
 
   const detail1 = JSON.parse(
     (await app.inject({ method: "GET", url: `/api/v1/reports/${reportId}`, headers: headers(token) })).body

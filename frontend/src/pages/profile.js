@@ -25,6 +25,7 @@ import {
 } from "../api/client.js";
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
+import { loadThread } from "./chat.js";
 
 export function statusLabel(s) {
   if (s === "confirmed") return "已确认";

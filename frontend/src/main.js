@@ -1,7 +1,12 @@
 ﻿import { track } from "./track.js";
 import { api, LS_LAST_PLAN, LS_LAST_REPORT, LS_THREAD, LS_TOKEN } from "./api/client.js";
 import { el } from "./lib/dom.js";
-import { loadAdminIntelligencePage, loadIntelligencePage } from "./pages/intelligence.js";
+import {
+  loadAdminIntelligencePage,
+  loadIntelligencePage,
+  runAdminPreflightUrls,
+  runAdminSafeCollect,
+} from "./pages/intelligence.js";
 import { loadProfile } from "./pages/profile.js";
 import { loadPlanPage } from "./pages/plan.js";
 import { loadReportPage } from "./pages/report.js";
@@ -13,6 +18,7 @@ import {
 } from "./pages/chat.js";
 import { navigateTo, logout, parseHash } from "./shell/navigation.js";
 import { handleRoute, showPanel } from "./shell/router.js";
+import { getComposerReplacementUserMessageId } from "./app-state.js";
 
 el("refresh-intelligence")?.addEventListener("click", () => {
   const r = parseHash();
@@ -25,6 +31,8 @@ el("intel-search-form")?.addEventListener("submit", (ev) => {
 });
 
 el("refresh-admin-intel")?.addEventListener("click", () => loadAdminIntelligencePage());
+el("admin-intel-preflight")?.addEventListener("click", () => runAdminPreflightUrls());
+el("admin-intel-collect")?.addEventListener("click", () => runAdminSafeCollect());
 
 document.querySelectorAll(".nav-link").forEach((a) => {
   a.addEventListener("click", (ev) => {
@@ -111,9 +119,8 @@ el("form")?.addEventListener("submit", async (ev) => {
       }
       return;
     }
-    const { composerReplacementUserMessageId } = await import("./app-state.js");
-    const replaceMid = composerReplacementUserMessageId
-      ? String(composerReplacementUserMessageId).trim()
+    const replaceMid = getComposerReplacementUserMessageId()
+      ? String(getComposerReplacementUserMessageId()).trim()
       : "";
     const body = { content };
     if (replaceMid) body.replace_user_message_id = replaceMid;

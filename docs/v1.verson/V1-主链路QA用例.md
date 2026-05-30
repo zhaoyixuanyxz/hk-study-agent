@@ -64,3 +64,38 @@
 | V1-P4-QA-02 | 情报翻译抽检 |
 
 完成抽检后在 [V1-具体任务完成清单.md](V1-具体任务完成清单.md) 与验收模板中归档。
+
+---
+
+## V3-QA 情报 Admin（V3-INTEL）
+
+| 步骤 | 操作 | 预期 |
+|------|------|------|
+| 1 | 审核员登录，打开 **Intelligence › Admin** | 可见「检测链接」「安全采集」 |
+| 2 | 点击「检测链接」 | 显示上次 preflight 摘要（成功/失败条数） |
+| 3 | 点击「安全采集」 | Toast 含 ingested / skipped_preflight / errors |
+| 4 | 普通用户 Tab 仅「刷新列表」 | 网络面板无 `POST .../admin/collect` |
+| 5 | CLI：`cd backend && npm run intelligence:check-urls` | 与 Admin 探活结果一致 |
+
+---
+
+## V3-QA 聊天边界（V3-CHAT）
+
+| 步骤 | 操作 | 预期 |
+|------|------|------|
+| 1 | 发送「想去美国读 CS 硕士」 | 短拒答；响应含 scope 引导 |
+| 2 | 发送「申请港科大授课型硕士数据科学」 | 正常回复；无 scope_redirect |
+| 3 | 查看 Profile | 未把「美国」写成主申请地区 |
+| 4 | `npm run test:v1-chat-scope` | 全绿 |
+
+---
+
+## V3-QA 引用与图表（V3-KB + V3-VIS）
+
+| 步骤 | 操作 | 预期 |
+|------|------|------|
+| 1 | 就绪后生成 **Plan** | citations ≥6；有 visuals 时出现图表区 |
+| 2 | 生成 **Report** | `#report-risk-items` 区块；风险矩阵/预算图 |
+| 3 | 报告 30/60/90 勾选后刷新 | 勾选状态保留 |
+| 4 | `npm run test:v1-v3` | 全绿 |
+| 5 | 归档抽检表：[V1-V3-Sprint-QA-归档-2026-05-30.md](V1-V3-Sprint-QA-归档-2026-05-30.md) |

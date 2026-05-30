@@ -86,7 +86,13 @@ export async function runIngestion(store, opts = {}) {
   if (fetchEnabled && crawlMode !== "legacy") {
     const feeds = loadFeedUrlsFile().feeds;
     const registryFeeds = feeds.length ? feeds : buildCrawlFeeds();
-    return runRealCrawl(store, { ...opts, fetchEnabled: true, feeds: registryFeeds });
+    const respectPreflight = opts.respectPreflight !== false;
+    return runRealCrawl(store, {
+      ...opts,
+      fetchEnabled: true,
+      feeds: registryFeeds,
+      respectPreflight,
+    });
   }
   const maxFetch = Math.min(50, Math.max(1, Number(opts.maxFetch || process.env.INTELLIGENCE_FETCH_MAX || DEFAULT_MAX_FETCH)));
   const ks = createKnowledgeStore(store);

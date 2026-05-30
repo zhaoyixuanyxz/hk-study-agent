@@ -1,3 +1,5 @@
+import { escapeHtml } from "./lib/dom.js";
+
 /** 去掉 ``` / ```json 围栏包裹整段的情形。 */
 export function stripMarkdownCodeFence(s) {
   const t = s.trim();
@@ -91,4 +93,15 @@ export function extractAssistantDisplayText(raw) {
   }
 
   return decodeLiteralEscapes(stripTrailingMarkdownJsonBlocks(s).trim());
+}
+
+/**
+ * 助手气泡内极简 Markdown：**加粗**、换行；其余已 HTML 转义。
+ * @param {string} plain
+ */
+export function formatAssistantHtml(plain) {
+  let h = escapeHtml(plain);
+  h = h.replace(/\n/g, "<br>");
+  h = h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  return h;
 }

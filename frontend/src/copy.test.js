@@ -4,12 +4,16 @@ import {
   formatFactLabel,
   formatFlowState,
   formatPlanCitationsHint,
+  INTEL_USER_REFRESH_LABEL,
+  formatAdminCollectResult,
+  formatAdminPreflightSummary,
   formatReadinessCopy,
   formatThreadMeta,
   formatTruthStatusLabel,
   formatMissingDimensions,
   formatSourceHintLabel,
   formatTimelineUrgencyLine,
+  timelineUrgencyMeta,
   truthStatusTagClass,
 } from "./copy.js";
 
@@ -70,4 +74,34 @@ test("V1-P2 source hints and plan citation placeholder", () => {
 test("V1-P2 timeline urgency lines", () => {
   assert.ok(formatTimelineUrgencyLine("tight").includes("偏紧"));
   assert.equal(formatTimelineUrgencyLine("unknown"), "");
+});
+
+test("CQ-B timelineUrgencyMeta maps levels to bar classes", () => {
+  const tight = timelineUrgencyMeta("tight");
+  assert.ok(tight);
+  assert.equal(tight.barClass, "urgency-bar--tight");
+  assert.equal(tight.label, "偏紧");
+  assert.equal(timelineUrgencyMeta("bogus"), null);
+});
+
+test("V3-INTEL user refresh label avoids implying crawl", () => {
+  assert.equal(INTEL_USER_REFRESH_LABEL, "刷新列表");
+});
+
+test("V3-INTEL admin collect result copy includes skip counts", () => {
+  const line = formatAdminCollectResult({
+    items_ingested: 2,
+    items_updated: 1,
+    skipped_preflight: 3,
+    items_skipped_quality: 1,
+    errors: ["x"],
+  });
+  assert.match(line, /新增 2/);
+  assert.match(line, /跳过坏链 3/);
+  assert.match(line, /质量保护跳过 1/);
+});
+
+test("V3-INTEL preflight summary copy", () => {
+  assert.match(formatAdminPreflightSummary({ ran_at: "2026-01-01", total: 10, ok_count: 8, failed_count: 2 }), /失败 2/);
+  assert.equal(formatAdminPreflightSummary({ empty: true }), "尚未执行链接检测。");
 });

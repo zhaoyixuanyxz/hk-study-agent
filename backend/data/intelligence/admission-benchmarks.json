@@ -1,0 +1,582 @@
+{
+  "version": 1,
+  "description": "港八大热门项目录取参考基准（公开资料整理，非官方录取承诺；供方案 fit_note 与 citation 引用）",
+  "items": [
+    {
+      "id": "bench-hku-msc-cs",
+      "sourceId": "hku-official",
+      "schoolIds": ["hku"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Computer Science", "computer-science", "CS"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hku/msc-computer-science",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "港大 MSc Computer Science 录取参考基准",
+        "summaryZh": "授课型硕士 CS：GPA 与数学/编程先修权重较高；竞争度偏高。数据来自公开招生说明与历年趋势整理，不构成录取承诺。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.5, "minimum": 3.2, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Mathematics", "weight": "high", "note": "M1/M2 或同等数学" },
+          { "subject": "Computer Science", "weight": "high", "note": "核心编程与数据结构" }
+        ],
+        "competitionTag": "high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hku-msc-ds",
+      "sourceId": "hku-official",
+      "schoolIds": ["hku"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Data Science", "data-science", "DS"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hku/msc-data-science",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "港大 MSc Data Science 录取参考基准",
+        "summaryZh": "数据科学方向：统计与编程双权重；GPA 3.4+ 较常见。仅供参考，请以官网当年要求为准。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.4, "minimum": 3.0, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Statistics", "weight": "high", "note": "概率统计或同等课程" },
+          { "subject": "Programming", "weight": "high", "note": "Python/R 项目经验加分" }
+        ],
+        "competitionTag": "high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hku-mfin",
+      "sourceId": "hku-official",
+      "schoolIds": ["hku"],
+      "infoType": "benchmark",
+      "programTags": ["Master of Finance", "finance", "MFin"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hku/master-of-finance",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "港大 Master of Finance 录取参考基准",
+        "summaryZh": "金融硕士：量化背景与实习经历权重高；语言与 GMAT/GRE 视项目轮次。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.6, "minimum": 3.3, "scale": "4.0" },
+        "language": { "ielts": 7.0, "toefl": 90 },
+        "subjectWeights": [
+          { "subject": "Finance", "weight": "high", "note": "公司金融/投资学" },
+          { "subject": "Quantitative Methods", "weight": "medium", "note": "计量或数学背景" }
+        ],
+        "competitionTag": "very_high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cuhk-msc-cs",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cuhk"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Computer Science", "computer-science"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cuhk/msc-computer-science",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "中大 MSc Computer Science 录取参考基准",
+        "summaryZh": "CS 授课型：本科 CS/EE 相关背景匹配度较高；GPA 3.3 左右为常见 admitted 区间参考。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.3, "minimum": 3.0, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Algorithms", "weight": "high", "note": "算法与系统课程" },
+          { "subject": "Mathematics", "weight": "medium", "note": "离散数学/线代" }
+        ],
+        "competitionTag": "high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cuhk-msc-ba",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cuhk"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Business Analytics", "business-analytics", "BA"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cuhk/msc-business-analytics",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "中大 MSc Business Analytics 录取参考基准",
+        "summaryZh": "商业分析：统计+商科交叉；编程与 SQL 能力为常见筛选维度。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.4, "minimum": 3.1, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Statistics", "weight": "high", "note": "回归/机器学习基础" },
+          { "subject": "Business", "weight": "medium", "note": "管理或经济选修" }
+        ],
+        "competitionTag": "high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cuhk-mim",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cuhk"],
+      "infoType": "benchmark",
+      "programTags": ["MSc in Management", "MiM", "management"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cuhk/msc-management",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "中大 MiM 管理学硕士录取参考基准",
+        "summaryZh": "管理学硕士：实习与领导力叙事权重较高；语言 6.5 为常见底线参考。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.3, "minimum": 3.0, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Management", "weight": "medium", "note": "管理类课程或实习" },
+          { "subject": "Communication", "weight": "medium", "note": "文书与面试表现" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkust-msc-bdt",
+      "sourceId": "hkust-official",
+      "schoolIds": ["hkust"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Big Data Technology", "big-data", "BDT"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkust/msc-big-data-technology",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "科大 MSc Big Data Technology 录取参考基准",
+        "summaryZh": "大数据技术：数学与编程双高权重；竞争度偏高，建议早轮递交。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.4, "minimum": 3.1, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Big Data Systems", "weight": "high", "note": "分布式/数据库项目" },
+          { "subject": "Machine Learning", "weight": "high", "note": "ML 课程或竞赛" }
+        ],
+        "competitionTag": "very_high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkust-msc-fintech",
+      "sourceId": "hkust-official",
+      "schoolIds": ["hkust"],
+      "infoType": "benchmark",
+      "programTags": ["MSc FinTech", "fintech", "finance"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkust/msc-fintech",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "科大 MSc FinTech 录取参考基准",
+        "summaryZh": "金融科技：量化+编程背景常见；GPA 3.5 左右为 competitive 参考区间。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.5, "minimum": 3.2, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Finance", "weight": "high", "note": "金融建模" },
+          { "subject": "Computer Science", "weight": "high", "note": "区块链/支付系统选修" }
+        ],
+        "competitionTag": "very_high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkust-msc-is",
+      "sourceId": "hkust-official",
+      "schoolIds": ["hkust"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Information Systems", "information-systems", "IS"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkust/msc-information-systems",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "科大 MSc Information Systems 录取参考基准",
+        "summaryZh": "信息系统：IT 管理+技术实现；对跨专业友好度相对较高。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Information Systems", "weight": "medium", "note": "ERP/数据库课程" },
+          { "subject": "Business IT", "weight": "medium", "note": "产品或运维实习" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-polyu-msc-dsa",
+      "sourceId": "hku-official",
+      "schoolIds": ["polyu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Data Science and Analytics", "data-science", "DSA"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/polyu/msc-data-science-analytics",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "理大 MSc Data Science and Analytics 录取参考基准",
+        "summaryZh": "数据科学与分析：统计与编程权重高；GPA 3.2 为常见 match 参考。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Statistics", "weight": "high", "note": "统计推断" },
+          { "subject": "Data Mining", "weight": "high", "note": "数据挖掘项目" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-polyu-msc-ai",
+      "sourceId": "hku-official",
+      "schoolIds": ["polyu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Artificial Intelligence", "artificial-intelligence", "AI"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/polyu/msc-artificial-intelligence",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "理大 MSc Artificial Intelligence 录取参考基准",
+        "summaryZh": "人工智能：ML/DL 课程与项目经验权重高；语言 6.0 为常见底线。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.3, "minimum": 2.9, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Machine Learning", "weight": "high", "note": "深度学习选修" },
+          { "subject": "Mathematics", "weight": "medium", "note": "线代/优化" }
+        ],
+        "competitionTag": "high",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-polyu-msc-scm",
+      "sourceId": "hku-official",
+      "schoolIds": ["polyu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Supply Chain Management", "supply-chain", "SCM"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/polyu/msc-supply-chain",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "理大 MSc Supply Chain Management 录取参考基准",
+        "summaryZh": "供应链管理：运营与物流实习加分；竞争度中等。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.1, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Operations", "weight": "medium", "note": "运营/物流课程" },
+          { "subject": "Analytics", "weight": "medium", "note": "Excel/SQL 能力" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cityu-msc-cs",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cityu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Computer Science", "computer-science"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cityu/msc-computer-science",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "城大 MSc Computer Science 录取参考基准",
+        "summaryZh": "城大 CS：编程与系统课程权重高；rolling 自费路径相对可行。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Programming", "weight": "high", "note": "OOP/数据结构" },
+          { "subject": "Software Engineering", "weight": "medium", "note": "项目经验" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cityu-msc-ds",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cityu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Data Science", "data-science"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cityu/msc-data-science",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "城大 MSc Data Science 录取参考基准",
+        "summaryZh": "数据科学：统计+编程；GPA 3.2 附近为常见 admitted 趋势参考。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Statistics", "weight": "high", "note": "概率统计" },
+          { "subject": "Python", "weight": "high", "note": "数据分析项目" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cityu-msc-bis",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cityu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Business Information Systems", "BIS"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cityu/msc-business-information-systems",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "城大 MSc Business Information Systems 录取参考基准",
+        "summaryZh": "商业信息系统：IT+商科交叉；对转专业相对友好。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.0, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Business IT", "weight": "medium", "note": "信息系统基础" },
+          { "subject": "Database", "weight": "medium", "note": "数据库/SQL" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkbu-msc-daai",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["hkbu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Data Analytics and AI", "data-analytics", "AI"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkbu/msc-data-analytics-ai",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "浸会 MSc Data Analytics and AI 录取参考基准",
+        "summaryZh": "数据分析与 AI：编程与统计双权重；语言 6.0 为常见参考底线。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.1, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 74 },
+        "subjectWeights": [
+          { "subject": "Data Analytics", "weight": "high", "note": "数据分析课程" },
+          { "subject": "AI", "weight": "medium", "note": "机器学习选修" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkbu-msc-fin",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["hkbu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Finance", "finance"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkbu/msc-finance",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "浸会 MSc Finance 录取参考基准",
+        "summaryZh": "金融硕士：金融核心课程与实习经历权重较高。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Finance", "weight": "high", "note": "投资/公司金融" },
+          { "subject": "Accounting", "weight": "medium", "note": "财会基础" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hkbu-msc-itm",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["hkbu"],
+      "infoType": "benchmark",
+      "programTags": ["MSc IT Management", "IT management"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hkbu/msc-it-management",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "浸会 MSc IT Management 录取参考基准",
+        "summaryZh": "IT 管理：技术+管理叙事；适合有 IT 实习背景的申请人。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.0, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 74 },
+        "subjectWeights": [
+          { "subject": "IT Management", "weight": "medium", "note": "项目管理/运维" },
+          { "subject": "Business", "weight": "medium", "note": "管理类选修" }
+        ],
+        "competitionTag": "low",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-lingnan-msc-ba",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["lingnan"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Business Analytics", "business-analytics"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/lingnan/msc-business-analytics",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "岭南 MSc Business Analytics 录取参考基准",
+        "summaryZh": "岭南商分：对小班教学与跨专业较友好；GPA 2.8+ 为常见参考底线。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.0, "minimum": 2.8, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Statistics", "weight": "medium", "note": "基础统计" },
+          { "subject": "Business", "weight": "medium", "note": "商科背景或实习" }
+        ],
+        "competitionTag": "low",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-lingnan-msc-fin",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["lingnan"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Finance", "finance"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/lingnan/msc-finance",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "岭南 MSc Finance 录取参考基准",
+        "summaryZh": "岭南金融：竞争度相对较低；仍须满足语言与材料完整性。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 2.9, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Finance", "weight": "medium", "note": "金融基础课程" },
+          { "subject": "Economics", "weight": "low", "note": "宏观/微观选修" }
+        ],
+        "competitionTag": "low",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-eduhk-ma-tcl",
+      "sourceId": "eduhk-official",
+      "schoolIds": ["eduhk"],
+      "infoType": "benchmark",
+      "programTags": ["MA Teaching Chinese", "education", "TCL"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/eduhk/ma-teaching-chinese",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "教大 MA Teaching Chinese 录取参考基准",
+        "summaryZh": "中文教学：语言与教学经历权重高；适合教育方向转轨。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.0, "minimum": 2.7, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Chinese Language", "weight": "high", "note": "中文/文学背景" },
+          { "subject": "Education", "weight": "medium", "note": "教学或志愿经历" }
+        ],
+        "competitionTag": "low",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-eduhk-msc-edu",
+      "sourceId": "eduhk-official",
+      "schoolIds": ["eduhk"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Education", "education"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/eduhk/msc-education",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "教大 MSc Education 录取参考基准",
+        "summaryZh": "教育学硕士：教育相关经历与动机信权重较高。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 2.9, "minimum": 2.6, "scale": "4.0" },
+        "language": { "ielts": 6.0, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Education", "weight": "high", "note": "教育实习/工作" },
+          { "subject": "Research Methods", "weight": "medium", "note": "研究方法课程" }
+        ],
+        "competitionTag": "low",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-hku-mba",
+      "sourceId": "hku-official",
+      "schoolIds": ["hku"],
+      "infoType": "benchmark",
+      "programTags": ["MBA", "business"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/hku/mba",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "港大 MBA 录取参考基准",
+        "summaryZh": "MBA：工作年限与领导力叙事权重大于 GPA；GMAT/GRE 常见要求。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.3, "minimum": 3.0, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 80 },
+        "subjectWeights": [
+          { "subject": "Work Experience", "weight": "high", "note": "通常 2+ 年全职" },
+          { "subject": "Leadership", "weight": "high", "note": "管理与团队经历" }
+        ],
+        "competitionTag": "very_high",
+        "degreeLevel": "mba"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "bench-cuhk-msc-ie",
+      "sourceId": "cuhk-official",
+      "schoolIds": ["cuhk"],
+      "infoType": "benchmark",
+      "programTags": ["MSc Information Engineering", "information-engineering", "IE"],
+      "canonicalUrl": "https://seed.study-agent.local/benchmark/cuhk/msc-information-engineering",
+      "reviewStatus": "approved",
+      "locale": {
+        "titleZh": "中大 MSc Information Engineering 录取参考基准",
+        "summaryZh": "信息工程：通信/信号/CS 交叉；数学与工程课程权重较高。"
+      },
+      "structured": {
+        "benchmarkGpa": { "typical": 3.2, "minimum": 2.9, "scale": "4.0" },
+        "language": { "ielts": 6.5, "toefl": 79 },
+        "subjectWeights": [
+          { "subject": "Engineering Math", "weight": "high", "note": "信号/线代" },
+          { "subject": "Computer Networks", "weight": "medium", "note": "网络/系统选修" }
+        ],
+        "competitionTag": "medium",
+        "degreeLevel": "taught_masters"
+      },
+      "publishedAt": "2026-05-01T08:00:00.000Z"
+    }
+  ]
+}

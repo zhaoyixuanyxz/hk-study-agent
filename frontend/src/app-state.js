@@ -18,3 +18,26 @@ export function setCurrentReportDetail(v) {
 export function setLastPlanReportReadiness(v) {
   lastPlanReportReadiness = v;
 }
+
+/** 跨模块写入须用 setter（静态 import 的绑定只读） */
+export function setComposerReplacementUserMessageId(v) {
+  composerReplacementUserMessageId = v;
+}
+
+export function setComposerCorrectionBackfill(v) {
+  composerCorrectionBackfill = v;
+}
+
+export function setComposerCorrectionThreadId(v) {
+  composerCorrectionThreadId = v;
+}
+
+export function resetComposerCorrectionDraftState() {
+  composerReplacementUserMessageId = null;
+  composerCorrectionBackfill = "";
+  composerCorrectionThreadId = null;
+}
+
+export function getComposerReplacementUserMessageId() {
+  return composerReplacementUserMessageId;
+}

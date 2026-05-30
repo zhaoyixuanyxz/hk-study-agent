@@ -264,7 +264,7 @@
                   <h2 class="page-title"><span class="title-icon icon-intel" aria-hidden="true"></span>香港留学情报库</h2>
                   <p class="page-lede">按院校浏览已上线政策与截止信息，支持关键词检索；所有卡片均附来源链接。</p>
                 </div>
-                <button type="button" id="refresh-intelligence" class="btn btn-secondary">刷新情报</button>
+                <button type="button" id="refresh-intelligence" class="btn btn-secondary">刷新列表</button>
               </div>
               <form id="intel-search-form" class="intel-search-bar">
                 <input type="search" id="intel-search-q" placeholder="搜索院校、专业、政策关键词…" autocomplete="off" />
@@ -313,9 +313,19 @@
                 <h2 class="page-title">情报运营后台</h2>
                 <p class="page-lede">审核待发布条目、查看来源与采集配置（仅审核员可访问）。</p>
               </div>
-              <button type="button" id="refresh-admin-intel" class="btn btn-secondary">刷新队列</button>
+              <div class="page-intro-actions">
+                <button type="button" id="admin-intel-preflight" class="btn btn-secondary">检测链接</button>
+                <button type="button" id="admin-intel-collect" class="btn btn-primary">安全采集</button>
+                <button type="button" id="refresh-admin-intel" class="btn btn-ghost">刷新队列</button>
+              </div>
             </div>
             <p id="admin-intel-status" class="meta meta-line"></p>
+            <section class="card card--wide admin-preflight-card">
+              <h3 class="card-title">链接探活摘要</h3>
+              <div id="admin-intel-preflight-summary" class="profile-body">
+                <p class="placeholder">尚未执行检测。请先点击「检测链接」，再执行「安全采集」。</p>
+              </div>
+            </section>
             <div class="card-grid">
               <section class="card card--wide">
                 <h3 class="card-title">待审核队列</h3>

@@ -1,6 +1,11 @@
 import OpenAI from "openai";
-import { filterCitationsAgainstIntelligenceItems, normalizeCitations } from "./citation-utils.js";
+import {
+  filterCitationsAgainstCombinedSources,
+  filterCitationsAgainstIntelligenceItems,
+  normalizeCitations,
+} from "./citation-utils.js";
 import { composeSystemPrompt } from "./promptLayer.js";
+import { assessChatScope, buildScopeRedirectAgentOutput } from "./chat-scope.js";
 
 const REPLY_MAX_CHARS = 1000;
 const TRUNC_SUFFIX = "\n\n（已为你收敛篇幅，如需展开可继续追问。）";
@@ -223,6 +228,7 @@ export function normalizeAgentOutput(data) {
     suggested_followups: sug,
     readiness_for_profile: Boolean(data.readiness_for_profile),
     citations,
+    scope_redirect: Boolean(data.scope_redirect),
   };
 }
 
@@ -244,9 +250,11 @@ function mockCitationsFromIntel(userMessage, intelItems) {
   ];
 }
 
-function applyIntelCitationAllowlist(out, intelItems) {
-  if (!Array.isArray(intelItems) || !intelItems.length) return out;
-  const citations = filterCitationsAgainstIntelligenceItems(out.citations, intelItems);
+function applyIntelCitationAllowlist(out, intelItems, extKbEntries = []) {
+  if (!Array.isArray(intelItems) || !intelItems.length) {
+    if (!Array.isArray(extKbEntries) || !extKbEntries.length) return out;
+  }
+  const citations = filterCitationsAgainstCombinedSources(out.citations, intelItems || [], extKbEntries || []);
   const reply = maybeDisclaimPolicyFacts(out.reply, citations);
   return { ...out, citations, reply: capReply(reply) };
 }
@@ -261,7 +269,18 @@ export async function runProfileAgent({
   memoryContext,
   intelContextText,
   intelItems,
+  extKbEntries,
+  profileSnapshot,
 }) {
+  const scope = assessChatScope({ userMessage, snapshot: profileSnapshot });
+  if (!scope.inScope) {
+    return applyIntelCitationAllowlist(
+      normalizeAgentOutput(buildScopeRedirectAgentOutput(scope)),
+      intelItems,
+      extKbEntries
+    );
+  }
+
   const intelBlock =
     intelContextText && String(intelContextText).trim()
       ? [{ role: "system", content: String(intelContextText).slice(0, 8000) }]
@@ -270,12 +289,12 @@ export async function runProfileAgent({
   if (useMock) {
     const turns = 1 + historyOpenai.filter((m) => m.role === "user").length;
     let gaps = [];
-    if (turns < 2) gaps = ["目标国家/地区与意向专业方向"];
+    if (turns < 2) gaps = ["目标港校与授课型硕士专业方向"];
     else if (turns < 3) gaps = ["计划入学时间或申请季", "预算大致区间"];
     let reply;
     if (turns === 1) {
       reply =
-        "判断：刚开始建档，信息尚少。原因：还需要了解你的目标与背景主干。下一步：请先说说目标国家/地区和想读的专业大类？";
+        "判断：刚开始建档，信息尚少。原因：还需要了解你的港校目标与学术背景主干。下一步：请先说说意向的香港高校/专业大类（授课型硕士）？";
     } else if (turns === 2) {
       reply =
         "判断：主线方向更清晰了。原因：仍缺时间与预算，对方案梯队和费用风险影响很大。下一步：补充计划入学年份/申请季和大致预算区间？";
@@ -303,7 +322,8 @@ export async function runProfileAgent({
         readiness_for_profile: readiness,
         citations: rawCites,
       }),
-      intelItems
+      intelItems,
+      extKbEntries
     );
   }
 
@@ -331,5 +351,5 @@ export async function runProfileAgent({
     max_tokens: 900,
   });
   const raw = completion.choices[0]?.message?.content || "";
-  return applyIntelCitationAllowlist(normalizeAgentOutput(parseJson(raw)), intelItems);
+  return applyIntelCitationAllowlist(normalizeAgentOutput(parseJson(raw)), intelItems, extKbEntries);
 }
