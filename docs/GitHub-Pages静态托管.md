@@ -3,12 +3,6 @@
 > **本仓库为 Private，免费 GitHub 账号无法启用 Pages**（需改 Public 或付费 Pro）。  
 > 与 [hkia-assistant](https://github.com/zhaoyixuanyxz/hkia-assistant) 一致：**GitHub 仅作代码备份**，对外试用请用 README 中的 **方案 A（Tailscale / Cloudflare 隧道）** 或 **方案 B（云主机 Docker）**。
 
-历史上曾添加过 `deploy-github-pages.yml`，已移除，避免 Actions / Deployments 出现误导性红叉。
+历史上曾尝试 Pages 并已清理 Deployments 记录；`deploy-github-pages.yml` 与一次性清理工作流均已移除。
 
 若将来改为 **Public** 仓库并需要 Pages，可参考 git 历史中的 workflow 与 `frontend/scripts/build-github-pages.mjs`。
-
-## 清除 Deployments 里的旧红叉（一次性）
-
-1. 打开 **Actions** → **Cleanup GitHub Pages history** → **Run workflow** → Run  
-2. 等绿色勾后刷新 **Deployments** 页  
-3. 可选：清理完成后删除 `.github/workflows/cleanup-github-pages-history.yml` 并 push
