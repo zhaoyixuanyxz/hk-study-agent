@@ -6,3 +6,9 @@
 历史上曾添加过 `deploy-github-pages.yml`，已移除，避免 Actions / Deployments 出现误导性红叉。
 
 若将来改为 **Public** 仓库并需要 Pages，可参考 git 历史中的 workflow 与 `frontend/scripts/build-github-pages.mjs`。
+
+## 清除 Deployments 里的旧红叉（一次性）
+
+1. 打开 **Actions** → **Cleanup GitHub Pages history** → **Run workflow** → Run  
+2. 等绿色勾后刷新 **Deployments** 页  
+3. 可选：清理完成后删除 `.github/workflows/cleanup-github-pages-history.yml` 并 push

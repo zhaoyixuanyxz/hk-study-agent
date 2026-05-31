@@ -1,0 +1,84 @@
+# 一次性清理：删除历史的 github-pages 部署记录与 Deploy GitHub Pages 工作流运行。
+# 用法：Actions → Cleanup GitHub Pages history → Run workflow
+# 清理成功后可在下一 commit 删除本文件，避免再次运行。
+name: Cleanup GitHub Pages history
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  deployments: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete github-pages deployment records
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const deployments = await github.paginate(
+              github.rest.repos.listDeployments,
+              { owner, repo, environment: "github-pages", per_page: 100 }
+            );
+            core.info(`Found ${deployments.length} deployment(s) for github-pages`);
+            for (const d of deployments) {
+              try {
+                await github.rest.repos.createDeploymentStatus({
+                  owner,
+                  repo,
+                  deployment_id: d.id,
+                  state: "inactive",
+                });
+              } catch (e) {
+                core.warning(`inactive ${d.id}: ${e.message}`);
+              }
+              await github.rest.repos.deleteDeployment({
+                owner,
+                repo,
+                deployment_id: d.id,
+              });
+              core.info(`Deleted deployment ${d.id}`);
+            }
+
+      - name: Delete workflow runs (Deploy GitHub Pages)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+              owner,
+              repo,
+            });
+            const targets = workflows.workflows.filter(
+              (w) =>
+                w.name === "Deploy GitHub Pages" ||
+                (w.path && w.path.includes("deploy-github-pages"))
+            );
+            if (!targets.length) {
+              core.info("No Deploy GitHub Pages workflow found (already removed).");
+              return;
+            }
+            for (const wf of targets) {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+                owner,
+                repo,
+                workflow_id: wf.id,
+                per_page: 100,
+              });
+              core.info(`Workflow ${wf.name} (${wf.id}): ${runs.length} run(s)`);
+              for (const run of runs) {
+                await github.rest.actions.deleteWorkflowRun({
+                  owner,
+                  repo,
+                  run_id: run.id,
+                });
+                core.info(`Deleted run ${run.id}`);
+              }
+            }
+
+      - name: Summary
+        run: echo "Done. Refresh Deployments / Actions on GitHub."
