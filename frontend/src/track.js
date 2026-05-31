@@ -1,3 +1,5 @@
+import { resolveApiUrl } from "./api/base.js";
+
 const LS_TOKEN = "study_agent_token";
 
 /**
@@ -9,7 +11,7 @@ export async function track(name, props = {}) {
   try {
     const token = localStorage.getItem(LS_TOKEN);
     if (!token) return;
-    await fetch("/api/v1/analytics/events", {
+    await fetch(resolveApiUrl("/api/v1/analytics/events"), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

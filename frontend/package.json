@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:pages": "node scripts/build-github-pages.mjs",
     "preview": "vite preview",
-    "test": "node --test src/copy.test.js src/assistant-text.test.js src/module-wiring.test.js src/lib/plan-ui.test.js src/lib/action-plan-ui.test.js src/lib/plan-charts.test.js",
+    "test": "node --test src/copy.test.js src/assistant-text.test.js src/module-wiring.test.js src/lib/plan-ui.test.js src/lib/action-plan-ui.test.js src/lib/plan-charts.test.js src/api/base.test.js",
     "test:cq-b": "node --test src/copy.test.js src/lib/plan-ui.test.js src/lib/action-plan-ui.test.js src/lib/plan-charts.test.js && npm run build",
     "test:wiring": "node --test src/module-wiring.test.js",
     "audit:imports": "node scripts/audit-module-imports.mjs"

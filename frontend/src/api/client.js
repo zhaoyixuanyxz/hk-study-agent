@@ -1,3 +1,5 @@
+import { resolveApiUrl } from "./base.js";
+
 export const LS_TOKEN = "study_agent_token";
 export const LS_THREAD = "study_agent_thread_id";
 export const LS_LAST_PLAN = "study_agent_last_plan_id";
@@ -50,7 +52,7 @@ export async function api(path, opts = {}) {
     headers["Content-Type"] = "application/json";
     opts = { ...opts, body: JSON.stringify(opts.body) };
   }
-  const r = await fetch(path, { ...opts, headers });
+  const r = await fetch(resolveApiUrl(path), { ...opts, headers });
   const text = await r.text();
   let data;
   try {
@@ -98,10 +100,11 @@ export async function api(path, opts = {}) {
 
 export function fullUrlFromApiPath(path) {
   if (!path || typeof path !== "string") return "";
+  const resolved = resolveApiUrl(path);
   try {
-    return new URL(path, window.location.origin).href;
+    return new URL(resolved, window.location.origin).href;
   } catch {
-    return path;
+    return resolved;
   }
 }
 
@@ -114,7 +117,7 @@ export function shareStatusLabel(st) {
 
 export async function downloadReportPdf(reportId) {
   const token = localStorage.getItem(LS_TOKEN);
-  const r = await fetch(`/api/v1/reports/${encodeURIComponent(String(reportId))}/pdf`, {
+  const r = await fetch(resolveApiUrl(`/api/v1/reports/${encodeURIComponent(String(reportId))}/pdf`), {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!r.ok) {

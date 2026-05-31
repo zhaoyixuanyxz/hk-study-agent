@@ -85,6 +85,16 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 详见 [docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md)。
 
+### 5b. GitHub Pages 静态托管（仅前端）
+
+将 **Vite 构建产物** 发布到 `https://<用户>.github.io/<仓库名>/`；**API 不在 GitHub 上运行**，需通过仓库 Variable `VITE_API_BASE` 指向本机 Tailscale / 云主机，并在后端 `CORS_ORIGINS` 加入 Pages 地址。
+
+```bash
+cd frontend && npm run build:pages   # 本地模拟子路径打包
+```
+
+推送 `master`/`main` 后由 GitHub Actions 自动部署。完整步骤见 [docs/GitHub-Pages静态托管.md](docs/GitHub-Pages静态托管.md)。
+
 ### 6. 一键启动 / 关闭（Windows）
 
 | 文件 | 作用 |

@@ -1,4 +1,5 @@
-﻿import { track } from "./track.js";
+﻿import { maybeShowGithubPagesApiHint } from "./api/base.js";
+import { track } from "./track.js";
 import { api, LS_LAST_PLAN, LS_LAST_REPORT, LS_THREAD, LS_TOKEN } from "./api/client.js";
 import { el } from "./lib/dom.js";
 import {
@@ -218,6 +219,7 @@ function onWindowLoad() {
     location.hash = "#/chat";
   }
   handleRoute();
+  maybeShowGithubPagesApiHint();
 }
 
 window.addEventListener("load", onWindowLoad);
