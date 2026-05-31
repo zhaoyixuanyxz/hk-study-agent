@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/configure-pages@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -36,7 +38,6 @@ jobs:
           else
             echo "VITE_BASE_PATH=/${REPO}/" >> "$GITHUB_ENV"
           fi
-          echo "Pages base: ${VITE_BASE_PATH:-}(set in GITHUB_ENV)"
 
       - name: Install and build frontend
         working-directory: frontend
@@ -56,9 +57,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
+        id: deployment

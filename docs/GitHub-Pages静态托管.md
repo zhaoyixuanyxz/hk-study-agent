@@ -18,8 +18,10 @@
    git remote add origin https://github.com/<用户>/<仓库名>.git
    git push -u origin master
    ```
-2. **Settings → Pages → Build and deployment**
-   - Source：**GitHub Actions**（不要选 “Deploy from a branch” 与 Actions 冲突）
+2. **Settings → Pages → Build and deployment**（⚠️ 红叉部署失败时，90% 是这一步没做）
+   - Source：必须选 **GitHub Actions**（不要选 “Deploy from a branch”，否则 `deploy-pages` 会失败）
+3. **Settings → Actions → General → Workflow permissions**
+   - 选 **Read and write permissions**（让 Actions 能写入 Pages）
 3. **Settings → Secrets and variables → Actions → Variables**（推荐）
    - `VITE_API_BASE` = 你的 API 公网根地址，例如 `https://100.x.x.x:8010`（Tailscale）或 `https://study.example.com`（**不要**尾部 `/`）
 4. **后端 `.env` / 生产环境** 的 `CORS_ORIGINS` 增加 Pages 地址，例如：
@@ -59,10 +61,22 @@ npm run preview
 | 方案 B 云 Docker | Pages 前端 + `VITE_API_BASE` 指向云 Nginx 网关 |
 | 仅 Git 备份 | 已完成；Pages 为可选演示入口 |
 
+## Deployments 页红叉是什么意思？
+
+| 你看到的 | 含义 |
+|--------|------|
+| **Failed to deploy to github-pages** | 自动「发布网站」失败；**代码 push 可能已成功**，只是网页没上线 |
+| 两条记录 | 每次 push 触发一次；README 更新、Pages 配置各算一次 |
+| 点进某条 → 红色步骤 | 看是 **build**（打包失败）还是 **deploy**（未开 Pages / 权限不足） |
+
+修好 Settings 后：打开 **Actions** → **Deploy GitHub Pages** → **Run workflow** 重跑。
+
 ## 故障排查
 
 | 现象 | 处理 |
 |------|------|
+| deploy 失败、提示 Pages not enabled | **Settings → Pages → Source = GitHub Actions**，保存后重跑 workflow |
+| 403 / pages: write | **Actions → General → Read and write permissions** |
 | 白屏 / 资源 404 | 确认 Pages 使用 **GitHub Actions**；仓库名与 `VITE_BASE_PATH` 一致（重新跑 workflow） |
 | 登录失败 / CORS | 后端 `CORS_ORIGINS` 加入完整 Pages URL（含 `https://`） |
 | 顶部黄条「未连接 API」 | 设置仓库 Variable `VITE_API_BASE` 后重新部署 |
