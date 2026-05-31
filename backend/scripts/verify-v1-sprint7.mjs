@@ -23,10 +23,6 @@ const required = [
   "backend/scripts/backup-data.mjs",
   "backend/scripts/production-smoke.mjs",
   "docs/v1.verson/V1-云试点部署Runbook.md",
-  ".github/workflows/deploy-github-pages.yml",
-  "docs/GitHub-Pages静态托管.md",
-  "frontend/.env.pages.example",
-  "frontend/scripts/build-github-pages.mjs",
 ];
 
 for (const rel of required) {

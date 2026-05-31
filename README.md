@@ -64,27 +64,41 @@ API 健康检查：**http://127.0.0.1:8010/health**（应返回 `{"status":"ok"}
 
 ---
 
-## 给他人使用 · 方案 A（推荐试点）
+## GitHub 与本项目的关系
+
+| 用途 | 说明 |
+|------|------|
+| **私有仓库** | 仅备份代码、协作开发（与 [hkia-assistant](https://github.com/zhaoyixuanyxz/hkia-assistant) 相同） |
+| **不是** | 免费 GitHub Pages 托管整站（Private 需改 Public 或付费，**本项目不采用**） |
+| **给人试用** | 见下方方案 A / B |
+
+---
+
+## 给他人使用 · 方案 A（试点最快，推荐）
 
 **你托管，同事只开浏览器** — 不用装 Node、不用自己申请 API Key。
 
 | 你是谁 | 做什么 |
 |--------|--------|
-| **管理员（你）** | 本机 `启动项.bat` 起前后端 → 用 **Tailscale** 把内网地址发给同事 |
+| **管理员（你）** | 本机 `启动项.bat` 常开 → 用 **Tailscale** 或 **Cloudflare 隧道** 发链接 |
 | **使用者** | 打开链接 → 注册/登录 → 按 6 Tab 流程建档 |
 
 ```text
 快速试点（对方零安装）：
   1. 本机 .env 填好 DEEPSEEK_API_KEY（可选）
   2. 双击 启动项.bat
-  3. Tailscale 分享 http://<你的虚拟IP>:5180  （API 同机 8010，由 Vite 代理）
+  3. 用 Tailscale 发 http://100.x.x.x:5180
+     或 Cloudflare Tunnel 发 https://xxx.trycloudflare.com
+  4. 把链接发给同事
 ```
 
-后端 `CORS_ORIGINS` 需包含同事实际打开的页面来源（本机或 Tailscale 地址）。
+`.env` 里 `CORS_ORIGINS` 需包含同事实际打开的地址（Tailscale IP 或隧道域名 + 端口 **5180**）。API 与前端同机，Vite 会把 `/api` 代理到 **8010**。
+
+> 缺点：你电脑得常开；数据在本机 `backend/data/db.json`。详见根目录 [vibe coding.txt](vibe%20coding.txt) 方案 A。
 
 ### 24 小时在线 · 你关机也能用（方案 B，推荐长期）
 
-**Docker + 便宜云主机（约 ¥50/月）**，同事只打开公网地址。
+**Docker + 便宜云主机（约 ¥50/月）**，同事只打开公网地址（网关端口见 `.env.production`）。
 
 📖 一步步操作 → **[docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md)**
 
@@ -95,12 +109,7 @@ cp .env.production.example .env.production   # 填入 DEEPSEEK_API_KEY、CORS_OR
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-### GitHub Pages（仅静态前端 · 可选）
-
-推送 `main` 后 Actions 自动发布 UI：**https://zhaoyixuanyxz.github.io/hk-study-agent/**  
-API 仍需另部署；仓库 Variable 配置 `VITE_API_BASE`，后端 `CORS_ORIGINS` 加入 Pages 地址。
-
-📖 完整步骤 → **[docs/GitHub-Pages静态托管.md](docs/GitHub-Pages静态托管.md)**
+> 更新：本机改代码 → `git push` → 服务器 `git pull && docker compose -f docker-compose.prod.yml up -d --build`。
 
 ---
 
@@ -174,7 +183,7 @@ flowchart LR
 | 登录后接口 401 / CORS 报错 | 后端未起或 `CORS_ORIGINS` 未含前端地址 | 确认 `8010` 健康检查；改 `.env` 后重启 backend |
 | 对话像「假回复」 | `DEEPSEEK_API_KEY` 为空 | Mock 模式正常；要真模型则填 Key |
 | 方案/报告引用很少 | 情报未同步或未爬取 | `cd backend && npm run intelligence:sync-feeds` |
-| Pages 顶部黄条「未连接 API」 | 静态站未配 `VITE_API_BASE` | 见 [GitHub-Pages静态托管.md](docs/GitHub-Pages静态托管.md) |
+| 同事打不开你发的链接 | `CORS_ORIGINS` 未含对方访问的 URL | 在 `.env` 追加 Tailscale/隧道地址后重启后端 |
 | 双击 bat 闪退 | 文件带 UTF-8 BOM | 存为 UTF-8 无 BOM；或用 `启动项-保持窗口.bat` |
 | PDF 下载失败 | 未装 Chromium / `PDF_DISABLED=1` | 本地 `cd backend && npm install`；生产见 Runbook |
 
@@ -190,8 +199,7 @@ hk-study-agent/
 ├── backend/                    ← Fastify API + Agent + 情报管线
 ├── frontend/                   ← Vite 6 Tab 工作台
 ├── docs/                       ← 产品文档、V1/V3 路线图、QA 归档
-├── deploy/                     ← Docker / Nginx（方案 B）
-└── .github/workflows/          ← GitHub Pages 自动部署
+└── deploy/                     ← Docker / Nginx（方案 B）
 ```
 
 **本地数据不上传 Git**：`.env`、`backend/data/db.json`、`.cursor/`、运行时状态文件。
@@ -216,8 +224,8 @@ cd ../frontend && npm test && npm run build
 | [docs/v1.verson/README.md](docs/v1.verson/README.md) | 产品 / 研发 · V1 文档入口 |
 | [docs/v1.verson/V1-迭代路线图V3-详细任务清单.md](docs/v1.verson/V1-迭代路线图V3-详细任务清单.md) | 研发 · V3 任务与验收 |
 | [docs/v1.verson/V1-V3-Sprint-QA-归档-2026-05-30.md](docs/v1.verson/V1-V3-Sprint-QA-归档-2026-05-30.md) | QA · 手测清单 |
-| [docs/GitHub-Pages静态托管.md](docs/GitHub-Pages静态托管.md) | 管理员 · Pages 静态站 |
-| [docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md) | 管理员 · Docker 云试点 |
+| [docs/v1.verson/V1-云试点部署Runbook.md](docs/v1.verson/V1-云试点部署Runbook.md) | 管理员 · Docker 云试点（方案 B） |
+| [vibe coding.txt](vibe%20coding.txt) | 部署形态总览（Git 备份 vs 方案 A/B） |
 | [docs/Phase2-交付物与验收说明.md](docs/Phase2-交付物与验收说明.md) | 验收 · Phase2 API |
 | [Git回退指南.md](Git回退指南.md) | 开发 · 标签回退 |
 
