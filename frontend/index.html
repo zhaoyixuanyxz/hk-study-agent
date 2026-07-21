@@ -138,8 +138,18 @@
                 <li>随时保存进度</li>
                 <li>待确认事实会在下方高亮</li>
               </ul>
+              <div class="page-intro-actions">
+                <button type="button" id="btn-new-thread" class="btn btn-ghost btn-tiny">新开会话</button>
+              </div>
             </div>
             <div class="panel-surface panel-surface--chat">
+              <div id="locale-picker" class="locale-picker hidden" role="dialog" aria-label="Choose session language">
+                <p class="locale-picker-lede">选择本会话语言 / Choose language for this session（选定后不可更改）</p>
+                <div class="locale-picker-actions">
+                  <button type="button" id="locale-pick-zh" class="btn btn-primary" data-locale="zh">中文</button>
+                  <button type="button" id="locale-pick-en" class="btn btn-ghost" data-locale="en">English</button>
+                </div>
+              </div>
               <div id="meta" class="meta meta-line"></div>
               <section id="chat-progress" class="chat-progress" aria-label="建档进度"></section>
               <section id="chat-gap-cards" class="chat-gap-cards" aria-label="关键缺口"></section>

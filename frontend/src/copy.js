@@ -88,12 +88,13 @@ export function formatReadinessCopy(readiness) {
 }
 
 /**
- * @param {{ id?: string, orchestration_state?: string }} thread
+ * @param {{ id?: string, orchestration_state?: string, locale?: string } | null | undefined} thread
  */
 export function formatThreadMeta(thread) {
   const id = String(thread?.id || "");
   const shortId = id ? `${id.slice(0, 8)}…` : "待创建";
-  return `咨询会话 ${shortId} · 当前阶段：${formatFlowState(thread?.orchestration_state)}`;
+  const loc = thread?.locale === "en" ? "English" : "中文";
+  return `咨询会话 ${shortId} · 语言：${loc} · 当前阶段：${formatFlowState(thread?.orchestration_state)}`;
 }
 
 /**

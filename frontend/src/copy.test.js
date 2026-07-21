@@ -56,7 +56,14 @@ test("formatReadinessCopy returns friendly summary text", () => {
 test("formatThreadMeta hides internal state wording", () => {
   assert.equal(
     formatThreadMeta({ id: "abcd1234efgh", orchestration_state: "explore" }),
-    "咨询会话 abcd1234… · 当前阶段：顾问正在梳理你的背景与目标"
+    "咨询会话 abcd1234… · 语言：中文 · 当前阶段：顾问正在梳理你的背景与目标"
+  );
+});
+
+test("formatThreadMeta shows English when locale=en", () => {
+  assert.equal(
+    formatThreadMeta({ id: "abcd1234efgh", orchestration_state: "explore", locale: "en" }),
+    "咨询会话 abcd1234… · 语言：English · 当前阶段：顾问正在梳理你的背景与目标"
   );
 });
 

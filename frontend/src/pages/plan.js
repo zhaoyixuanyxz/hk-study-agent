@@ -189,7 +189,12 @@ el("btn-generate-plan")?.addEventListener("click", async () => {
   track("plan_generate_click", {});
   if (btn) btn.disabled = true;
   try {
-    const res = await api("/api/v1/plans/generate", { method: "POST", body: {} });
+    const res = await api("/api/v1/plans/generate", {
+      method: "POST",
+      body: {
+        thread_id: localStorage.getItem(LS_THREAD) || undefined,
+      },
+    });
     track("plan_generate_result", { ok: true, code: res.code || null });
     if (res.plan_id) localStorage.setItem(LS_LAST_PLAN, res.plan_id);
     const detail = res.plan_id

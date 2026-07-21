@@ -11,7 +11,7 @@ import {
   formatTruthStatusLabel,
   truthStatusTagClass,
 } from "../copy.js";
-import { api, LS_THREAD, LS_TOKEN } from "../api/client.js";
+import { api, LS_THREAD, LS_TOKEN, LS_PREFERRED_LOCALE } from "../api/client.js";
 import { el, setStatus, prettyTime, shortId } from "../lib/dom.js";
 import {
   composerReplacementUserMessageId,
@@ -314,12 +314,65 @@ export async function ensureSession() {
   if (!token) throw new Error("请先登录工作台，再继续当前操作。");
   let threadId = localStorage.getItem(LS_THREAD);
   if (!threadId) {
-    const t = await api("/api/v1/threads", { method: "POST" });
-    threadId = t.thread_id;
-    localStorage.setItem(LS_THREAD, threadId);
+    showLocalePicker();
+    return { token, threadId: null, needsLocale: true };
   }
-  return { token, threadId };
+  return { token, threadId, needsLocale: false };
 }
+
+export function readPreferredLocale() {
+  return localStorage.getItem(LS_PREFERRED_LOCALE) === "en" ? "en" : "zh";
+}
+
+export async function createThreadWithLocale(locale) {
+  const loc = locale === "en" ? "en" : "zh";
+  localStorage.setItem(LS_PREFERRED_LOCALE, loc);
+  const t = await api("/api/v1/threads", {
+    method: "POST",
+    body: { locale: loc },
+  });
+  localStorage.setItem(LS_THREAD, t.thread_id);
+  return t;
+}
+
+export function showLocalePicker() {
+  const box = document.getElementById("locale-picker");
+  if (box) box.classList.remove("hidden");
+}
+
+export function hideLocalePicker() {
+  const box = document.getElementById("locale-picker");
+  if (box) box.classList.add("hidden");
+}
+
+async function onLocalePicked(locale) {
+  hideLocalePicker();
+  const t = await createThreadWithLocale(locale);
+  await loadThread(t.thread_id);
+}
+
+document.getElementById("locale-pick-zh")?.addEventListener("click", () => {
+  void onLocalePicked("zh");
+});
+document.getElementById("locale-pick-en")?.addEventListener("click", () => {
+  void onLocalePicked("en");
+});
+
+document.getElementById("btn-new-thread")?.addEventListener("click", () => {
+  if (
+    !window.confirm(
+      "新开会话将锁定新的语言选择；当前会话仍可在历史中打开。继续？",
+    )
+  ) {
+    return;
+  }
+  localStorage.removeItem(LS_THREAD);
+  showLocalePicker();
+  const messages = document.getElementById("messages");
+  if (messages) messages.innerHTML = "";
+  const meta = document.getElementById("meta");
+  if (meta) meta.textContent = "请选择新会话语言";
+});
 
 export async function refreshReviewerNav() {
   const nav = el("nav-admin-intel");
@@ -364,8 +417,7 @@ export async function loadThread(threadId) {
         msg.includes("无权访问"));
     if (ourThreadMissing && localStorage.getItem(LS_THREAD) === threadId) {
       localStorage.removeItem(LS_THREAD);
-      const t = await api("/api/v1/threads", { method: "POST" });
-      localStorage.setItem(LS_THREAD, t.thread_id);
+      const t = await createThreadWithLocale(readPreferredLocale());
       const thread = await api(`/api/v1/threads/${t.thread_id}`);
       apply(thread);
       return;

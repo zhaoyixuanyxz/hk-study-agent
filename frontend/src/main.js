@@ -1,10 +1,11 @@
 ﻿import { maybeShowGithubPagesApiHint } from "./api/base.js";
 import { track } from "./track.js";
-import { api, LS_LAST_PLAN, LS_LAST_REPORT, LS_THREAD, LS_TOKEN } from "./api/client.js";
+import { api, LS_LAST_PLAN, LS_LAST_REPORT, LS_THREAD, LS_TOKEN, LS_PREFERRED_LOCALE } from "./api/client.js";
 import { el } from "./lib/dom.js";
 import {
   loadAdminIntelligencePage,
   loadIntelligencePage,
+  runAdminDiscover,
   runAdminPreflightUrls,
   runAdminSafeCollect,
 } from "./pages/intelligence.js";
@@ -33,6 +34,7 @@ el("intel-search-form")?.addEventListener("submit", (ev) => {
 
 el("refresh-admin-intel")?.addEventListener("click", () => loadAdminIntelligencePage());
 el("admin-intel-preflight")?.addEventListener("click", () => runAdminPreflightUrls());
+el("admin-intel-discover")?.addEventListener("click", () => runAdminDiscover());
 el("admin-intel-collect")?.addEventListener("click", () => runAdminSafeCollect());
 
 document.querySelectorAll(".nav-link").forEach((a) => {
@@ -70,7 +72,10 @@ el("btn-profile-full-reset")?.addEventListener("click", async () => {
   try {
     const res = await api("/api/v1/profile/full-reset", {
       method: "POST",
-      body: { confirm: true },
+      body: {
+        confirm: true,
+        locale: localStorage.getItem(LS_PREFERRED_LOCALE) === "en" ? "en" : "zh",
+      },
     });
     resetComposerReplaceDraftQuiet();
     localStorage.setItem(LS_THREAD, res.thread_id);
@@ -110,12 +115,13 @@ el("form")?.addEventListener("submit", async (ev) => {
     status.className = "status";
   }
   try {
-    const { ensureSession } = await import("./pages/chat.js");
+    const { ensureSession, showLocalePicker } = await import("./pages/chat.js");
     await ensureSession();
     threadId = localStorage.getItem(LS_THREAD);
     if (!threadId) {
+      showLocalePicker();
       if (status) {
-        status.textContent = "咨询会话尚未就绪，请刷新页面后重试。";
+        status.textContent = "请先选择本会话语言，再继续发送。";
         status.className = "status err";
       }
       return;

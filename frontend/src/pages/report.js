@@ -209,7 +209,10 @@ el("btn-generate-report")?.addEventListener("click", async () => {
   if (btn) btn.disabled = true;
   try {
     const planId = localStorage.getItem(LS_LAST_PLAN);
-    const body = planId ? { plan_id: planId } : {};
+    const body = {
+      thread_id: localStorage.getItem(LS_THREAD) || undefined,
+      ...(planId ? { plan_id: planId } : {}),
+    };
     const res = await api("/api/v1/reports/generate", { method: "POST", body });
     track("report_generate_result", { ok: true });
     if (res.report_id) {

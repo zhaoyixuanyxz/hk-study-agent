@@ -4,6 +4,7 @@ export const LS_TOKEN = "study_agent_token";
 export const LS_THREAD = "study_agent_thread_id";
 export const LS_LAST_PLAN = "study_agent_last_plan_id";
 export const LS_LAST_REPORT = "study_agent_last_report_id";
+export const LS_PREFERRED_LOCALE = "study_agent_preferred_locale";
 
 export function clearStoredSession() {
   localStorage.removeItem(LS_TOKEN);

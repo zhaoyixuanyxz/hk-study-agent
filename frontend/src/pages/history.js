@@ -17,6 +17,7 @@ import {
   LS_LAST_REPORT,
   LS_THREAD,
   LS_TOKEN,
+  LS_PREFERRED_LOCALE,
   clearStoredSession,
   fullUrlFromApiPath,
   downloadReportPdf,
@@ -26,7 +27,7 @@ import {
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
 import { navigateTo } from "../shell/navigation.js";
-import { loadThread } from "./chat.js";
+import { loadThread, createThreadWithLocale } from "./chat.js";
 import { loadProfile } from "./profile.js";
 
 export async function loadHistoryPage() {
@@ -87,7 +88,8 @@ export async function loadHistoryPage() {
         main.type = "button";
         main.className = "history-link history-thread-main";
         const pinLabel = t.pinned ? "置顶 · " : "";
-        main.textContent = `${pinLabel}${prettyTime(t.updated_at || t.created_at)} · 阶段：${formatFlowState(t.orchestration_state)}`;
+        const localeBadge = t.locale === "en" ? " · EN" : " · 中";
+        main.textContent = `${pinLabel}${prettyTime(t.updated_at || t.created_at)} · 阶段：${formatFlowState(t.orchestration_state)}${localeBadge}`;
         main.addEventListener("click", async () => {
           localStorage.setItem(LS_THREAD, t.thread_id);
           navigateTo("chat");
@@ -137,8 +139,8 @@ export async function loadHistoryPage() {
               if (rest.length) {
                 localStorage.setItem(LS_THREAD, rest[0].thread_id);
               } else {
-                const nt = await api("/api/v1/threads", { method: "POST" });
-                localStorage.setItem(LS_THREAD, nt.thread_id);
+                const preferred = localStorage.getItem(LS_PREFERRED_LOCALE) === "en" ? "en" : "zh";
+                await createThreadWithLocale(preferred);
               }
             }
             await loadHistoryPage();
