@@ -38,6 +38,7 @@ export function getSchoolDetail(store, schoolIdOrSlug) {
   const timeline = latest_items.slice(0, 30).map((item) => ({
     item_id: item.id,
     title_zh: item.locale?.titleZh || "",
+    title_original: item.locale?.titleOriginal || "",
     info_type: item.infoType,
     published_at: item.publishedAt,
     canonical_url: item.canonicalUrl,

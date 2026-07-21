@@ -39,6 +39,7 @@ import {
 } from "../lib/plan-charts.js";
 import { lastPlanReportReadiness, setLastPlanReportReadiness } from "../app-state.js";
 import { renderPlanReportGate } from "./profile.js";
+import { t } from "../i18n/index.js";
 
 export function hidePlanError() {
   const box = el("plan-error");
@@ -66,10 +67,10 @@ export function setPlanStatus(text, isErr) {
 export function renderPlan(plan) {
   const container = el("plan-content");
   if (!container || !plan) return;
-  const t = plan.tiers || {};
-  const reach = t.reach || {};
-  const match = t.match || {};
-  const safety = t.safety || {};
+  const tiers = plan.tiers || {};
+  const reach = tiers.reach || {};
+  const match = tiers.match || {};
+  const safety = tiers.safety || {};
 
   const tierHtml = (x, fallbackLabel) => {
     const label = x.label || fallbackLabel;
@@ -93,17 +94,17 @@ export function renderPlan(plan) {
   destroyPlanCharts();
   container.innerHTML = `
     ${chartsBlock}
-    ${tierHtml(reach, "冲刺建议")}
-    ${tierHtml(match, "匹配建议")}
-    ${tierHtml(safety, "保底建议")}
+    ${tierHtml(reach, t("plan.tier_reach"))}
+    ${tierHtml(match, t("plan.tier_match"))}
+    ${tierHtml(safety, t("plan.tier_safety"))}
     ${execPath}
     <section class="card plan-budget-card">
-      <h3>整体风险与预算</h3>
+      <h3>${t("plan.risk_budget")}</h3>
       <p>${escapeHtml(plan.risk_summary || "")}</p>
       <p>${escapeHtml(plan.budget_suggestion || "")}</p>
     </section>
     <section class="card plan-timeline-card">
-      <h3>时间线与节奏</h3>
+      <h3>${t("plan.timeline_section")}</h3>
       ${urgencyBlock}
       <p>${escapeHtml(plan.timeline_suggestion || "")}</p>
     </section>
@@ -127,7 +128,7 @@ export function appendPlanCitationSection(container, plan) {
   const sec = document.createElement("section");
   sec.className = cites.length ? "card plan-citations" : "card plan-citations plan-citations--empty";
   const h = document.createElement("h3");
-  h.textContent = "知识库与外链引用";
+  h.textContent = t("plan.citations_title");
   sec.appendChild(h);
   if (!cites.length) {
     const p = document.createElement("p");
@@ -145,8 +146,8 @@ export function appendPlanCitationSection(container, plan) {
 
 export async function loadPlanPage() {
   hidePlanError();
-  setPlanStatus("正在加载顾问方案，请稍候…");
-  setPanelLoading("plan-content", "正在加载方案…");
+  setPlanStatus(t("plan.status_loading"));
+  setPanelLoading("plan-content", t("plan.loading_panel"));
   const container = el("plan-content");
   try {
     const lastId = localStorage.getItem(LS_LAST_PLAN);
@@ -160,7 +161,7 @@ export async function loadPlanPage() {
       renderPlanReportGate(null);
       setPlanStatus("");
       if (container) {
-        container.innerHTML = `<p class="placeholder">暂无方案。请先在「画像」中确认就绪后，点击「生成方案」。</p>`;
+        container.innerHTML = `<p class="placeholder">${t("plan.empty")}</p>`;
       }
       return;
     }
@@ -170,14 +171,14 @@ export async function loadPlanPage() {
     if (detail.plan) {
       renderPlan(detail.plan);
       localStorage.setItem(LS_LAST_PLAN, detail.plan_id);
-      setPlanStatus(`已加载 · ${String(detail.plan_id).slice(0, 8)}…`);
+      setPlanStatus(t("plan.status_loaded", { id: String(detail.plan_id).slice(0, 8) }));
     }
   } catch (e) {
     setLastPlanReportReadiness(null);
     renderPlanReportGate(null);
     setPlanStatus(String(e.message || e), true);
     if (container) {
-      container.innerHTML = `<p class="placeholder">加载失败，请稍后重试。</p>`;
+      container.innerHTML = `<p class="placeholder">${t("plan.load_fail")}</p>`;
     }
   }
 }
@@ -185,7 +186,7 @@ export async function loadPlanPage() {
 el("btn-generate-plan")?.addEventListener("click", async () => {
   const btn = el("btn-generate-plan");
   hidePlanError();
-  setPlanStatus("顾问正在生成方案，请稍候…");
+  setPlanStatus(t("plan.status_generating"));
   track("plan_generate_click", {});
   if (btn) btn.disabled = true;
   try {
@@ -204,12 +205,12 @@ el("btn-generate-plan")?.addEventListener("click", async () => {
     renderPlanReportGate(lastPlanReportReadiness);
     if (detail.plan) renderPlan(detail.plan);
     else if (res.plan) renderPlan(res.plan);
-    setPlanStatus(`已生成 · ${String(res.plan_id || "").slice(0, 8)}…`);
+    setPlanStatus(t("plan.status_generated", { id: String(res.plan_id || "").slice(0, 8) }));
   } catch (e) {
     track("plan_generate_result", { ok: false, code: e.code || null });
     const sug = e.suggestion || "";
-    showPlanError(e.message || "顾问方案生成失败", sug);
-    setPlanStatus("暂时无法生成方案，请按提示补充后再试。", true);
+    showPlanError(e.message || t("plan.gen_fail"), sug);
+    setPlanStatus(t("plan.status_gen_fail"), true);
   } finally {
     if (btn) btn.disabled = false;
   }

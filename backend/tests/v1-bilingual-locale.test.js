@@ -207,3 +207,21 @@ test("mock report uses English chapter titles when locale=en", () => {
     assert.doesNotMatch(ch.title, /概述|画像|免责声明/);
   }
 });
+
+test("buildDeliverySectionsHtml respects locale=en for shell headings", async () => {
+  const { buildDeliverySectionsHtml } = await import("../src/report-service.js");
+  const html = buildDeliverySectionsHtml(
+    {
+      parent_summary: ["Family conclusion in English"],
+      action_plan: { days_30: ["a"], days_60: [], days_90: [] },
+      risk_items: [{ level: "high", label: "GPA band", detail: "Below median" }],
+    },
+    [],
+    { locale: "en" }
+  );
+  assert.match(html, /Parent Decision Summary/);
+  assert.match(html, /Risk Dashboard/);
+  assert.match(html, />High</);
+  assert.doesNotMatch(html, /家长决策摘要/);
+  assert.doesNotMatch(html, /风险仪表盘/);
+});

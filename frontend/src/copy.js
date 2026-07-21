@@ -1,33 +1,4 @@
-const FLOW_STATE_LABELS = {
-  init: "顾问正在建立会话上下文",
-  explore: "顾问正在梳理你的背景与目标",
-  gap_probing: "顾问正在补齐关键档案信息",
-  fact_confirmation: "请确认档案中的关键事实",
-  profile_ready: "档案已就绪，可进入方案阶段",
-};
-
-const FACT_KEY_LABELS = {
-  target_region: "目标地区",
-  field: "专业方向",
-  intent_degree: "申请学位",
-  gpa: "成绩水平",
-  school_background: "院校背景",
-  budget_range: "预算范围",
-  intake_or_season: "入学时间",
-  risk_style: "风险偏好",
-  language_score: "语言成绩",
-  language: "语言成绩",
-  internship: "实习经历",
-  research: "科研经历",
-};
-
-const DIMENSION_LABELS = {
-  academic: "学术背景",
-  goals: "申请目标",
-  budget: "预算信息",
-  timeline: "时间规划",
-  riskPreference: "风险偏好",
-};
+import { t } from "./i18n/index.js";
 
 /**
  * @param {string | undefined | null} raw
@@ -47,16 +18,21 @@ export function toTitleWords(raw) {
  * @param {string | undefined | null} state
  */
 export function formatFlowState(state) {
-  if (!state) return "顾问处理中";
-  return FLOW_STATE_LABELS[state] || "顾问处理中";
+  if (!state) return t("flow.fallback");
+  const key = `flow.${state}`;
+  const labeled = t(key);
+  return labeled === key ? t("flow.fallback") : labeled;
 }
 
 /**
  * @param {string | undefined | null} key
  */
 export function formatFactLabel(key) {
-  if (!key) return "信息字段";
-  return FACT_KEY_LABELS[key] || toTitleWords(key) || "信息字段";
+  if (!key) return t("fact.fallback");
+  const catalogKey = `fact.${key}`;
+  const labeled = t(catalogKey);
+  if (labeled !== catalogKey) return labeled;
+  return toTitleWords(key) || t("fact.fallback");
 }
 
 /**
@@ -64,7 +40,11 @@ export function formatFactLabel(key) {
  */
 export function formatMissingDimensions(dims) {
   if (!Array.isArray(dims) || !dims.length) return [];
-  return dims.map((x) => DIMENSION_LABELS[x] || toTitleWords(x));
+  return dims.map((x) => {
+    const catalogKey = `dim.${x}`;
+    const labeled = t(catalogKey);
+    return labeled !== catalogKey ? labeled : toTitleWords(x);
+  });
 }
 
 /**
@@ -75,14 +55,14 @@ export function formatReadinessCopy(readiness) {
   const missing = formatMissingDimensions(readiness?.missingRequired || []);
   if (ready) {
     return {
-      title: "方案条件已满足",
-      hint: "核心信息已齐全，建议立即生成顾问方案并查看梯度建议。",
+      title: t("readiness.ready_title"),
+      hint: t("readiness.ready_hint"),
       missing: [],
     };
   }
   return {
-    title: "建议先补齐关键项",
-    hint: "补全以下信息后再生成方案，匹配度与可执行性会更高。",
+    title: t("readiness.gap_title"),
+    hint: t("readiness.gap_hint"),
     missing,
   };
 }
@@ -92,9 +72,13 @@ export function formatReadinessCopy(readiness) {
  */
 export function formatThreadMeta(thread) {
   const id = String(thread?.id || "");
-  const shortId = id ? `${id.slice(0, 8)}…` : "待创建";
-  const loc = thread?.locale === "en" ? "English" : "中文";
-  return `咨询会话 ${shortId} · 语言：${loc} · 当前阶段：${formatFlowState(thread?.orchestration_state)}`;
+  const shortId = id ? `${id.slice(0, 8)}…` : t("thread.pending_id");
+  const locLabel = thread?.locale === "en" ? t("lang.english") : t("lang.chinese");
+  return t("thread.meta", {
+    id: shortId,
+    lang: locLabel,
+    stage: formatFlowState(thread?.orchestration_state),
+  });
 }
 
 /**
@@ -139,9 +123,9 @@ export function formatSourceHintLabel(hint) {
  * @param {string | undefined | null} u
  */
 export function formatTimelineUrgencyLine(u) {
-  if (u === "tight") return "节奏评估：偏紧——建议尽快锁定节点与材料清单，并预留补件时间。";
-  if (u === "relaxed") return "节奏评估：相对从容——仍建议按官网轮次倒排，避免临近截止扎堆。";
-  if (u === "normal") return "节奏评估：中等——建议按里程碑推进并定期复盘进度。";
+  if (u === "tight") return t("urgency.tight_line");
+  if (u === "relaxed") return t("urgency.relaxed_line");
+  if (u === "normal") return t("urgency.normal_line");
   return "";
 }
 
@@ -153,7 +137,7 @@ export function timelineUrgencyMeta(u) {
   if (u === "tight") {
     return {
       level: "tight",
-      label: "偏紧",
+      label: t("urgency.tight"),
       line: formatTimelineUrgencyLine(u),
       barWidth: "100%",
       barClass: "urgency-bar--tight",
@@ -162,7 +146,7 @@ export function timelineUrgencyMeta(u) {
   if (u === "relaxed") {
     return {
       level: "relaxed",
-      label: "从容",
+      label: t("urgency.relaxed"),
       line: formatTimelineUrgencyLine(u),
       barWidth: "33%",
       barClass: "urgency-bar--relaxed",
@@ -171,7 +155,7 @@ export function timelineUrgencyMeta(u) {
   if (u === "normal") {
     return {
       level: "normal",
-      label: "中等",
+      label: t("urgency.normal"),
       line: formatTimelineUrgencyLine(u),
       barWidth: "66%",
       barClass: "urgency-bar--normal",
@@ -182,7 +166,7 @@ export function timelineUrgencyMeta(u) {
 
 /** Plan 页引用区空态说明 */
 export function formatPlanCitationsHint() {
-  return "此处仅展示方案中显式给出的可追溯外链；若无条目，表示当前结论主要依据档案内信息与通用规划逻辑。";
+  return t("plan.citations_hint");
 }
 
 /** 用户情报 Tab：仅重新加载已上线列表，不触发后台爬取 */
@@ -207,4 +191,3 @@ export function formatAdminPreflightSummary(s) {
   if (!s?.ran_at) return "尚未执行链接检测。";
   return `上次检测 ${s.ran_at}：共 ${s.total ?? 0} 条，可用 ${s.ok_count ?? 0}，失败 ${s.failed_count ?? 0}`;
 }
-

@@ -18,50 +18,80 @@
       <div class="auth-layout">
         <aside class="auth-brand">
           <p class="auth-eyebrow">Study Planning Companion</p>
-          <h1 class="auth-brand-title">留学规划<span class="auth-brand-accent">智能建档</span></h1>
-          <p class="auth-brand-copy">
+          <h1 class="auth-brand-title">
+            <span data-i18n="auth.brand_title">留学规划</span><span class="auth-brand-accent" data-i18n="auth.brand_accent">智能建档</span>
+          </h1>
+          <p class="auth-brand-copy" data-i18n="auth.brand_copy">
             以对话收集背景，生成可执行的画像、方案与报告 —— 像顾问工作台一样，一步步陪你理清申请路径。
           </p>
           <ul class="auth-highlights">
-            <li>自然语言建档，无需填僵硬的超长表单</li>
-            <li>冲刺 / 匹配 / 保底梯度与风险提示</li>
-            <li>报告在线留存，同一账号随时回看</li>
+            <li data-i18n="auth.highlight_1">自然语言建档，无需填僵硬的超长表单</li>
+            <li data-i18n="auth.highlight_2">冲刺 / 匹配 / 保底梯度与风险提示</li>
+            <li data-i18n="auth.highlight_3">报告在线留存，同一账号随时回看</li>
           </ul>
         </aside>
         <div class="auth-card">
           <div class="auth-card-head">
-            <h2 class="auth-card-kicker" id="auth-card-title">欢迎回到顾问席位</h2>
-            <p id="auth-card-sub" class="auth-card-sub">登录后继续推进你的申请档案，并获取下一步顾问建议</p>
+            <h2 class="auth-card-kicker" id="auth-card-title" data-i18n="auth.login_title">欢迎回到顾问席位</h2>
+            <p id="auth-card-sub" class="auth-card-sub" data-i18n="auth.login_sub">登录后继续推进你的申请档案，并获取下一步顾问建议</p>
           </div>
           <form id="form-login" class="auth-form">
             <label class="field-label"
-              >邮箱
+              ><span data-i18n="auth.email">邮箱</span>
               <input type="email" id="login-email" required autocomplete="username" placeholder="name@example.com" />
             </label>
             <label class="field-label"
-              >密码
-              <input type="password" id="login-password" required minlength="6" autocomplete="current-password" placeholder="至少 6 位" />
+              ><span data-i18n="auth.password">密码</span>
+              <input
+                type="password"
+                id="login-password"
+                required
+                minlength="6"
+                autocomplete="current-password"
+                data-i18n-placeholder="auth.password_ph"
+                placeholder="至少 6 位"
+              />
             </label>
             <p id="login-err" class="status err hidden"></p>
-            <button type="submit" class="btn btn-primary btn-block">进入工作台</button>
-            <p class="auth-switch">没有账号？<a href="#/register">注册新账号</a></p>
+            <button type="submit" class="btn btn-primary btn-block" data-i18n="auth.login_submit">进入工作台</button>
+            <p class="auth-switch">
+              <span data-i18n="auth.no_account">没有账号？</span><a href="#/register" data-i18n="auth.register_link">注册新账号</a>
+            </p>
           </form>
           <form id="form-register" class="auth-form hidden">
             <label class="field-label"
-              >邮箱
+              ><span data-i18n="auth.email">邮箱</span>
               <input type="email" id="register-email" required autocomplete="email" placeholder="name@example.com" />
             </label>
             <label class="field-label"
-              >密码（至少 6 位）
-              <input type="password" id="register-password" required minlength="6" autocomplete="new-password" placeholder="设置登录密码" />
+              ><span data-i18n="auth.password_min">密码（至少 6 位）</span>
+              <input
+                type="password"
+                id="register-password"
+                required
+                minlength="6"
+                autocomplete="new-password"
+                data-i18n-placeholder="auth.password_set_ph"
+                placeholder="设置登录密码"
+              />
             </label>
             <label class="field-label"
-              >确认密码
-              <input type="password" id="register-password2" required minlength="6" autocomplete="new-password" placeholder="再次输入密码" />
+              ><span data-i18n="auth.password_confirm">确认密码</span>
+              <input
+                type="password"
+                id="register-password2"
+                required
+                minlength="6"
+                autocomplete="new-password"
+                data-i18n-placeholder="auth.password_again_ph"
+                placeholder="再次输入密码"
+              />
             </label>
             <p id="register-err" class="status err hidden"></p>
-            <button type="submit" class="btn btn-primary btn-block">创建顾问档案</button>
-            <p class="auth-switch">已有账号？<a href="#/login">返回登录</a></p>
+            <button type="submit" class="btn btn-primary btn-block" data-i18n="auth.register_submit">创建顾问档案</button>
+            <p class="auth-switch">
+              <span data-i18n="auth.has_account">已有账号？</span><a href="#/login" data-i18n="auth.login_link">返回登录</a>
+            </p>
           </form>
         </div>
       </div>
@@ -80,47 +110,65 @@
             <div class="brand-lockup">
               <span class="brand-mark" aria-hidden="true"></span>
               <div>
-                <p class="brand-eyebrow">留学规划</p>
-                <p class="brand-name">高级留学咨询工作台</p>
+                <p class="brand-eyebrow" data-i18n="brand.eyebrow">留学规划</p>
+                <p class="brand-name" data-i18n="brand.name">高级留学咨询工作台</p>
               </div>
             </div>
             <div class="bar-row">
-              <nav class="nav nav-stepper" aria-label="建档步骤">
+              <nav class="nav nav-stepper" data-i18n-aria="nav.aria" aria-label="建档步骤">
                 <a href="#/chat" class="nav-link nav-step" data-panel="chat">
                   <span class="step-glyph icon-chat" aria-hidden="true"></span>
                   <span class="step-index">1</span>
-                  <span class="step-copy"><strong>和我聊聊</strong><small>建立基础档案</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.chat.strong">和我聊聊</strong
+                    ><small data-i18n-small="nav.chat.small">建立基础档案</small></span
+                  >
                 </a>
                 <a href="#/profile" class="nav-link nav-step" data-panel="profile">
                   <span class="step-glyph icon-profile" aria-hidden="true"></span>
                   <span class="step-index">2</span>
-                  <span class="step-copy"><strong>核对档案</strong><small>确认关键信息</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.profile.strong">核对档案</strong
+                    ><small data-i18n-small="nav.profile.small">确认关键信息</small></span
+                  >
                 </a>
                 <a href="#/plan" class="nav-link nav-step" data-panel="plan">
                   <span class="step-glyph icon-plan" aria-hidden="true"></span>
                   <span class="step-index">3</span>
-                  <span class="step-copy"><strong>选校方案</strong><small>生成冲刺匹配保底</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.plan.strong">选校方案</strong
+                    ><small data-i18n-small="nav.plan.small">生成冲刺匹配保底</small></span
+                  >
                 </a>
                 <a href="#/report" class="nav-link nav-step" data-panel="report">
                   <span class="step-glyph icon-report" aria-hidden="true"></span>
                   <span class="step-index">4</span>
-                  <span class="step-copy"><strong>完整报告</strong><small>查看可回看的建议</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.report.strong">完整报告</strong
+                    ><small data-i18n-small="nav.report.small">查看可回看的建议</small></span
+                  >
                 </a>
                 <a href="#/history" class="nav-link nav-step" data-panel="history">
                   <span class="step-glyph icon-history" aria-hidden="true"></span>
                   <span class="step-index">5</span>
-                  <span class="step-copy"><strong>过往记录</strong><small>会话与交付物</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.history.strong">过往记录</strong
+                    ><small data-i18n-small="nav.history.small">会话与交付物</small></span
+                  >
                 </a>
                 <a href="#/intelligence" class="nav-link nav-step" data-panel="intelligence">
                   <span class="step-glyph icon-intel" aria-hidden="true"></span>
                   <span class="step-index">6</span>
-                  <span class="step-copy"><strong>情报库</strong><small>院校政策与检索</small></span>
+                  <span class="step-copy"
+                    ><strong data-i18n-strong="nav.intel.strong">情报库</strong
+                    ><small data-i18n-small="nav.intel.small">院校政策与检索</small></span
+                  >
                 </a>
               </nav>
               <a href="#/admin/intelligence" class="nav-link nav-link-admin-intel hidden" data-panel="admin-intelligence" id="nav-admin-intel">
-                <span class="inline-icon icon-intel" aria-hidden="true"></span>运营审核
+                <span class="inline-icon icon-intel" aria-hidden="true"></span><span data-i18n="nav.admin_intel">运营审核</span>
               </a>
-              <button type="button" id="btn-logout" class="btn btn-ghost btn-logout">退出顾问台</button>
+              <button type="button" id="btn-logout" class="btn btn-ghost btn-logout" data-i18n="nav.logout">退出顾问台</button>
             </div>
           </div>
         </header>
@@ -128,23 +176,27 @@
         <div class="layout">
           <main id="panel-chat" class="panel chat hidden">
             <div class="page-intro">
-              <h2 class="page-title"><span class="title-icon icon-chat" aria-hidden="true"></span>对话建档</h2>
-              <p class="page-lede">像与留学顾问沟通一样描述背景与目标，系统会循序追问并同步整理档案。</p>
+              <h2 class="page-title">
+                <span class="title-icon icon-chat" aria-hidden="true"></span><span data-i18n="chat.title">对话建档</span>
+              </h2>
+              <p class="page-lede" data-i18n="chat.lede">像与留学顾问沟通一样描述背景与目标，系统会循序追问并同步整理档案。</p>
               <div class="step-hint-row">
-                <span class="step-hint-text">建议下一步前往「核对档案」，确认关键信息后再进入方案阶段。</span>
-                <a class="btn btn-ghost btn-next-step" href="#/profile">下一步：核对档案</a>
+                <span class="step-hint-text" data-i18n="chat.hint">建议下一步前往「核对档案」，确认关键信息后再进入方案阶段。</span>
+                <a class="btn btn-ghost btn-next-step" href="#/profile" data-i18n="chat.next_profile">下一步：核对档案</a>
               </div>
               <ul class="page-tasks" aria-hidden="true">
                 <li>随时保存进度</li>
                 <li>待确认事实会在下方高亮</li>
               </ul>
               <div class="page-intro-actions">
-                <button type="button" id="btn-new-thread" class="btn btn-ghost btn-tiny">新开会话</button>
+                <button type="button" id="btn-new-thread" class="btn btn-ghost btn-tiny" data-i18n="chat.new_thread">新开会话</button>
               </div>
             </div>
             <div class="panel-surface panel-surface--chat">
               <div id="locale-picker" class="locale-picker hidden" role="dialog" aria-label="Choose session language">
-                <p class="locale-picker-lede">选择本会话语言 / Choose language for this session（选定后不可更改）</p>
+                <p class="locale-picker-lede" data-i18n="chat.locale_picker_lede">
+                  选择本会话语言 / Choose language for this session（选定后不可更改）
+                </p>
                 <div class="locale-picker-actions">
                   <button type="button" id="locale-pick-zh" class="btn btn-primary" data-locale="zh">中文</button>
                   <button type="button" id="locale-pick-en" class="btn btn-ghost" data-locale="en">English</button>
@@ -158,15 +210,23 @@
               <section id="confirm-strip" class="confirm-strip" aria-label="待确认事实"></section>
               <div id="messages" class="messages"></div>
               <form id="form" class="composer">
-                <textarea id="input" rows="3" placeholder="例：本科计算机，均分 82，想申香港 / 新加坡一年制授课型硕士…" required></textarea>
+                <textarea
+                  id="input"
+                  rows="3"
+                  data-i18n-placeholder="chat.input.placeholder"
+                  placeholder="例：本科计算机，均分 82，想申香港 / 新加坡一年制授课型硕士…"
+                  required
+                ></textarea>
                 <div id="chat-replace-draft" class="chat-replace-draft hidden" aria-live="polite">
-                  <p class="chat-replace-draft-copy">
-                    正在<strong>纠错上一条提问</strong>：提交后以当前输入框正文重新询问助手，并<strong>替换</strong>上一条助手回复。
+                  <p class="chat-replace-draft-copy" data-i18n="chat.replace_draft">
+                    正在纠错上一条提问：提交后以当前输入框正文重新询问助手，并替换上一条助手回复。
                   </p>
-                  <button type="button" id="cancel-replace-draft" class="btn btn-ghost btn-tiny">取消纠错</button>
+                  <button type="button" id="cancel-replace-draft" class="btn btn-ghost btn-tiny" data-i18n="chat.cancel_replace">
+                    取消纠错
+                  </button>
                 </div>
                 <div class="actions">
-                  <button type="submit" id="send" class="btn btn-primary">提交给顾问助手</button>
+                  <button type="submit" id="send" class="btn btn-primary" data-i18n="chat.send">提交给顾问助手</button>
                   <span id="status" class="status"></span>
                 </div>
               </form>
@@ -176,40 +236,53 @@
           <main id="panel-profile" class="panel profile hidden">
             <div class="page-intro page-intro--row">
               <div>
-                <h2 class="page-title"><span class="title-icon icon-profile" aria-hidden="true"></span>我的画像</h2>
-                <p class="page-lede">这里会汇总档案主线、信息缺口与确认状态，帮助你判断是否可以直接生成方案。</p>
+                <h2 class="page-title">
+                  <span class="title-icon icon-profile" aria-hidden="true"></span><span data-i18n="profile.title">我的画像</span>
+                </h2>
+                <p class="page-lede" data-i18n="profile.lede">
+                  这里会汇总档案主线、信息缺口与确认状态，帮助你判断是否可以直接生成方案。
+                </p>
                 <div class="step-hint-row">
-                  <a class="btn btn-ghost btn-prev-step" href="#/chat">上一步：继续建档</a>
-                  <a class="btn btn-ghost btn-next-step" href="#/plan">下一步：生成方案</a>
+                  <a class="btn btn-ghost btn-prev-step" href="#/chat" data-i18n="profile.prev">上一步：继续建档</a>
+                  <a class="btn btn-ghost btn-next-step" href="#/plan" data-i18n="profile.next">下一步：生成方案</a>
                 </div>
               </div>
-              <button type="button" id="refresh-profile" class="btn btn-secondary">更新档案视图</button>
+              <button type="button" id="refresh-profile" class="btn btn-secondary" data-i18n="profile.refresh">更新档案视图</button>
             </div>
             <p id="profile-updated" class="meta meta-line"></p>
             <div class="card-grid">
               <section class="card card--feature">
-                <h3 class="card-title"><span class="inline-icon icon-summary" aria-hidden="true"></span>摘要</h3>
+                <h3 class="card-title">
+                  <span class="inline-icon icon-summary" aria-hidden="true"></span><span data-i18n="profile.summary">摘要</span>
+                </h3>
                 <div id="profile-summary" class="profile-body">顾问正在整理中…</div>
               </section>
               <section class="card card--feature">
-                <h3 class="card-title"><span class="inline-icon icon-gap" aria-hidden="true"></span>待补充与影响</h3>
+                <h3 class="card-title">
+                  <span class="inline-icon icon-gap" aria-hidden="true"></span><span data-i18n="profile.gaps">待补充与影响</span>
+                </h3>
                 <ul id="profile-gaps" class="gaps"></ul>
               </section>
               <section class="card card--wide">
-                <h3 class="card-title"><span class="inline-icon icon-fact" aria-hidden="true"></span>分区档案（可信状态）</h3>
+                <h3 class="card-title">
+                  <span class="inline-icon icon-fact" aria-hidden="true"></span
+                  ><span data-i18n="profile.sections">分区档案（可信状态）</span>
+                </h3>
                 <div id="profile-sections" class="profile-sections" aria-label="申请档案分区"></div>
               </section>
               <section class="card card--wide card--muted">
-                <h3 class="card-title"><span class="inline-icon icon-ready" aria-hidden="true"></span>能否生成方案</h3>
+                <h3 class="card-title">
+                  <span class="inline-icon icon-ready" aria-hidden="true"></span
+                  ><span data-i18n="profile.readiness">能否生成方案</span>
+                </h3>
                 <div id="profile-readiness" class="profile-body"></div>
               </section>
               <section class="card card--wide profile-danger-zone" aria-labelledby="profile-danger-title">
-                <h3 id="profile-danger-title" class="card-title">危险操作</h3>
-                <p class="profile-danger-copy">
-                  以下操作会<strong>不可恢复</strong>地清空：画像记忆与快照、对话摘要检索块、已生成的<strong>顾问方案</strong>与<strong>交付报告</strong>，以及<strong>全部咨询会话与消息</strong>。登录邮箱与密码保留；若后端为本地
-                  JSON 存储，请先自行备份数据库文件。
+                <h3 id="profile-danger-title" class="card-title" data-i18n="profile.danger">危险操作</h3>
+                <p class="profile-danger-copy" data-i18n="profile.danger_copy">
+                  以下操作会不可恢复地清空：画像记忆与快照、对话摘要检索块、已生成的顾问方案与交付报告，以及全部咨询会话与消息。登录邮箱与密码保留。
                 </p>
-                <button type="button" id="btn-profile-full-reset" class="btn btn-danger">
+                <button type="button" id="btn-profile-full-reset" class="btn btn-danger" data-i18n="profile.danger_btn">
                   清空建档并删除全部咨询记录…
                 </button>
               </section>
@@ -219,51 +292,59 @@
           <main id="panel-plan" class="panel plan hidden">
             <div class="page-intro page-intro--row">
               <div>
-                <h2 class="page-title"><span class="title-icon icon-plan" aria-hidden="true"></span>留学方案</h2>
-                <p class="page-lede">档案就绪后可生成冲刺 / 匹配 / 保底三档建议，并附风险提示与执行路径。</p>
+                <h2 class="page-title">
+                  <span class="title-icon icon-plan" aria-hidden="true"></span><span data-i18n="plan.title">留学方案</span>
+                </h2>
+                <p class="page-lede" data-i18n="plan.lede">档案就绪后可生成冲刺 / 匹配 / 保底三档建议，并附风险提示与执行路径。</p>
                 <div class="step-hint-row">
-                  <a class="btn btn-ghost btn-prev-step" href="#/profile">上一步：核对档案</a>
-                  <a class="btn btn-ghost btn-next-step" href="#/report">下一步：查看报告</a>
+                  <a class="btn btn-ghost btn-prev-step" href="#/profile" data-i18n="plan.prev">上一步：核对档案</a>
+                  <a class="btn btn-ghost btn-next-step" href="#/report" data-i18n="plan.next">下一步：查看报告</a>
                 </div>
               </div>
               <div class="plan-actions">
-                <button type="button" id="btn-generate-plan" class="btn btn-primary">生成顾问方案</button>
-                <button type="button" id="btn-generate-report" class="btn btn-secondary">生成交付报告</button>
-                <button type="button" id="refresh-plan" class="btn btn-ghost">更新方案视图</button>
+                <button type="button" id="btn-generate-plan" class="btn btn-primary" data-i18n="plan.generate">生成顾问方案</button>
+                <button type="button" id="btn-generate-report" class="btn btn-secondary" data-i18n="plan.generate_report">
+                  生成交付报告
+                </button>
+                <button type="button" id="refresh-plan" class="btn btn-ghost" data-i18n="plan.refresh">更新方案视图</button>
               </div>
             </div>
             <p id="plan-status" class="meta meta-line"></p>
             <section id="plan-report-gate" class="plan-report-gate hidden" aria-live="polite"></section>
             <section id="plan-error" class="card card--alert plan-error hidden" aria-live="polite"></section>
             <section id="plan-content" class="plan-stack plan-content">
-              <p class="placeholder">生成后将展示三档院校建议、关键风险提示与分步执行建议。</p>
+              <p class="placeholder" data-i18n="plan.placeholder">生成后将展示三档院校建议、关键风险提示与分步执行建议。</p>
             </section>
           </main>
 
           <main id="panel-report" class="panel report hidden">
             <div class="page-intro page-intro--row">
               <div>
-                <h2 class="page-title"><span class="title-icon icon-report" aria-hidden="true"></span>留学规划报告</h2>
-                <p class="page-lede">基于档案与方案生成可交付报告，支持在线阅读、回溯与后续迭代。</p>
+                <h2 class="page-title">
+                  <span class="title-icon icon-report" aria-hidden="true"></span><span data-i18n="report.title">留学规划报告</span>
+                </h2>
+                <p class="page-lede" data-i18n="report.lede">基于档案与方案生成可交付报告，支持在线阅读、回溯与后续迭代。</p>
                 <div class="step-hint-row">
-                  <a class="btn btn-ghost btn-prev-step" href="#/plan">上一步：返回方案</a>
-                  <a class="btn btn-ghost btn-next-step" href="#/history">查看历史记录</a>
+                  <a class="btn btn-ghost btn-prev-step" href="#/plan" data-i18n="report.prev">上一步：返回方案</a>
+                  <a class="btn btn-ghost btn-next-step" href="#/history" data-i18n="report.next">查看历史记录</a>
                 </div>
               </div>
               <div class="plan-actions plan-actions--wrap">
-                <button type="button" id="refresh-report" class="btn btn-secondary">更新报告内容</button>
-                <button type="button" id="btn-report-pdf" class="btn btn-secondary" title="需要本机或服务器已安装 Chromium">下载 PDF</button>
-                <button type="button" id="btn-report-share-on" class="btn btn-secondary">开启分享</button>
-                <button type="button" id="btn-report-share-copy" class="btn btn-ghost hidden">复制分享链接</button>
-                <button type="button" id="btn-report-share-open" class="btn btn-ghost hidden">打开分享页</button>
-                <button type="button" id="btn-report-share-off" class="btn btn-ghost hidden">关闭分享</button>
+                <button type="button" id="refresh-report" class="btn btn-secondary" data-i18n="report.refresh">更新报告内容</button>
+                <button type="button" id="btn-report-pdf" class="btn btn-secondary" title="需要本机或服务器已安装 Chromium" data-i18n="report.pdf">
+                  下载 PDF
+                </button>
+                <button type="button" id="btn-report-share-on" class="btn btn-secondary" data-i18n="report.share_on">开启分享</button>
+                <button type="button" id="btn-report-share-copy" class="btn btn-ghost hidden" data-i18n="report.share_copy">复制分享链接</button>
+                <button type="button" id="btn-report-share-open" class="btn btn-ghost hidden" data-i18n="report.share_open">打开分享页</button>
+                <button type="button" id="btn-report-share-off" class="btn btn-ghost hidden" data-i18n="report.share_off">关闭分享</button>
               </div>
             </div>
             <p id="report-status" class="meta meta-line"></p>
             <section id="report-error" class="card card--alert plan-error hidden" aria-live="polite"></section>
             <section id="report-meta" class="report-meta hidden"></section>
             <div id="report-content" class="report-content report-sheet">
-              <p class="placeholder">顾问正在准备报告内容…</p>
+              <p class="placeholder" data-i18n="report.placeholder">顾问正在准备报告内容…</p>
             </div>
           </main>
 
@@ -271,47 +352,58 @@
             <div id="intel-dashboard-view">
               <div class="page-intro page-intro--row">
                 <div>
-                  <h2 class="page-title"><span class="title-icon icon-intel" aria-hidden="true"></span>香港留学情报库</h2>
-                  <p class="page-lede">按院校浏览已上线政策与截止信息，支持关键词检索；所有卡片均附来源链接。</p>
+                  <h2 class="page-title">
+                    <span class="title-icon icon-intel" aria-hidden="true"></span
+                    ><span data-i18n="intel.title">香港留学情报库</span>
+                  </h2>
+                  <p class="page-lede" data-i18n="intel.lede">
+                    按院校浏览已上线政策与截止信息，支持关键词检索；所有卡片均附来源链接。
+                  </p>
                 </div>
-                <button type="button" id="refresh-intelligence" class="btn btn-secondary">刷新列表</button>
+                <button type="button" id="refresh-intelligence" class="btn btn-secondary" data-i18n="intel.refresh">刷新列表</button>
               </div>
               <form id="intel-search-form" class="intel-search-bar">
-                <input type="search" id="intel-search-q" placeholder="搜索院校、专业、政策关键词…" autocomplete="off" />
+                <input
+                  type="search"
+                  id="intel-search-q"
+                  data-i18n-placeholder="intel.search_ph"
+                  placeholder="搜索院校、专业、政策关键词…"
+                  autocomplete="off"
+                />
                 <select id="intel-search-info-type" aria-label="信息类型">
-                  <option value="">全部类型</option>
-                  <option value="policy">政策</option>
-                  <option value="deadline">截止日期</option>
-                  <option value="tuition">学费</option>
-                  <option value="admission">录取</option>
-                  <option value="program">专业</option>
+                  <option value="" data-i18n="intel.all_types">全部类型</option>
+                  <option value="policy" data-i18n="intel.type_policy">政策</option>
+                  <option value="deadline" data-i18n="intel.type_deadline">截止日期</option>
+                  <option value="tuition" data-i18n="intel.type_tuition">学费</option>
+                  <option value="admission" data-i18n="intel.type_admission">录取</option>
+                  <option value="program" data-i18n="intel.type_program">专业</option>
                 </select>
-                <button type="submit" class="btn btn-primary">搜索</button>
+                <button type="submit" class="btn btn-primary" data-i18n="intel.search">搜索</button>
               </form>
               <p id="intel-status" class="meta meta-line"></p>
               <section class="intel-section">
-                <h3 class="intel-section-title">院校入口</h3>
+                <h3 class="intel-section-title" data-i18n="intel.schools">院校入口</h3>
                 <div id="intel-school-grid" class="intel-school-grid"></div>
               </section>
               <section class="intel-section">
-                <h3 class="intel-section-title">检索结果</h3>
+                <h3 class="intel-section-title" data-i18n="intel.results">检索结果</h3>
                 <div id="intel-search-results" class="intel-item-list"></div>
               </section>
             </div>
             <div id="intel-school-view" class="hidden">
               <div class="page-intro page-intro--row">
                 <div>
-                  <a href="#/intelligence" class="btn btn-ghost btn-tiny">← 返回情报库</a>
-                  <h2 class="page-title" id="intel-school-title">院校详情</h2>
+                  <a href="#/intelligence" class="btn btn-ghost btn-tiny" data-i18n="intel.back">← 返回情报库</a>
+                  <h2 class="page-title" id="intel-school-title" data-i18n="intel.school_detail">院校详情</h2>
                   <p class="page-lede" id="intel-school-lede"></p>
                 </div>
               </div>
               <section class="intel-section">
-                <h3 class="intel-section-title">最新情报</h3>
+                <h3 class="intel-section-title" data-i18n="intel.latest">最新情报</h3>
                 <div id="intel-school-items" class="intel-item-list"></div>
               </section>
               <section class="intel-section">
-                <h3 class="intel-section-title">变化时间线</h3>
+                <h3 class="intel-section-title" data-i18n="intel.timeline">变化时间线</h3>
                 <ul id="intel-school-timeline" class="intel-timeline"></ul>
               </section>
             </div>
@@ -325,6 +417,7 @@
               </div>
               <div class="page-intro-actions">
                 <button type="button" id="admin-intel-preflight" class="btn btn-secondary">检测链接</button>
+                <button type="button" id="admin-intel-discover" class="btn btn-secondary">发现同域链接</button>
                 <button type="button" id="admin-intel-collect" class="btn btn-primary">安全采集</button>
                 <button type="button" id="refresh-admin-intel" class="btn btn-ghost">刷新队列</button>
               </div>
@@ -335,6 +428,11 @@
               <div id="admin-intel-preflight-summary" class="profile-body">
                 <p class="placeholder">尚未执行检测。请先点击「检测链接」，再执行「安全采集」。</p>
               </div>
+            </section>
+            <section class="card card--wide">
+              <h3 class="card-title">发现候选（先批 URL，再爬）</h3>
+              <p class="meta">同域新链接仅进入候选池；批准后才会进入下一轮选题可爬名单。</p>
+              <div id="admin-intel-candidates" class="admin-intel-queue"></div>
             </section>
             <div class="card-grid">
               <section class="card card--wide">
@@ -355,14 +453,16 @@
           <main id="panel-history" class="panel history hidden">
             <div class="page-intro page-intro--row">
               <div>
-                <h2 class="page-title"><span class="title-icon icon-history" aria-hidden="true"></span>历史记录</h2>
-                <p class="page-lede">可快速回看会话、档案版本、方案与报告，并从任一节点继续推进。</p>
+                <h2 class="page-title">
+                  <span class="title-icon icon-history" aria-hidden="true"></span><span data-i18n="history.title">历史记录</span>
+                </h2>
+                <p class="page-lede" data-i18n="history.lede">可快速回看会话、档案版本、方案与报告，并从任一节点继续推进。</p>
               </div>
-              <button type="button" id="refresh-history" class="btn btn-secondary">更新记录列表</button>
+              <button type="button" id="refresh-history" class="btn btn-secondary" data-i18n="history.refresh">更新记录列表</button>
             </div>
             <p id="history-status" class="meta meta-line"></p>
             <div id="history-content" class="history-content history-board">
-              <p class="placeholder">正在整理你的历史记录…</p>
+              <p class="placeholder" data-i18n="history.placeholder">正在整理你的历史记录…</p>
             </div>
           </main>
         </div>

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { setUiLocale } from "./i18n/index.js";
 import {
   formatFactLabel,
   formatFlowState,
@@ -18,29 +19,50 @@ import {
 } from "./copy.js";
 
 test("formatFlowState maps known states into plain Chinese", () => {
+  setUiLocale("zh");
   assert.equal(formatFlowState("gap_probing"), "顾问正在补齐关键档案信息");
   assert.equal(formatFlowState("fact_confirmation"), "请确认档案中的关键事实");
   assert.equal(formatFlowState("profile_ready"), "档案已就绪，可进入方案阶段");
 });
 
+test("formatFlowState is English when UI locale is en", () => {
+  setUiLocale("en");
+  assert.match(formatFlowState("explore"), /background|goals/i);
+  assert.match(formatFlowState("gap_probing"), /gap|profile/i);
+  setUiLocale("zh");
+});
+
 test("formatFlowState has safe fallback for unknown values", () => {
+  setUiLocale("zh");
   assert.equal(formatFlowState("unknown_state"), "顾问处理中");
+  setUiLocale("en");
+  assert.equal(formatFlowState("unknown_state"), "Advisor working");
+  setUiLocale("zh");
 });
 
 test("formatFactLabel maps known keys and formats unknown keys", () => {
+  setUiLocale("zh");
   assert.equal(formatFactLabel("target_region"), "目标地区");
   assert.equal(formatFactLabel("first-generation"), "First Generation");
 });
 
 test("formatMissingDimensions converts dimension ids into readable labels", () => {
+  setUiLocale("zh");
   assert.deepEqual(formatMissingDimensions(["goals", "riskPreference", "other_dim"]), [
     "申请目标",
     "风险偏好",
     "Other Dim",
   ]);
+  setUiLocale("en");
+  assert.deepEqual(formatMissingDimensions(["goals", "riskPreference"]), [
+    "Application goals",
+    "Risk preference",
+  ]);
+  setUiLocale("zh");
 });
 
 test("formatReadinessCopy returns friendly summary text", () => {
+  setUiLocale("zh");
   assert.deepEqual(formatReadinessCopy({ ready: true, missingRequired: [] }), {
     title: "方案条件已满足",
     hint: "核心信息已齐全，建议立即生成顾问方案并查看梯度建议。",
@@ -53,18 +75,39 @@ test("formatReadinessCopy returns friendly summary text", () => {
   });
 });
 
+test("formatReadinessCopy is English when UI locale is en", () => {
+  setUiLocale("en");
+  const ready = formatReadinessCopy({ ready: true, missingRequired: [] });
+  assert.match(ready.title, /ready|plan/i);
+  const gap = formatReadinessCopy({ ready: false, missingRequired: ["goals"] });
+  assert.match(gap.title, /gap|fill/i);
+  assert.deepEqual(gap.missing, ["Application goals"]);
+  setUiLocale("zh");
+});
+
 test("formatThreadMeta hides internal state wording", () => {
+  setUiLocale("zh");
   assert.equal(
     formatThreadMeta({ id: "abcd1234efgh", orchestration_state: "explore" }),
     "咨询会话 abcd1234… · 语言：中文 · 当前阶段：顾问正在梳理你的背景与目标"
   );
 });
 
-test("formatThreadMeta shows English when locale=en", () => {
+test("formatThreadMeta shows English language name when thread locale=en under zh UI", () => {
+  setUiLocale("zh");
   assert.equal(
     formatThreadMeta({ id: "abcd1234efgh", orchestration_state: "explore", locale: "en" }),
     "咨询会话 abcd1234… · 语言：English · 当前阶段：顾问正在梳理你的背景与目标"
   );
+});
+
+test("formatThreadMeta uses English shell when UI locale is en", () => {
+  setUiLocale("en");
+  const s = formatThreadMeta({ id: "abcd1234efgh", orchestration_state: "explore", locale: "en" });
+  assert.match(s, /Session/i);
+  assert.match(s, /Language/i);
+  assert.match(s, /English/i);
+  setUiLocale("zh");
 });
 
 test("V1-P2 truth status labels and tag classes", () => {
@@ -79,11 +122,13 @@ test("V1-P2 source hints and plan citation placeholder", () => {
 });
 
 test("V1-P2 timeline urgency lines", () => {
+  setUiLocale("zh");
   assert.ok(formatTimelineUrgencyLine("tight").includes("偏紧"));
   assert.equal(formatTimelineUrgencyLine("unknown"), "");
 });
 
 test("CQ-B timelineUrgencyMeta maps levels to bar classes", () => {
+  setUiLocale("zh");
   const tight = timelineUrgencyMeta("tight");
   assert.ok(tight);
   assert.equal(tight.barClass, "urgency-bar--tight");

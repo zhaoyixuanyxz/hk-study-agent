@@ -1,3 +1,5 @@
+import { t } from "../i18n/index.js";
+
 const LS_PREFIX = "cq_action_plan_";
 
 /**
@@ -53,7 +55,7 @@ export function parseRiskFromActionText(text) {
     return { level: "low", label: s.replace(/^【[^】]+】\s*/, "").slice(0, 80) };
   }
   if (/contingency|最坏情况|全拒/i.test(s)) {
-    return { level: "high", label: "需准备备选方案（全拒 / gap year）" };
+    return { level: "high", label: t("report.contingency") };
   }
   return null;
 }
@@ -97,35 +99,35 @@ export function extractRiskItemsFromReport(root) {
     const body = ch5.textContent || "";
     if (/风险|预算|时间线/.test(body) && !seen.has("medium:ch5")) {
       seen.add("medium:ch5");
-      items.push({ level: "medium", label: "关注预算波动、认证周期与轮次截止（见第 5 章）" });
+      items.push({ level: "medium", label: t("report.ch5_risk") });
     }
   }
 
   return items.slice(0, 8);
 }
 
-const RISK_LABELS = { high: "高", medium: "中", low: "低" };
-
-/**
- * @param {{ level: string, label: string }[]} riskItems
- */
 export function renderRiskDashboardHtml(riskItems) {
   const items = Array.isArray(riskItems) ? riskItems : [];
+  const RISK_LABELS = {
+    high: t("report.risk_high"),
+    medium: t("report.risk_medium"),
+    low: t("report.risk_low"),
+  };
   if (!items.length) {
     return `<section class="report-risk-dashboard report-risk-dashboard--empty" id="report-risk-dashboard">
-      <h2 class="report-risk-title">风险仪表盘</h2>
-      <p class="placeholder">暂无结构化风险标签；请查看行动计划与第 5 章时间线。</p>
+      <h2 class="report-risk-title">${t("report.risk_dash")}</h2>
+      <p class="placeholder">${t("report.risk_empty")}</p>
     </section>`;
   }
   const cards = items
     .map((r) => {
-      const lvl = RISK_LABELS[r.level] || "中";
+      const lvl = RISK_LABELS[r.level] || t("report.risk_medium");
       return `<div class="risk-card risk-card--${r.level}"><span class="risk-level">${lvl}</span><span class="risk-label">${escapeHtmlText(r.label)}</span></div>`;
     })
     .join("");
   return `<section class="report-risk-dashboard" id="report-risk-dashboard">
-    <h2 class="report-risk-title">风险仪表盘</h2>
-    <p class="report-risk-lede">从 30/60/90 天行动计划与策略章节提取的关注点（非录取承诺）。</p>
+    <h2 class="report-risk-title">${t("report.risk_dash")}</h2>
+    <p class="report-risk-lede">${t("report.risk_dash_lede")}</p>
     <div class="risk-dashboard-grid">${cards}</div>
   </section>`;
 }
@@ -208,7 +210,7 @@ export function enhanceReportCitations(container, citations) {
     const link = document.createElement("a");
     link.className = "cite-intel-link";
     link.href = `#/intelligence?q=${encodeURIComponent(meta.itemId)}`;
-    link.textContent = " · 查看情报";
+    link.textContent = t("report.view_intel");
     link.dataset.intelId = meta.itemId;
     a.parentElement?.appendChild(link);
   }

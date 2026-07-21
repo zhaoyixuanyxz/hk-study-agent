@@ -27,13 +27,14 @@ import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
 import { enhanceReportPage, parseReportVisualsFromHtml } from "../lib/action-plan-ui.js";
 import { destroyReportCharts, injectReportVisuals } from "../lib/report-charts.js";
+import { localizeReportShellHtml } from "../lib/report-localize.js";
 import { navigateTo, parseHash } from "../shell/navigation.js";
 import {
   currentReportDetail,
   lastPlanReportReadiness,
   setCurrentReportDetail,
 } from "../app-state.js";
-
+import { getUiLocale, t } from "../i18n/index.js";
 export function hideReportError() {
   const box = el("report-error");
   if (box) {
@@ -64,12 +65,12 @@ export function renderReport(detail) {
   if (!container) return;
   if (detail && detail.html) {
     destroyReportCharts();
-    container.innerHTML = detail.html;
+    container.innerHTML = localizeReportShellHtml(detail.html, getUiLocale());
     enhanceReportPage(container, detail);
     const visuals = detail.visuals || parseReportVisualsFromHtml(container);
     void injectReportVisuals(container, visuals);
   } else {
-    container.innerHTML = `<p class="placeholder">报告内容为空。</p>`;
+    container.innerHTML = `<p class="placeholder">${t("report.placeholder")}</p>`;
   }
   if (meta) {
     if (!detail || !detail.report_id) {
@@ -80,11 +81,11 @@ export function renderReport(detail) {
       const cite = detail.citation_count ?? "—";
       const share = shareStatusLabel(detail.share_status);
       const views = detail.share_view_count ?? 0;
-      meta.innerHTML = `<span>报告编号：<code>${escapeHtml(shortId(detail.report_id))}</code></span> · <span>生成时间：${escapeHtml(
+      meta.innerHTML = `<span>${t("report.meta_id")}<code>${escapeHtml(shortId(detail.report_id))}</code></span> · <span>${t("report.meta_time")}${escapeHtml(
         prettyTime(detail.created_at)
-      )}</span> · <span>字数（估算）：${escapeHtml(String(detail.word_count ?? "—"))}</span> · <span>引用条目：${escapeHtml(
+      )}</span> · <span>${t("report.meta_words")}${escapeHtml(String(detail.word_count ?? "—"))}</span> · <span>${t("report.meta_cites")}${escapeHtml(
         String(cite)
-      )}</span> · <span>分享：${escapeHtml(share)}</span> · <span>分享页访问：${escapeHtml(String(views))}</span>`;
+      )}</span> · <span>${t("report.meta_share")}${escapeHtml(share)}</span> · <span>${t("report.meta_views")}${escapeHtml(String(views))}</span>`;
     }
   }
   setupReportDeliveryUi();

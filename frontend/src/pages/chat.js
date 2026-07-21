@@ -12,6 +12,7 @@ import {
   truthStatusTagClass,
 } from "../copy.js";
 import { api, LS_THREAD, LS_TOKEN, LS_PREFERRED_LOCALE } from "../api/client.js";
+import { applyUiLocale, resolveUiLocaleFromThread, t } from "../i18n/index.js";
 import { el, setStatus, prettyTime, shortId } from "../lib/dom.js";
 import {
   composerReplacementUserMessageId,
@@ -86,14 +87,11 @@ export function renderMessages(container, items) {
   container.scrollTop = container.scrollHeight;
 }
 
-const DIM_LABEL_CHAT = {
-  academic: "学术背景",
-  language: "语言与标化",
-  goals: "目标方向",
-  budget: "预算",
-  timeline: "时间线",
-  riskPreference: "风险偏好",
-};
+function dimLabelChat(key) {
+  const catalogKey = `dim.${key}`;
+  const labeled = t(catalogKey);
+  return labeled !== catalogKey ? labeled : key;
+}
 
 export function latestAssistantMeta(messages) {
   if (!Array.isArray(messages)) return null;
@@ -145,10 +143,10 @@ export function renderChatAdvisoryPanels(meta) {
   if (pp && pp.dimensions && typeof pp.dimensions === "object") {
     const h = document.createElement("div");
     h.className = "chat-progress-head";
-    h.textContent = `建档进度 · 总览约 ${pp.summary_pct ?? 0}%`;
+    h.textContent = t("chat.progress_head", { pct: pp.summary_pct ?? 0 });
     progEl.appendChild(h);
     for (const [k, v] of Object.entries(pp.dimensions)) {
-      const lab = DIM_LABEL_CHAT[k] || k;
+      const lab = dimLabelChat(k);
       const complete = typeof v.complete === "number" ? v.complete : 0;
       const pct = Math.round(complete * 100);
       const wrap = document.createElement("div");
@@ -186,7 +184,7 @@ export function renderChatAdvisoryPanels(meta) {
   if (items.length) {
     const gh = document.createElement("div");
     gh.className = "chat-gap-head";
-    gh.textContent = "当前关键缺口";
+    gh.textContent = t("chat.gaps_head");
     gapEl.appendChild(gh);
     for (const it of items) {
       const card = document.createElement("div");
@@ -347,8 +345,9 @@ export function hideLocalePicker() {
 
 async function onLocalePicked(locale) {
   hideLocalePicker();
-  const t = await createThreadWithLocale(locale);
-  await loadThread(t.thread_id);
+  applyUiLocale(locale);
+  const created = await createThreadWithLocale(locale);
+  await loadThread(created.thread_id);
 }
 
 document.getElementById("locale-pick-zh")?.addEventListener("click", () => {
@@ -359,19 +358,17 @@ document.getElementById("locale-pick-en")?.addEventListener("click", () => {
 });
 
 document.getElementById("btn-new-thread")?.addEventListener("click", () => {
-  if (
-    !window.confirm(
-      "新开会话将锁定新的语言选择；当前会话仍可在历史中打开。继续？",
-    )
-  ) {
+  if (!window.confirm(t("chat.new_thread_confirm"))) {
     return;
   }
   localStorage.removeItem(LS_THREAD);
   showLocalePicker();
+  clearChatAdvisoryPanels();
   const messages = document.getElementById("messages");
   if (messages) messages.innerHTML = "";
   const meta = document.getElementById("meta");
-  if (meta) meta.textContent = "请选择新会话语言";
+  if (meta) meta.textContent = t("chat.pick_locale_meta");
+  applyUiLocale(readPreferredLocale());
 });
 
 export async function refreshReviewerNav() {
@@ -399,6 +396,7 @@ export async function loadThread(threadId) {
   const metaEl = el("meta");
   const container = el("messages");
   const apply = (thread) => {
+    applyUiLocale(resolveUiLocaleFromThread(thread));
     metaEl.textContent = formatThreadMeta(thread);
     const msgs = thread.messages || [];
     renderMessages(container, msgs);

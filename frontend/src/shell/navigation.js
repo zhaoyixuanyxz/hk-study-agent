@@ -1,6 +1,7 @@
-import { api, LS_TOKEN, clearStoredSession } from "../api/client.js";
+import { api, LS_TOKEN, clearStoredSession, LS_PREFERRED_LOCALE } from "../api/client.js";
 import { el } from "../lib/dom.js";
 import { resetComposerReplaceDraftQuiet } from "../pages/chat.js";
+import { applyUiLocale, normalizeUiLocale, t } from "../i18n/index.js";
 
 export function parseHash() {
   const raw = (location.hash || "").replace(/^#/, "");
@@ -28,20 +29,34 @@ export function showAuth(which) {
   el("view-app").classList.add("hidden");
   el("form-login").classList.toggle("hidden", which !== "login");
   el("form-register").classList.toggle("hidden", which !== "register");
+  applyUiLocale(normalizeUiLocale(localStorage.getItem(LS_PREFERRED_LOCALE)));
   const title = el("auth-card-title");
   const sub = el("auth-card-sub");
   if (which === "register") {
-    if (title) title.textContent = "创建顾问档案";
-    if (sub) sub.textContent = "填写邮箱与密码，立即开启你的咨询工作台";
+    if (title) {
+      title.setAttribute("data-i18n", "auth.register_title");
+      title.textContent = t("auth.register_title");
+    }
+    if (sub) {
+      sub.setAttribute("data-i18n", "auth.register_sub");
+      sub.textContent = t("auth.register_sub");
+    }
   } else {
-    if (title) title.textContent = "欢迎回到顾问席位";
-    if (sub) sub.textContent = "登录后继续推进你的申请档案与咨询建议";
+    if (title) {
+      title.setAttribute("data-i18n", "auth.login_title");
+      title.textContent = t("auth.login_title");
+    }
+    if (sub) {
+      sub.setAttribute("data-i18n", "auth.login_sub");
+      sub.textContent = t("auth.login_sub");
+    }
   }
 }
 
 export function showAppShell() {
   el("view-auth").classList.add("hidden");
   el("view-app").classList.remove("hidden");
+  applyUiLocale(normalizeUiLocale(localStorage.getItem(LS_PREFERRED_LOCALE)));
 }
 
 /**

@@ -1,16 +1,19 @@
 /**
  * Report 页可视化：风险 2×2 矩阵 + 预算 band（V3-VIS）
  */
+import { t } from "../i18n/index.js";
 
 /** @type {import('chart.js').Chart | null} */
 let budgetChart = null;
 
-const QUADRANT_META = [
-  { key: "high_high", title: "高影响 · 高可能", className: "risk-q--hh" },
-  { key: "high_low", title: "高影响 · 低可能", className: "risk-q--hl" },
-  { key: "low_high", title: "低影响 · 高可能", className: "risk-q--lh" },
-  { key: "low_low", title: "低影响 · 低可能", className: "risk-q--ll" },
-];
+function quadrantMeta() {
+  return [
+    { key: "high_high", title: t("report.q_hh"), className: "risk-q--hh" },
+    { key: "high_low", title: t("report.q_hl"), className: "risk-q--hl" },
+    { key: "low_high", title: t("report.q_lh"), className: "risk-q--lh" },
+    { key: "low_low", title: t("report.q_ll"), className: "risk-q--ll" },
+  ];
+}
 
 /**
  * @param {unknown} visuals
@@ -28,19 +31,21 @@ export function hasReportVisuals(visuals) {
 export function renderRiskMatrixHtml(visuals) {
   const q = visuals?.riskMatrix?.quadrants;
   if (!q || typeof q !== "object") return "";
-  const cells = QUADRANT_META.map((meta) => {
-    const items = Array.isArray(q[meta.key]) ? q[meta.key] : [];
-    const lis = items.length
-      ? items.map((t) => `<li>${escapeHtml(String(t))}</li>`).join("")
-      : `<li class="muted">—</li>`;
-    return `<div class="risk-matrix-cell ${meta.className}">
+  const cells = quadrantMeta()
+    .map((meta) => {
+      const items = Array.isArray(q[meta.key]) ? q[meta.key] : [];
+      const lis = items.length
+        ? items.map((txt) => `<li>${escapeHtml(String(txt))}</li>`).join("")
+        : `<li class="muted">—</li>`;
+      return `<div class="risk-matrix-cell ${meta.className}">
       <h4>${escapeHtml(meta.title)}</h4>
       <ul>${lis}</ul>
     </div>`;
-  }).join("");
+    })
+    .join("");
   return `<section class="report-visuals-block report-risk-matrix-block" id="report-risk-matrix">
-    <h3>风险矩阵（2×2）</h3>
-    <p class="report-visuals-lede">影响与可能性的组合视图，非录取概率。</p>
+    <h3>${t("report.risk_matrix")}</h3>
+    <p class="report-visuals-lede">${t("report.risk_matrix_lede")}</p>
     <div class="risk-matrix-grid">${cells}</div>
   </section>`;
 }
@@ -67,15 +72,15 @@ export function buildBudgetChartConfig(visuals) {
     data: {
       labels,
       datasets: [
-        { label: "下限 (HKD)", data: mins, backgroundColor: "rgba(148, 163, 184, 0.5)", stack: "stack0" },
-        { label: "区间跨度", data: spans, backgroundColor: "rgba(59, 130, 246, 0.65)", stack: "stack0" },
+        { label: t("report.budget_floor"), data: mins, backgroundColor: "rgba(148, 163, 184, 0.5)", stack: "stack0" },
+        { label: t("report.budget_span"), data: spans, backgroundColor: "rgba(59, 130, 246, 0.65)", stack: "stack0" },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        title: { display: true, text: "预算区间（港币）", font: { size: 13 } },
+        title: { display: true, text: t("report.budget_title"), font: { size: 13 } },
       },
       scales: {
         x: { stacked: true },
@@ -125,7 +130,7 @@ export function renderReportChartsHostHtml() {
   return `<section class="report-visuals-host" id="report-visuals-host">
     <div id="report-risk-matrix-mount"></div>
     <div class="report-chart-wrap">
-      <canvas id="report-budget-chart" role="img" aria-label="预算区间图"></canvas>
+      <canvas id="report-budget-chart" role="img" aria-label="${t("report.budget_aria")}"></canvas>
     </div>
   </section>`;
 }

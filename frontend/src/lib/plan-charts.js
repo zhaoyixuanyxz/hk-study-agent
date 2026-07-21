@@ -1,6 +1,7 @@
 /**
  * Plan 页 Chart.js 可视化（V3-VIS）。无 visuals 时不渲染。
  */
+import { t } from "../i18n/index.js";
 
 /** @type {import('chart.js').Chart | null} */
 let tierChart = null;
@@ -33,7 +34,7 @@ export function buildTierChartConfig(visuals) {
       labels,
       datasets: [
         {
-          label: "相对可行性",
+          label: t("plan.relative_feasibility"),
           data: scores,
           backgroundColor: ["rgba(239, 68, 68, 0.65)", "rgba(59, 130, 246, 0.65)", "rgba(34, 197, 94, 0.65)"],
         },
@@ -44,10 +45,10 @@ export function buildTierChartConfig(visuals) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        title: { display: true, text: "梯度相对可行性", font: { size: 13 } },
+        title: { display: true, text: t("plan.tier_feasibility"), font: { size: 13 } },
       },
       scales: {
-        y: { min: 0, max: 100, title: { display: true, text: "指数" } },
+        y: { min: 0, max: 100, title: { display: true, text: t("plan.index") } },
       },
     },
   };
@@ -67,7 +68,7 @@ export function buildTimelineChartConfig(visuals) {
       labels,
       datasets: [
         {
-          label: "距今（月）",
+          label: t("plan.months_from_now"),
           data,
           backgroundColor: "rgba(99, 102, 241, 0.6)",
         },
@@ -79,10 +80,10 @@ export function buildTimelineChartConfig(visuals) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        title: { display: true, text: "时间线里程碑", font: { size: 13 } },
+        title: { display: true, text: t("plan.timeline_milestones"), font: { size: 13 } },
       },
       scales: {
-        x: { min: 0, title: { display: true, text: "月" } },
+        x: { min: 0, title: { display: true, text: t("plan.months") } },
       },
     },
   };
@@ -124,7 +125,7 @@ export async function mountPlanCharts(host, visuals) {
         labels: bars.map((b) => b.label),
         datasets: [
           {
-            label: "指数",
+            label: t("plan.index"),
             data: bars.map((b) => b.value),
             backgroundColor: "rgba(14, 165, 233, 0.55)",
           },
@@ -135,7 +136,7 @@ export async function mountPlanCharts(host, visuals) {
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          title: { display: true, text: "背景对标条", font: { size: 13 } },
+          title: { display: true, text: t("plan.benchmark_bars"), font: { size: 13 } },
         },
         scales: { y: { min: 0, max: 100 } },
       },
@@ -163,12 +164,12 @@ export function destroyPlanCharts() {
  */
 export function renderPlanChartsHostHtml() {
   return `<section class="card plan-visuals-card" id="plan-visuals">
-    <h3>方案可视化</h3>
-    <p class="plan-charts-lede">相对可行性/时间线示意，非录取概率。</p>
+    <h3>${t("plan.visuals_title")}</h3>
+    <p class="plan-charts-lede">${t("plan.visuals_lede")}</p>
     <div class="plan-charts-grid">
-      <div class="plan-chart-wrap"><canvas id="plan-tier-chart" role="img" aria-label="梯度条形图"></canvas></div>
-      <div class="plan-chart-wrap"><canvas id="plan-timeline-chart" role="img" aria-label="时间线里程碑"></canvas></div>
-      <div class="plan-chart-wrap plan-chart-wrap--bench"><canvas id="plan-benchmark-chart" role="img" aria-label="背景对标"></canvas></div>
+      <div class="plan-chart-wrap"><canvas id="plan-tier-chart" role="img" aria-label="${t("plan.aria_tier")}"></canvas></div>
+      <div class="plan-chart-wrap"><canvas id="plan-timeline-chart" role="img" aria-label="${t("plan.aria_timeline")}"></canvas></div>
+      <div class="plan-chart-wrap plan-chart-wrap--bench"><canvas id="plan-benchmark-chart" role="img" aria-label="${t("plan.aria_benchmark")}"></canvas></div>
     </div>
   </section>`;
 }

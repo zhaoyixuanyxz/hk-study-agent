@@ -26,6 +26,7 @@ import {
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
 import { loadThread } from "./chat.js";
+import { t } from "../i18n/index.js";
 
 export function statusLabel(s) {
   if (s === "confirmed") return "已确认";
@@ -204,10 +205,11 @@ export function renderPlanReportGate(rr) {
   box.classList.remove("hidden");
   const ok = rr.ok === true;
   box.className = ok ? "plan-report-gate plan-report-gate--ok card" : "plan-report-gate plan-report-gate--warn card";
+  box.innerHTML = "";
 
   const h = document.createElement("h3");
   h.className = "plan-report-gate-title";
-  h.textContent = ok ? "交付报告：就绪检查已通过" : "交付报告前：建议先处理下列事项";
+  h.textContent = ok ? t("plan.gate_ok") : t("plan.gate_warn");
   box.appendChild(h);
 
   const reasons = rr.reasons || [];
@@ -226,7 +228,7 @@ export function renderPlanReportGate(rr) {
   if (steps.length) {
     const p = document.createElement("p");
     p.className = "plan-report-gate-next-label";
-    p.textContent = "建议下一步";
+    p.textContent = t("plan.gate_next");
     box.appendChild(p);
     const ul2 = document.createElement("ul");
     ul2.className = "plan-report-gate-list";
@@ -247,7 +249,9 @@ export async function loadProfile() {
   const updatedEl = el("profile-updated");
   setPanelLoading("profile-sections", "正在加载申请档案…");
   try {
-    const data = await api("/api/v1/profile");
+    const tid = localStorage.getItem(LS_THREAD);
+    const q = tid ? `?thread_id=${encodeURIComponent(tid)}` : "";
+    const data = await api(`/api/v1/profile${q}`);
     const snap = data.snapshot;
     const pv = data.profile_view || null;
     if (!snap) {

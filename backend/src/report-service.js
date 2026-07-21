@@ -552,7 +552,7 @@ export async function generateHtmlReport(snapshot, plan, opts) {
     mergedCitations = filterCitationsAgainstCombinedSources(mergedCitations, intelItems, extKbEntries);
   }
 
-  const deliveryHtml = buildDeliverySectionsHtml(parsed, mergedCitations);
+  const deliveryHtml = buildDeliverySectionsHtml(parsed, mergedCitations, { locale });
 
   const chapters = [];
   const sectionHtmls = [];
@@ -587,7 +587,9 @@ export async function generateHtmlReport(snapshot, plan, opts) {
     ok: true,
     report: {
       schemaVersion: String(parsed.schemaVersion || REPORT_RESULT_SCHEMA_VERSION),
-      title: String(parsed.title || "留学申请规划报告（自动生成）"),
+      title: String(parsed.title || "").trim() || (locale === "en"
+        ? "Study Application Planning Report (auto-generated)"
+        : "留学申请规划报告（自动生成）"),
       chapters,
       html,
       wordCount,

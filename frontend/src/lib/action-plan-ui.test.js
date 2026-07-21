@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { setUiLocale } from "../i18n/index.js";
 import {
   actionPlanStorageKey,
   parseRiskFromActionText,
@@ -33,8 +34,18 @@ test("renderRiskDashboardHtml renders risk cards", () => {
 });
 
 test("renderRiskDashboardHtml empty state", () => {
+  setUiLocale("zh");
   const html = renderRiskDashboardHtml([]);
   assert.match(html, /暂无结构化风险标签/);
+});
+
+test("renderRiskDashboardHtml is English when UI is en", () => {
+  setUiLocale("en");
+  const html = renderRiskDashboardHtml([{ level: "high", label: "Deadline pinch" }]);
+  assert.match(html, /Risk dashboard/i);
+  assert.match(html, /High|H/i);
+  assert.doesNotMatch(html, /风险仪表盘/);
+  setUiLocale("zh");
 });
 
 test("extractRiskItemsFromReport parses action plan list items", () => {

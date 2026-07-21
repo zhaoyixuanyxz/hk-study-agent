@@ -26,6 +26,8 @@ import {
 import { el, escapeHtml, prettyTime, setStatus, shortId } from "../lib/dom.js";
 import { setPanelLoading } from "../lib/loading.js";
 import { renderIntelSourceLink } from "../lib/intel-links.js";
+import { intelCardSummary, intelCardTitle } from "../lib/intel-display.js";
+import { applyUiLocale, getUiLocale } from "../i18n/index.js";
 
 function renderStructuredBlock(item) {
   const s = item.structured;
@@ -89,8 +91,8 @@ function renderStructuredBlock(item) {
 }
 
 export function renderIntelItemCard(item) {
-  const title = escapeHtml(item.title_zh || "未命名条目");
-  const summary = escapeHtml((item.summary_zh || "").slice(0, 200));
+  const title = escapeHtml(intelCardTitle(item));
+  const summary = escapeHtml(intelCardSummary(item).slice(0, 200));
   const date = item.published_at ? String(item.published_at).slice(0, 10) : "";
   const link = renderIntelSourceLink(item.canonical_url);
   const structured = renderStructuredBlock(item);
@@ -109,6 +111,7 @@ export function renderIntelItemCard(item) {
 }
 
 export async function loadIntelligencePage(schoolSlug = null) {
+  applyUiLocale(getUiLocale());
   const dash = el("intel-dashboard-view");
   const schoolView = el("intel-school-view");
   const status = el("intel-status");
@@ -139,7 +142,7 @@ export async function loadIntelligencePage(schoolSlug = null) {
       if (tl) {
         const lines = (data.timeline || []).map(
           (t) =>
-            `<li><time>${escapeHtml(String(t.published_at || "").slice(0, 10))}</time> <strong>${escapeHtml(t.title_zh || "")}</strong> <span class="tag">${escapeHtml(t.info_type || "")}</span></li>`
+            `<li><time>${escapeHtml(String(t.published_at || "").slice(0, 10))}</time> <strong>${escapeHtml(intelCardTitle(t))}</strong> <span class="tag">${escapeHtml(t.info_type || "")}</span></li>`
         );
         tl.innerHTML = lines.length ? lines.join("") : "<li>暂无时间线记录</li>";
       }
