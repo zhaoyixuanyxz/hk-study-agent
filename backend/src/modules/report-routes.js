@@ -6,6 +6,7 @@ import {
 } from "../report-service.js";
 import { renderHtmlToPdf } from "../pdf-service.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
+import { resolveThreadLocale } from "../output-locale.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -58,6 +59,15 @@ export function registerReportRoutes(app, ctx) {
       limit: 12,
     });
 
+    let thread = null;
+    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
+    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
+    if (!thread) {
+      const threads = store.listThreadsByUser(user.id);
+      thread = threads[0] || null;
+    }
+    const locale = resolveThreadLocale(thread);
+
     const gen = await generateHtmlReport(latest.snapshot, planRow.plan, {
       useMock,
       deepseekApiKey: key,
@@ -67,6 +77,7 @@ export function registerReportRoutes(app, ctx) {
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
       extKbEntries: intelPack.extKbEntries,
+      locale,
     });
 
     if (!gen.ok) {

@@ -6,6 +6,7 @@ import {
 } from "./citation-utils.js";
 import { composeSystemPrompt } from "./promptLayer.js";
 import { assessChatScope, buildScopeRedirectAgentOutput } from "./chat-scope.js";
+import { normalizeLocale } from "./output-locale.js";
 
 const REPLY_MAX_CHARS = 1000;
 const TRUNC_SUFFIX = "\n\n（已为你收敛篇幅，如需展开可继续追问。）";
@@ -271,7 +272,9 @@ export async function runProfileAgent({
   intelItems,
   extKbEntries,
   profileSnapshot,
+  locale,
 }) {
+  const loc = normalizeLocale(locale);
   const scope = assessChatScope({ userMessage, snapshot: profileSnapshot });
   if (!scope.inScope) {
     return applyIntelCitationAllowlist(
@@ -289,36 +292,59 @@ export async function runProfileAgent({
   if (useMock) {
     const turns = 1 + historyOpenai.filter((m) => m.role === "user").length;
     let gaps = [];
-    if (turns < 2) gaps = ["目标港校与授课型硕士专业方向"];
-    else if (turns < 3) gaps = ["计划入学时间或申请季", "预算大致区间"];
     let reply;
-    if (turns === 1) {
-      reply =
-        "判断：刚开始建档，信息尚少。原因：还需要了解你的港校目标与学术背景主干。下一步：请先说说意向的香港高校/专业大类（授课型硕士）？";
-    } else if (turns === 2) {
-      reply =
-        "判断：主线方向更清晰了。原因：仍缺时间与预算，对方案梯队和费用风险影响很大。下一步：补充计划入学年份/申请季和大致预算区间？";
+    let suggestedFollowups;
+    if (loc === "en") {
+      if (turns < 2) gaps = ["Target HK schools and taught MSc field"];
+      else if (turns < 3) gaps = ["Planned intake / application season", "Budget range"];
+      if (turns === 1) {
+        reply =
+          "Assessment: just starting. Reason: need your target HK schools and taught-master field. Next: which Hong Kong universities/program areas are you considering?";
+      } else if (turns === 2) {
+        reply =
+          "Assessment: main direction is clearer. Reason: still missing timeline and budget, which heavily affect tier mix and cost risk. Next: share your planned intake year/season and rough budget range?";
+      } else {
+        reply =
+          "Assessment: enough for an initial profile. Reason: academics, direction, timeline and budget meet the minimum set. Short diagnosis: treat HK taught masters as the main narrative, then fine-tune tiers. Next: confirm facts in the profile page, then try generating a plan.";
+      }
+      suggestedFollowups = ["Could you share current language scores or test plans?"];
     } else {
-      reply =
-        "判断：主干信息已够做初步画像。原因：学术、方向、时间线与预算已具备最小集合。短诊断：可把香港授课型硕士作为主叙事线，后续再微调梯度。下一步：你可以在「核对档案」确认事实后，尝试生成方案。";
+      if (turns < 2) gaps = ["目标港校与授课型硕士专业方向"];
+      else if (turns < 3) gaps = ["计划入学时间或申请季", "预算大致区间"];
+      if (turns === 1) {
+        reply =
+          "判断：刚开始建档，信息尚少。原因：还需要了解你的港校目标与学术背景主干。下一步：请先说说意向的香港高校/专业大类（授课型硕士）？";
+      } else if (turns === 2) {
+        reply =
+          "判断：主线方向更清晰了。原因：仍缺时间与预算，对方案梯队和费用风险影响很大。下一步：补充计划入学年份/申请季和大致预算区间？";
+      } else {
+        reply =
+          "判断：主干信息已够做初步画像。原因：学术、方向、时间线与预算已具备最小集合。短诊断：可把香港授课型硕士作为主叙事线，后续再微调梯度。下一步：你可以在「核对档案」确认事实后，尝试生成方案。";
+      }
+      suggestedFollowups = ["方便说说目前语言成绩或考试计划吗？"];
     }
     const readiness = turns >= 3 && !gaps.length;
     const memHint = memoryContext
-      ? `\n\n（系统已检索到与你相关的历史记忆片段，可适当承接，但不要重复追问已覆盖的信息。）`
+      ? loc === "en"
+        ? "\n\n(Retrieved memory fragments related to you are available; continue accordingly, but do not re-ask already covered information.)"
+        : "\n\n（系统已检索到与你相关的历史记忆片段，可适当承接，但不要重复追问已覆盖的信息。）"
       : "";
     const rawCites = mockCitationsFromIntel(userMessage, intelItems);
     let mockReply = reply;
     if (rawCites.length && POLICY_HINT.test(userMessage) === false && /学费|截止|政策|录取要求/i.test(userMessage)) {
       mockReply =
-        reply +
-        "\n\n根据情报库检索，可参考下方已上线条目的官方摘要（链接见引用区）；具体数字与截止日期请以院校官网为准。";
+        loc === "en"
+          ? reply +
+            "\n\nPer the intelligence library, see the official summary of the linked entries below; confirm numbers and deadlines against the school's official website."
+          : reply +
+            "\n\n根据情报库检索，可参考下方已上线条目的官方摘要（链接见引用区）；具体数字与截止日期请以院校官网为准。";
     }
     return applyIntelCitationAllowlist(
       normalizeAgentOutput({
         reply: mockReply + memHint,
         gaps,
         gap_items: [],
-        suggested_followups: ["方便说说目前语言成绩或考试计划吗？"],
+        suggested_followups: suggestedFollowups,
         readiness_for_profile: readiness,
         citations: rawCites,
       }),
@@ -331,7 +357,7 @@ export async function runProfileAgent({
     apiKey: deepseekApiKey,
     baseURL: deepseekBaseUrl,
   });
-  const system = composeSystemPrompt("v1");
+  const system = composeSystemPrompt("v1", { locale: loc });
   const mem =
     memoryContext && String(memoryContext).trim()
       ? [{ role: "system", content: `[RETRIEVED_MEMORY]\n${String(memoryContext).slice(0, 6000)}` }]

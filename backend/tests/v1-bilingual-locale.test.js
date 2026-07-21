@@ -138,3 +138,55 @@ test("POST /profile/full-reset with confirm:true and locale=en returns locale=en
   assert.equal(body.locale, "en");
   assert.ok(body.thread_id, "thread_id should be returned");
 });
+
+import { composeSystemPrompt } from "../src/promptLayer.js";
+import { runProfileAgent } from "../src/agent.js";
+import { buildMockStructuredPlan } from "../src/planning-service.js";
+
+test("composeSystemPrompt appends OUTPUT_LOCALE for en", () => {
+  const s = composeSystemPrompt("v1", { locale: "en" });
+  assert.match(s, /\[OUTPUT_LOCALE\]/);
+  assert.match(s, /locale=en/);
+});
+
+test("composeSystemPrompt defaults to zh locale block when no opts", () => {
+  const s = composeSystemPrompt("v1");
+  assert.match(s, /\[OUTPUT_LOCALE\]/);
+  assert.match(s, /locale=zh/);
+});
+
+test("mock agent reply is English when locale=en", async () => {
+  const out = await runProfileAgent({
+    userMessage: "I want HK taught masters in CS",
+    historyOpenai: [],
+    useMock: true,
+    locale: "en",
+  });
+  assert.match(out.reply, /[A-Za-z]{3,}/);
+  assert.doesNotMatch(out.reply, /判断：|下一步：/);
+});
+
+test("mock agent reply is Chinese when locale=zh (default)", async () => {
+  const out = await runProfileAgent({
+    userMessage: "我想申请香港授课型硕士",
+    historyOpenai: [],
+    useMock: true,
+  });
+  assert.match(out.reply, /判断|下一步|信息/);
+});
+
+test("mock plan uses English labels when locale=en", () => {
+  const plan = buildMockStructuredPlan({}, [], [], { locale: "en" });
+  assert.equal(plan.tiers.reach.label, "Reach");
+  assert.equal(plan.tiers.match.label, "Match");
+  assert.equal(plan.tiers.safety.label, "Safety");
+  assert.match(plan.risk_summary, /[A-Za-z]{4,}/);
+  assert.doesNotMatch(plan.tiers.reach.label, /冲刺/);
+});
+
+test("mock plan uses Chinese labels by default", () => {
+  const plan = buildMockStructuredPlan({}, [], []);
+  assert.equal(plan.tiers.reach.label, "冲刺");
+  assert.equal(plan.tiers.match.label, "匹配");
+  assert.equal(plan.tiers.safety.label, "保底");
+});

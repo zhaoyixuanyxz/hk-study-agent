@@ -5,6 +5,7 @@ import {
 } from "./citation-utils.js";
 import { loadPromptText } from "./promptLayer.js";
 import { buildMockReportVisuals, normalizeReportVisuals } from "./visuals-normalize.js";
+import { buildOutputLocaleBlock, normalizeLocale } from "./output-locale.js";
 
 export const REPORT_RESULT_SCHEMA_VERSION = "2.0";
 
@@ -153,9 +154,11 @@ function planCitations(plan) {
 /**
  * @param {string[]} items
  * @param {boolean} ordered
+ * @param {string} [emptyLabel]
  */
-function listHtml(items, ordered) {
-  if (!items.length) return `<p>${escapeHtmlText("（暂无条目）")}</p>`;
+function listHtml(items, ordered, emptyLabel) {
+  const empty = emptyLabel || "（暂无条目）";
+  if (!items.length) return `<p>${escapeHtmlText(empty)}</p>`;
   const tag = ordered ? "ol" : "ul";
   const lis = items.map((t) => `<li>${escapeHtmlText(t)}</li>`).join("");
   return `<${tag} class="report-list">${lis}</${tag}>`;
@@ -164,8 +167,10 @@ function listHtml(items, ordered) {
 /**
  * @param {object} parsed from model or mock
  * @param {object} mergedCitations normalized citations (plan + model)
+ * @param {{ locale?: string }} [options]
  */
-export function buildDeliverySectionsHtml(parsed, mergedCitations) {
+export function buildDeliverySectionsHtml(parsed, mergedCitations, options = {}) {
+  const isEn = normalizeLocale(options.locale) === "en";
   const delivery = normalizeReportDelivery(parsed) || {
     parent_summary: [],
     action_plan: { days_30: [], days_60: [], days_90: [] },
@@ -178,53 +183,62 @@ export function buildDeliverySectionsHtml(parsed, mergedCitations) {
   const d90 = delivery.action_plan.days_90;
   const gloss = delivery.plain_language_notes;
 
-  const parentBlock = `<section class="report-chapter" id="parent-summary"><h2>家长决策摘要</h2><p class="report-lede">以下为面向家庭决策者的结论速览（预算、风险与方向）。</p>${listHtml(
+  const emptyList = isEn ? "(no entries)" : "（暂无条目）";
+  const parentBlock = `<section class="report-chapter" id="parent-summary"><h2>${escapeHtmlText(isEn ? "Parent Decision Summary" : "家长决策摘要")}</h2><p class="report-lede">${escapeHtmlText(isEn ? "Conclusion scan for family decision-makers (budget, risk, direction)." : "以下为面向家庭决策者的结论速览（预算、风险与方向）。")}</p>${listHtml(
     parentLines,
-    false
+    false,
+    emptyList
   )}</section>`;
 
-  const actionBlock = `<section class="report-chapter" id="action-plan"><h2>学生行动计划（30 / 60 / 90 天）</h2>
-    <h3 class="report-subh">未来 30 天</h3>${listHtml(d30, true)}
-    <h3 class="report-subh">第 31–60 天</h3>${listHtml(d60, true)}
-    <h3 class="report-subh">第 61–90 天</h3>${listHtml(d90, true)}
+  const actionBlock = `<section class="report-chapter" id="action-plan"><h2>${escapeHtmlText(isEn ? "Student Action Plan (30 / 60 / 90 days)" : "学生行动计划（30 / 60 / 90 天）")}</h2>
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Next 30 days" : "未来 30 天")}</h3>${listHtml(d30, true, emptyList)}
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 31-60" : "第 31–60 天")}</h3>${listHtml(d60, true, emptyList)}
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 61-90" : "第 61–90 天")}</h3>${listHtml(d90, true, emptyList)}
   </section>`;
 
   let citeInner = "";
   if (mergedCitations.length === 0) {
     citeInner = `<p>${escapeHtmlText(
-      "本报告未引用外部知识库条目；策略依据主要来自建档对话与方案结构。若方案页展示引用，可重新生成报告以同步。"
+      isEn
+        ? "This report cites no external KB entries; strategy relies on onboarding chat and plan structure. If citations appear on the plan page, regenerate the report to sync."
+        : "本报告未引用外部知识库条目；策略依据主要来自建档对话与方案结构。若方案页展示引用，可重新生成报告以同步。"
     )}</p>`;
   } else {
     citeInner = `<ul class="report-cite-list">${mergedCitations
       .map((c) => {
-        const title = escapeHtmlText(c.sourceTitle || c.itemId || "来源");
+        const title = escapeHtmlText(c.sourceTitle || c.itemId || (isEn ? "source" : "来源"));
         const url = escapeHtmlText(c.url);
         return `<li><a href="${url}" rel="noopener noreferrer" target="_blank">${title}</a>${c.quoteOrSummary ? ` — ${escapeHtmlText(String(c.quoteOrSummary).slice(0, 200))}` : ""}</li>`;
       })
       .join("")}</ul>`;
   }
-  const citeBlock = `<section class="report-chapter" id="report-citations"><h2>引用与参考来源</h2>${citeInner}</section>`;
+  const citeBlock = `<section class="report-chapter" id="report-citations"><h2>${escapeHtmlText(isEn ? "Citations & References" : "引用与参考来源")}</h2>${citeInner}</section>`;
 
   const glossBlock =
     gloss.length > 0
-      ? `<section class="report-chapter" id="plain-language"><h2>术语短解</h2>${listHtml(gloss, false)}</section>`
+      ? `<section class="report-chapter" id="plain-language"><h2>${escapeHtmlText(isEn ? "Term Glossary" : "术语短解")}</h2>${listHtml(gloss, false, emptyList)}</section>`
       : "";
 
-  const riskBlock = buildRiskItemsSectionHtml(delivery.risk_items);
+  const riskBlock = buildRiskItemsSectionHtml(delivery.risk_items, { locale: options.locale });
 
   return `\n${parentBlock}\n${riskBlock}\n${actionBlock}\n${citeBlock}\n${glossBlock}\n`;
 }
 
 const RISK_LEVEL_ZH = { high: "高", medium: "中", low: "低" };
+const RISK_LEVEL_EN = { high: "High", medium: "Medium", low: "Low" };
 
 /**
  * @param {{ level: string, label: string, detail?: string }[]} riskItems
+ * @param {{ locale?: string }} [options]
  */
-export function buildRiskItemsSectionHtml(riskItems) {
+export function buildRiskItemsSectionHtml(riskItems, options = {}) {
   if (!Array.isArray(riskItems) || !riskItems.length) return "";
+  const isEn = normalizeLocale(options.locale) === "en";
+  const levelMap = isEn ? RISK_LEVEL_EN : RISK_LEVEL_ZH;
+  const fallback = isEn ? "Medium" : "中";
   const cards = riskItems
     .map((r) => {
-      const lvl = RISK_LEVEL_ZH[r.level] || "中";
+      const lvl = levelMap[r.level] || fallback;
       const detail = r.detail
         ? `<p class="risk-item-detail">${escapeHtmlText(r.detail)}</p>`
         : "";
@@ -235,8 +249,8 @@ export function buildRiskItemsSectionHtml(riskItems) {
     })
     .join("");
   return `<section class="report-chapter report-risk-items" id="report-risk-items">
-    <h2>风险仪表盘</h2>
-    <p class="report-lede">结构化风险条目（由报告生成，非录取承诺）。</p>
+    <h2>${escapeHtmlText(isEn ? "Risk Dashboard" : "风险仪表盘")}</h2>
+    <p class="report-lede">${escapeHtmlText(isEn ? "Structured risk items (report-generated, not admission promises)." : "结构化风险条目（由报告生成，非录取承诺）。")}</p>
     <div class="risk-dashboard-grid">${cards}</div>
   </section>`;
 }
@@ -246,7 +260,9 @@ export function buildRiskItemsSectionHtml(riskItems) {
  * @param {object} snapshot profile snapshot 对象
  * @param {object} plan 结构化方案
  */
-export function buildMockHtmlReport(snapshot, plan) {
+export function buildMockHtmlReport(snapshot, plan, options = {}) {
+  const locale = normalizeLocale(options.locale);
+  const isEn = locale === "en";
   const summary = flattenSnapshotSummary(snapshot);
   const tiers = plan.tiers || {};
   const reach = tiers.reach || {};
@@ -255,77 +271,137 @@ export function buildMockHtmlReport(snapshot, plan) {
 
   const merged = planCitations(plan);
 
-  const parsed = {
-    parent_summary: [
-      `结论：以当前画像与方案为主轴，建议按「${reach.label || "冲刺"} / ${match.label || "匹配"} / ${safety.label || "保底"}」组合推进。`,
-      `预算：方案中的费用与时间线为区间说明，请以家庭现金流与院校当年公示为准。`,
-      `风险：请关注语言节点、材料认证周期与轮次截止，避免「卡点」导致被动。`,
-    ],
-    action_plan: {
-      days_30: [
-        "【核对+Checklist】成绩单/在读证明与画像一致性自检（高优先，风险：材料不符导致拒审）",
-        "【时间线】列出 3-5 目标项目 + 官方截止/考试要求（引用 intel 日期）",
-        "【预算对齐】与父母确认上限与自费/奖学金偏好（量化：学费+生活+考试预留 15% 浮动）",
-      ],
-      days_60: [
-        "【语言/标化】安排或豁免确认 + 成绩目标（中风险：晚考卡 rolling）",
-        "【文书】主 PS/简历 draft，按项目权重（JUPAS Math 等）迭代差异版",
-        "【推荐人】确认 2-3 位 + 沟通 timeline（低风险但需 buffer）",
-      ],
-      days_90: [
-        "【提交】按轮次网申 + 附件/支付 checklist（高风险：截止前 48h 卡点）",
-        "【面试】项目特定问题准备 + mock（含香港本地政策问答）",
-        "【 contingency】最坏情况推演：全拒备选 + gap year / 其他地区 plan",
-      ],
-    },
-    plain_language_notes: [
-      "冲刺/匹配/保底：分别指录取把握较低的主攻、把握中等的重心、用于托底的组合，不代表官方分类。",
-    ],
-    risk_items: [
-      {
-        level: "high",
-        label: "轮次截止前材料/语言未齐",
-        detail: "高风险：卡点提交可能导致当轮失效，请倒排 30 天清单。",
-      },
-      {
-        level: "medium",
-        label: "预算与汇率波动",
-        detail: "中风险：学费与生活费请以官网与当年汇率为准，预留 10–15% buffer。",
-      },
-      {
-        level: "low",
-        label: "推荐人沟通档期",
-        detail: "低风险：提前 4–6 周联系推荐人并确认提交路径。",
-      },
-    ],
-    visuals: buildMockReportVisuals(plan),
-  };
+  const parsed = isEn
+    ? {
+        parent_summary: [
+          `Conclusion: with current profile and plan as the main axis, push forward with the "${reach.label || "Reach"} / ${match.label || "Match"} / ${safety.label || "Safety"}" mix.`,
+          `Budget: fees and timeline in the plan are indicative ranges; refer to family cash flow and the school's official annual figures.`,
+          `Risk: watch language milestones, credentialing lead times, and round deadlines to avoid last-minute blockers.`,
+        ],
+        action_plan: {
+          days_30: [
+            "[Verify + Checklist] Self-check transcripts / enrollment proof vs profile (high priority; risk: material mismatch triggers rejection)",
+            "[Timeline] List 3-5 target programs + official deadlines / test requirements (cite intel dates)",
+            "[Budget alignment] Confirm cap and self-funded / scholarship preference with parents (quantify: tuition + living + tests with 15% buffer)",
+          ],
+          days_60: [
+            "[Language/standardized tests] Schedule or confirm waivers + score targets (medium risk: late tests break rolling rounds)",
+            "[Essays] Main PS / CV draft, iterate per-program weighted variants (e.g. JUPAS Math)",
+            "[Recommenders] Confirm 2-3 + communicate timeline (low risk but needs buffer)",
+          ],
+          days_90: [
+            "[Submit] Per-round applications + attachments / payment checklist (high risk: 48h-before-deadline crunch)",
+            "[Interview] Program-specific prep + mock (incl. HK local policy Q&A)",
+            "[Contingency] Worst-case drill: all-reject backup + gap year / other regions plan",
+          ],
+        },
+        plain_language_notes: [
+          "Reach / Match / Safety: respectively the lower-odds main push, mid-odds focus, and backup mix; not an official classification.",
+        ],
+        risk_items: [
+          {
+            level: "high",
+            label: "Materials / language not ready before round deadline",
+            detail: "High risk: late submission can void the round; back-plan a 30-day checklist.",
+          },
+          {
+            level: "medium",
+            label: "Budget and exchange-rate swings",
+            detail: "Medium risk: tuition and living costs follow official sites and current exchange rates; keep a 10-15% buffer.",
+          },
+          {
+            level: "low",
+            label: "Recommender scheduling",
+            detail: "Low risk: contact recommenders 4-6 weeks ahead and confirm submission path.",
+          },
+        ],
+        visuals: buildMockReportVisuals(plan),
+      }
+    : {
+        parent_summary: [
+          `结论：以当前画像与方案为主轴，建议按「${reach.label || "冲刺"} / ${match.label || "匹配"} / ${safety.label || "保底"}」组合推进。`,
+          `预算：方案中的费用与时间线为区间说明，请以家庭现金流与院校当年公示为准。`,
+          `风险：请关注语言节点、材料认证周期与轮次截止，避免「卡点」导致被动。`,
+        ],
+        action_plan: {
+          days_30: [
+            "【核对+Checklist】成绩单/在读证明与画像一致性自检（高优先，风险：材料不符导致拒审）",
+            "【时间线】列出 3-5 目标项目 + 官方截止/考试要求（引用 intel 日期）",
+            "【预算对齐】与父母确认上限与自费/奖学金偏好（量化：学费+生活+考试预留 15% 浮动）",
+          ],
+          days_60: [
+            "【语言/标化】安排或豁免确认 + 成绩目标（中风险：晚考卡 rolling）",
+            "【文书】主 PS/简历 draft，按项目权重（JUPAS Math 等）迭代差异版",
+            "【推荐人】确认 2-3 位 + 沟通 timeline（低风险但需 buffer）",
+          ],
+          days_90: [
+            "【提交】按轮次网申 + 附件/支付 checklist（高风险：截止前 48h 卡点）",
+            "【面试】项目特定问题准备 + mock（含香港本地政策问答）",
+            "【 contingency】最坏情况推演：全拒备选 + gap year / 其他地区 plan",
+          ],
+        },
+        plain_language_notes: [
+          "冲刺/匹配/保底：分别指录取把握较低的主攻、把握中等的重心、用于托底的组合，不代表官方分类。",
+        ],
+        risk_items: [
+          {
+            level: "high",
+            label: "轮次截止前材料/语言未齐",
+            detail: "高风险：卡点提交可能导致当轮失效，请倒排 30 天清单。",
+          },
+          {
+            level: "medium",
+            label: "预算与汇率波动",
+            detail: "中风险：学费与生活费请以官网与当年汇率为准，预留 10–15% buffer。",
+          },
+          {
+            level: "low",
+            label: "推荐人沟通档期",
+            detail: "低风险：提前 4–6 周联系推荐人并确认提交路径。",
+          },
+        ],
+        visuals: buildMockReportVisuals(plan),
+      };
 
-  const deliveryHtml = buildDeliverySectionsHtml(parsed, merged);
+  const deliveryHtml = buildDeliverySectionsHtml(parsed, merged, { locale });
 
-  const paragraphs = [];
-  paragraphs.push(`执行摘要：${summary}。本报告将画像、策略梯度、风险与执行节奏压缩呈现，便于家长与学生分工推进。`);
-  paragraphs.push(
-    `申请人画像维度：请持续核对绩点、院校背景、语言与意向专业是否与纸质材料一致；待确认项请以官方证明为准，勿将对话推断当作事实。`
-  );
-  paragraphs.push(
-    `申请目标与策略：以香港方向与当前意向为主线，三档用于组织梯度与心理预期，不是录取承诺；需到各项目页面核对先修与最低线。`
-  );
-  paragraphs.push(
-    `梯度摘录：「${reach.label || "冲刺"}」${reach.summary || ""} ${reach.rationale || ""} 「${match.label || "匹配"}」${match.summary || ""} ${match.rationale || ""} 「${safety.label || "保底"}」${safety.summary || ""} ${safety.rationale || ""}`
-  );
-  paragraphs.push(
-    `风险、预算与时间线：${escapeHtmlText(plan.risk_summary || "（见方案）")}；预算提示：${escapeHtmlText(plan.budget_suggestion || "")}；时间线：${escapeHtmlText(plan.timeline_suggestion || "")}。`
-  );
-  paragraphs.push(`材料与执行：先稳定事实，再打磨叙事，最后逐项目对齐差异点；提交前检查网申字段、附件与推荐人链接。`);
-  paragraphs.push(
-    `${escapeHtmlText(plan.disclaimer || DEFAULT_REPORT_DISCLAIMER)} 后续可做：① 更新画像；② 维护截止表；③ 分阶段考试与文书；④ 提交前全流程复查。`
-  );
+  const paragraphs = isEn
+    ? [
+        `Executive summary: ${summary}. This report compresses profile, strategy tiers, risk, and execution rhythm for parent-student division of work.`,
+        `Profile dimensions: keep verifying GPA, school background, language, and intended field against paper materials; pending items should follow official proof, not chat inference as fact.`,
+        `Application goals and strategy: with HK direction and current intent as the main line, the three tiers organize gradient and psychological expectation, not admission promises; verify prerequisites and minimums on each program page.`,
+        `Tier excerpt: "${reach.label || "Reach"}" ${reach.summary || ""} ${reach.rationale || ""} "${match.label || "Match"}" ${match.summary || ""} ${match.rationale || ""} "${safety.label || "Safety"}" ${safety.summary || ""} ${safety.rationale || ""}`,
+        `Risk, budget, and timeline: ${escapeHtmlText(plan.risk_summary || "(see plan)")}; budget note: ${escapeHtmlText(plan.budget_suggestion || "")}; timeline: ${escapeHtmlText(plan.timeline_suggestion || "")}.`,
+        `Materials and execution: stabilize facts first, then polish narrative, then align per-program differentiators; check application fields, attachments, and recommender links before submit.`,
+        `${escapeHtmlText(plan.disclaimer || DEFAULT_REPORT_DISCLAIMER)} Next steps: 1) update profile; 2) maintain deadline tracker; 3) phased tests and essays; 4) full-flow review before submission.`,
+      ]
+    : [
+        `执行摘要：${summary}。本报告将画像、策略梯度、风险与执行节奏压缩呈现，便于家长与学生分工推进。`,
+        `申请人画像维度：请持续核对绩点、院校背景、语言与意向专业是否与纸质材料一致；待确认项请以官方证明为准，勿将对话推断当作事实。`,
+        `申请目标与策略：以香港方向与当前意向为主线，三档用于组织梯度与心理预期，不是录取承诺；需到各项目页面核对先修与最低线。`,
+        `梯度摘录：「${reach.label || "冲刺"}」${reach.summary || ""} ${reach.rationale || ""} 「${match.label || "匹配"}」${match.summary || ""} ${match.rationale || ""} 「${safety.label || "保底"}」${safety.summary || ""} ${safety.rationale || ""}`,
+        `风险、预算与时间线：${escapeHtmlText(plan.risk_summary || "（见方案）")}；预算提示：${escapeHtmlText(plan.budget_suggestion || "")}；时间线：${escapeHtmlText(plan.timeline_suggestion || "")}。`,
+        `材料与执行：先稳定事实，再打磨叙事，最后逐项目对齐差异点；提交前检查网申字段、附件与推荐人链接。`,
+        `${escapeHtmlText(plan.disclaimer || DEFAULT_REPORT_DISCLAIMER)} 后续可做：① 更新画像；② 维护截止表；③ 分阶段考试与文书；④ 提交前全流程复查。`,
+      ];
 
-  const sections = CHAPTER_DEFS.map((ch, i) => {
+  const chapterTitles = isEn
+    ? [
+        "Overview & Executive Summary",
+        "Applicant Profile & Key Facts",
+        "Application Goals & Strategy Frame",
+        "Plan Tier Notes (Reach / Match / Safety)",
+        "Risk, Budget & Timeline",
+        "Materials & Execution Advice",
+        "Disclaimer & Next Steps",
+      ]
+    : CHAPTER_DEFS.map((c) => c.title);
+  const chapterIds = CHAPTER_DEFS.map((c) => c.id);
+
+  const sections = chapterIds.map((id, i) => {
     const body = paragraphs[i] || paragraphs[paragraphs.length - 1];
     const paras = body.split("\n\n").map((p) => `<p>${escapeHtmlText(p)}</p>`);
-    return `<section class="report-chapter" id="${escapeHtmlText(ch.id)}"><h2>${escapeHtmlText(ch.title)}</h2>${paras.join("")}</section>`;
+    return `<section class="report-chapter" id="${escapeHtmlText(id)}"><h2>${escapeHtmlText(chapterTitles[i])}</h2>${paras.join("")}</section>`;
   });
 
   const coreHtml = sections.join("\n");
@@ -338,10 +414,10 @@ export function buildMockHtmlReport(snapshot, plan) {
 
   return {
     schemaVersion: REPORT_RESULT_SCHEMA_VERSION,
-    title: "留学申请规划报告（自动生成）",
-    chapters: CHAPTER_DEFS.map((c, i) => ({
-      id: c.id,
-      title: c.title,
+    title: isEn ? "Study Application Planning Report (auto-generated)" : "留学申请规划报告（自动生成）",
+    chapters: chapterIds.map((id, i) => ({
+      id,
+      title: chapterTitles[i],
       html: sections[i],
     })),
     html,
@@ -381,15 +457,17 @@ function parseReportJson(content) {
  *   intelContextText?: string,
  *   intelItems?: object[],
  *   extKbEntries?: object[],
+ *   locale?: string,
  * }} opts
  */
 export async function generateHtmlReport(snapshot, plan, opts) {
+  const locale = normalizeLocale(opts.locale);
   const baseCites = planCitations(plan);
   const intelItems = opts.intelItems || [];
   const extKbEntries = opts.extKbEntries || [];
 
   if (opts.useMock) {
-    const report = buildMockHtmlReport(snapshot, plan);
+    const report = buildMockHtmlReport(snapshot, plan, { locale });
     let cites = normalizeCitations([...(report.citations || []), ...baseCites], 12);
     cites = filterCitationsAgainstCombinedSources(cites, intelItems, extKbEntries);
     report.citations = cites;
@@ -405,8 +483,10 @@ export async function generateHtmlReport(snapshot, plan, opts) {
   });
 
   const system =
-    loadPromptText("report.txt") ||
-    "你是留学规划顾问写作助手。只输出一个 JSON 对象，不要 markdown。";
+    (loadPromptText("report.txt") ||
+      "你是留学规划顾问写作助手。只输出一个 JSON 对象，不要 markdown。") +
+    "\n\n" +
+    buildOutputLocaleBlock(locale);
 
   let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组；补充引用时 itemId 与 url 须来自下方情报上下文，不要编造失效链接。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
   if (opts.intelContextText && String(opts.intelContextText).trim()) {

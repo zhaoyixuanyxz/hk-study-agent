@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { buildOutputLocaleBlock, normalizeLocale } from "./output-locale.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -15,7 +16,7 @@ export function loadPromptText(file, version = "v1") {
   return readFileSync(p, "utf8").trim();
 }
 
-export function composeSystemPrompt(version = "v1") {
+export function composeSystemPrompt(version = "v1", opts = {}) {
   const base = join(__dirname, "..", "prompts", version);
   const layers = [
     ["[SYSTEM]", "system.txt"],
@@ -43,5 +44,6 @@ export function composeSystemPrompt(version = "v1") {
       "readiness_for_profile（布尔：是否已具备生成后续留学画像/方案的最小信息）," +
       "citations（数组：引用外部/政策事实时必填；每项含 itemId、url 必填；可选 sourceTitle、publishedAt、quoteOrSummary；无来源则宁可不写事实也不要编造链接）。"
   );
+  parts.push(buildOutputLocaleBlock(normalizeLocale(opts.locale)));
   return parts.join("\n\n");
 }

@@ -174,6 +174,7 @@ export function registerChatRoutes(app, ctx) {
       intelItems: intelPack.items,
       extKbEntries: intelPack.extKbEntries,
       profileSnapshot: latestSnap?.snapshot,
+      locale: resolveThreadLocale(t),
     });
 
     const filteredCitations = agentOut.citations || [];

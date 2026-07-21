@@ -10,6 +10,7 @@ import {
 } from "./intelligence/external-kb-loader.js";
 import { loadPromptText } from "./promptLayer.js";
 import { buildMockPlanVisuals, normalizePlanVisuals } from "./visuals-normalize.js";
+import { buildOutputLocaleBlock, normalizeLocale } from "./output-locale.js";
 
 const PLAN_RESULT_SCHEMA_VERSION = "1.0";
 
@@ -135,7 +136,8 @@ function applyIntelToPlan(plan, intelItems, extKbEntries = []) {
   return { ...rest, citations: merged, citationRefs: citationsToCitationRefs(merged) };
 }
 
-export function buildMockStructuredPlan(planInputView, intelItems, extKbEntries) {
+export function buildMockStructuredPlan(planInputView, intelItems, extKbEntries, options = {}) {
+  const locale = normalizeLocale(options.locale);
   const ext =
     extKbEntries ||
     selectExternalKbForProfile({ planInputView, limit: 8 });
@@ -145,45 +147,92 @@ export function buildMockStructuredPlan(planInputView, intelItems, extKbEntries)
   const t = flattenDim(planInputView, "timeline");
   const r = flattenDim(planInputView, "riskPreference");
 
-  const region = g.target_region || g.intent_degree || "目标地区";
-  const field = g.field || "意向专业";
-  const gpa = a.gpa || "（未提供）";
-  const school = a.school_background || "（未提供）";
-  const budget = b.budget_range || "（未提供）";
-  const intake = t.intake_or_season || "（未提供）";
-  const risk = r.risk_style || "均衡";
+  const region = g.target_region || g.intent_degree || (locale === "en" ? "Target region" : "目标地区");
+  const field = g.field || (locale === "en" ? "Intended field" : "意向专业");
+  const gpa = a.gpa || (locale === "en" ? "(not provided)" : "（未提供）");
+  const school = a.school_background || (locale === "en" ? "(not provided)" : "（未提供）");
+  const budget = b.budget_range || (locale === "en" ? "(not provided)" : "（未提供）");
+  const intake = t.intake_or_season || (locale === "en" ? "(not provided)" : "（未提供）");
+  const risk = r.risk_style || (locale === "en" ? "balanced" : "均衡");
+
+  const disclaimer =
+    locale === "en"
+      ? "This plan is auto-generated based on the information you provided. It is for reference only and does not constitute any admission, visa, or financial commitment. Specific school choices, application requirements, and deadlines should follow official university channels."
+      : DEFAULT_DISCLAIMER;
+
+  const risk_summary =
+    locale === "en"
+      ? `Based on your current background (${school}, GPA ${gpa}) and target (${region} · ${field}), admission remains affected by yearly competition, quotas, and material quality; please do not read any statement as an admission promise.`
+      : `基于你当前背景（${school}，GPA ${gpa}）与目标（${region} · ${field}），申请仍受当年竞争、名额与材料质量影响；请避免将任何表述理解为录取承诺。`;
+
+  const budget_suggestion =
+    locale === "en"
+      ? `Provided budget range: ${budget}. Reserve room for language tests, credentialing, application fees, and living-cost variance; refer to official fees and exchange rates.`
+      : `已提供预算区间：${budget}。建议预留语言考试、认证、申请费与生活费波动；具体以官方费用与汇率为准。`;
+
+  const timeline_suggestion =
+    locale === "en"
+      ? `Intended intake/application season: ${intake}. Back-plan milestones as "materials → applications & recommendations → interviews/补充", and watch each program's round deadlines.`
+      : `意向入学/申请季：${intake}。建议按「材料准备 → 网申与推荐信 → 面试/补件」倒排里程碑，并关注目标院校轮次截止日期。`;
+
+  const tiers =
+    locale === "en"
+      ? {
+          reach: {
+            label: "Reach",
+            summary: `In the ${region} direction, try a more competitive program mix (${field}) matching your long-term goals.`,
+            rationale: `With risk preference "${risk}", the reach tier explores the upside; prioritize programs aligned with your narrative and GPA/language and prerequisite fit.`,
+            risk_note: `The reach tier carries higher uncertainty: fierce competition and yearly quota swings may move outcomes; not an admission probability promise.`,
+            fit_note: `Fit: Math M1/M2 and core science electives weigh heavily for DS/AI HK programs; if scores fall below typical admitted profiles, reach fit is lower (historical trend, not official odds).`,
+          },
+          match: {
+            label: "Match",
+            summary: `Main application path: programs aligned with ${school} background and ${field} target.`,
+            rationale: `This tier emphasizes feasibility and goal fit; concentrate effort and essays here.`,
+            risk_note: `Match tier still requires language, prerequisites, and complete materials; "match" is not auto-admit.`,
+            fit_note: `Fit: undergraduate background aligns with ${field}; GPA ${gpa} sits near the common admitted band for HK taught masters (historical trend; verify on official sites each year).`,
+          },
+          safety: {
+            label: "Safety",
+            summary: `A safer backup path: lowers "all-reject" risk but still requires minimum program requirements and complete materials.`,
+            rationale: `Safety is not "guaranteed admit"; use it to balance risk while still preparing materials and interviews.`,
+            risk_note: `Safety schools still have minimum thresholds and material review; slacking on preparation can still cause losses.`,
+            fit_note: `Fit: safety tier typically maps to programs with lower thresholds than the main mix; still meet official language and prerequisite floors, with rolling-round self-funded paths relatively viable.`,
+          },
+        }
+      : {
+          reach: {
+            label: "冲刺",
+            summary: `在 ${region} 方向尝试更 competitive 的项目组合（${field}），以匹配你的长期目标。`,
+            rationale: `在风险偏好为「${risk}」时，冲刺档用于探索上限；请结合 GPA/语言与项目先修要求，优先选择与你叙事一致的项目。`,
+            risk_note: `冲刺档不确定性更高：竞争激烈与当年名额波动可能导致结果偏离预期，不代表录取概率承诺。`,
+            fit_note: `程序匹配度：Math M1/M2 与核心科学选修对 DS/AI 等港校项目权重较高；若科目成绩未达 typical admitted profile，冲刺档匹配度偏低（基于历史趋势，非官方概率）。`,
+          },
+          match: {
+            label: "匹配",
+            summary: `主申路径：与 ${school} 背景、${field} 目标较一致的项目组合。`,
+            rationale: `该档强调可行性与目标匹配；建议把主要精力与文书材料放在这一档的项目上。`,
+            risk_note: `匹配档仍需满足语言、先修与材料完整性；「匹配」不等于自动录取。`,
+            fit_note: `程序匹配度：本科背景与 ${field} 主线一致；GPA ${gpa} 接近港校授课型硕士常见 admitted 区间（基于历史趋势，请以当年官网为准）。`,
+          },
+          safety: {
+            label: "保底",
+            summary: `更稳妥的备选路径：降低「全拒」风险，但仍需满足项目最低要求与材料完整性。`,
+            rationale: `保底不等于「一定录取」，用于平衡风险；建议仍认真完成材料与面试准备。`,
+            risk_note: `保底院校仍有最低门槛与材料审核；懈怠准备仍可能导致意外失利。`,
+            fit_note: `程序匹配度：保底档通常对应门槛低于主申组合的项目；仍须满足官网公示的语言与先修底线，rolling round 自费路径相对可行。`,
+          },
+        };
 
   const base = {
     schemaVersion: PLAN_RESULT_SCHEMA_VERSION,
-    disclaimer: DEFAULT_DISCLAIMER,
-    risk_summary: `基于你当前背景（${school}，GPA ${gpa}）与目标（${region} · ${field}），申请仍受当年竞争、名额与材料质量影响；请避免将任何表述理解为录取承诺。`,
-    budget_suggestion: `已提供预算区间：${budget}。建议预留语言考试、认证、申请费与生活费波动；具体以官方费用与汇率为准。`,
-    timeline_suggestion: `意向入学/申请季：${intake}。建议按「材料准备 → 网申与推荐信 → 面试/补件」倒排里程碑，并关注目标院校轮次截止日期。`,
+    disclaimer,
+    risk_summary,
+    budget_suggestion,
+    timeline_suggestion,
     timeline_urgency: "normal",
     citations: [],
-    tiers: {
-      reach: {
-        label: "冲刺",
-        summary: `在 ${region} 方向尝试更 competitive 的项目组合（${field}），以匹配你的长期目标。`,
-        rationale: `在风险偏好为「${risk}」时，冲刺档用于探索上限；请结合 GPA/语言与项目先修要求，优先选择与你叙事一致的项目。`,
-        risk_note: `冲刺档不确定性更高：竞争激烈与当年名额波动可能导致结果偏离预期，不代表录取概率承诺。`,
-        fit_note: `程序匹配度：Math M1/M2 与核心科学选修对 DS/AI 等港校项目权重较高；若科目成绩未达 typical admitted profile，冲刺档匹配度偏低（基于历史趋势，非官方概率）。`,
-      },
-      match: {
-        label: "匹配",
-        summary: `主申路径：与 ${school} 背景、${field} 目标较一致的项目组合。`,
-        rationale: `该档强调可行性与目标匹配；建议把主要精力与文书材料放在这一档的项目上。`,
-        risk_note: `匹配档仍需满足语言、先修与材料完整性；「匹配」不等于自动录取。`,
-        fit_note: `程序匹配度：本科背景与 ${field} 主线一致；GPA ${gpa} 接近港校授课型硕士常见 admitted 区间（基于历史趋势，请以当年官网为准）。`,
-      },
-      safety: {
-        label: "保底",
-        summary: `更稳妥的备选路径：降低「全拒」风险，但仍需满足项目最低要求与材料完整性。`,
-        rationale: `保底不等于「一定录取」，用于平衡风险；建议仍认真完成材料与面试准备。`,
-        risk_note: `保底院校仍有最低门槛与材料审核；懈怠准备仍可能导致意外失利。`,
-        fit_note: `程序匹配度：保底档通常对应门槛低于主申组合的项目；仍须满足官网公示的语言与先修底线，rolling round 自费路径相对可行。`,
-      },
-    },
+    tiers,
   };
   base._planInputView = planInputView;
   const withIntel = applyIntelToPlan(base, intelItems, ext);
@@ -274,11 +323,13 @@ export function normalizePlanResult(raw) {
  *   intelContextText?: string,
  *   intelItems?: object[],
  *   extKbEntries?: object[],
+ *   locale?: string,
  * }} opts
  */
 export async function generateStructuredPlan(planInputView, opts) {
+  const locale = normalizeLocale(opts.locale);
   if (opts.useMock) {
-    const plan = buildMockStructuredPlan(planInputView, opts.intelItems, opts.extKbEntries);
+    const plan = buildMockStructuredPlan(planInputView, opts.intelItems, opts.extKbEntries, { locale });
     return { ok: true, plan };
   }
 
@@ -291,8 +342,10 @@ export async function generateStructuredPlan(planInputView, opts) {
   });
 
   const system =
-    loadPromptText("plan.txt") ||
-    "你是留学规划助手。只输出一个 JSON 对象，不要输出 markdown。";
+    (loadPromptText("plan.txt") ||
+      "你是留学规划助手。只输出一个 JSON 对象，不要输出 markdown。") +
+    "\n\n" +
+    buildOutputLocaleBlock(locale);
 
   let user = `请仅基于以下 planInputView（JSON）生成结构化方案：\n${JSON.stringify(planInputView, null, 2)}`;
   if (opts.intelContextText && String(opts.intelContextText).trim()) {

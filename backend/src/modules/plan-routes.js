@@ -7,6 +7,7 @@ import { recordPlanGenerateRequest, getPlanGenerateMetricsSnapshot } from "../pl
 import { buildReportReadiness } from "../report-readiness.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
 import { logPlanGenerationFailure } from "./context.js";
+import { resolveThreadLocale } from "../output-locale.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -18,6 +19,7 @@ export function registerPlanRoutes(app, ctx) {
   app.post("/api/v1/plans/generate", async (request, reply) => {
     const started = Date.now();
     const user = await auth(request);
+    const body = request.body && typeof request.body === "object" ? request.body : {};
     const latest = store.getLatestProfileSnapshot(user.id);
     const pre = checkPlanGenerationPreconditions(latest);
     if (!pre.ok) {
@@ -48,6 +50,15 @@ export function registerPlanRoutes(app, ctx) {
       limit: 12,
     });
 
+    let thread = null;
+    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
+    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
+    if (!thread) {
+      const threads = store.listThreadsByUser(user.id);
+      thread = threads[0] || null;
+    }
+    const locale = resolveThreadLocale(thread);
+
     const gen = await generateStructuredPlan(piv, {
       useMock,
       deepseekApiKey: key,
@@ -57,6 +68,7 @@ export function registerPlanRoutes(app, ctx) {
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
       extKbEntries: intelPack.extKbEntries,
+      locale,
     });
 
     if (!gen.ok) {
