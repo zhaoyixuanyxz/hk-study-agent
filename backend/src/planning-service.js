@@ -4,6 +4,7 @@ import {
   filterCitationsAgainstCombinedSources,
   normalizeCitations,
 } from "./citation-utils.js";
+import { buildDeepseekChatBody, resolveDeepseekBaseUrl, resolveDeepseekModel } from "./deepseek-client.js";
 import {
   externalKbCitationId,
   selectExternalKbForProfile,
@@ -14,11 +15,11 @@ import { buildOutputLocaleBlock, normalizeLocale } from "./output-locale.js";
 
 const PLAN_RESULT_SCHEMA_VERSION = "1.0";
 
-/** @returns {number} 毫秒，默认 120s */
+/** @returns {number} 毫秒；V4 Pro 思考模式默认 300s */
 export function getPlanGenerationTimeoutMs() {
   const n = Number(process.env.PLAN_GENERATION_TIMEOUT_MS);
   if (Number.isFinite(n) && n >= 5000 && n <= 600000) return Math.floor(n);
-  return 120000;
+  return 300000;
 }
 
 const DEFAULT_DISCLAIMER =
@@ -336,7 +337,7 @@ export async function generateStructuredPlan(planInputView, opts) {
   const timeoutMs = opts.timeoutMs ?? getPlanGenerationTimeoutMs();
   const client = new OpenAI({
     apiKey: opts.deepseekApiKey,
-    baseURL: opts.deepseekBaseUrl || "https://api.deepseek.com",
+    baseURL: resolveDeepseekBaseUrl(opts.deepseekBaseUrl),
     timeout: timeoutMs,
     maxRetries: 0,
   });
@@ -357,15 +358,19 @@ export async function generateStructuredPlan(planInputView, opts) {
 
   let completion;
   try {
-    completion = await client.chat.completions.create({
-      model: opts.deepseekModel || "deepseek-chat",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      temperature: 0.35,
-      signal: controller.signal,
-    });
+    completion = await client.chat.completions.create(
+      buildDeepseekChatBody({
+        model: resolveDeepseekModel(opts.deepseekModel),
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        thinking: true,
+        reasoningEffort: "high",
+        temperature: 0.35,
+      }),
+      { signal: controller.signal }
+    );
   } catch (e) {
     const aborted =
       e?.name === "AbortError" ||

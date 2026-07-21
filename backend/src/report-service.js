@@ -3,6 +3,7 @@ import {
   filterCitationsAgainstCombinedSources,
   normalizeCitations,
 } from "./citation-utils.js";
+import { buildDeepseekChatBody, resolveDeepseekBaseUrl, resolveDeepseekModel } from "./deepseek-client.js";
 import { loadPromptText } from "./promptLayer.js";
 import { buildMockReportVisuals, normalizeReportVisuals } from "./visuals-normalize.js";
 import { buildOutputLocaleBlock, normalizeLocale } from "./output-locale.js";
@@ -12,11 +13,11 @@ export const REPORT_RESULT_SCHEMA_VERSION = "2.0";
 const DEFAULT_REPORT_DISCLAIMER =
   "本报告由系统根据对话建档信息与自动生成的留学方案整理而成，仅供参考，不构成任何录取、签证或财务承诺。具体选校、申请要求与截止时间请以院校及官方渠道为准。";
 
-/** @returns {number} 毫秒，默认 120s */
+/** @returns {number} 毫秒；V4 Pro 思考模式默认 300s */
 export function getReportGenerationTimeoutMs() {
   const n = Number(process.env.REPORT_GENERATION_TIMEOUT_MS);
   if (Number.isFinite(n) && n >= 5000 && n <= 600000) return Math.floor(n);
-  return 120000;
+  return 300000;
 }
 
 /**
@@ -154,7 +155,6 @@ function planCitations(plan) {
 /**
  * @param {string[]} items
  * @param {boolean} ordered
- * @param {string} [emptyLabel]
  */
 function listHtml(items, ordered, emptyLabel) {
   const empty = emptyLabel || "（暂无条目）";
@@ -167,7 +167,6 @@ function listHtml(items, ordered, emptyLabel) {
 /**
  * @param {object} parsed from model or mock
  * @param {object} mergedCitations normalized citations (plan + model)
- * @param {{ locale?: string }} [options]
  */
 export function buildDeliverySectionsHtml(parsed, mergedCitations, options = {}) {
   const isEn = normalizeLocale(options.locale) === "en";
@@ -183,17 +182,16 @@ export function buildDeliverySectionsHtml(parsed, mergedCitations, options = {})
   const d90 = delivery.action_plan.days_90;
   const gloss = delivery.plain_language_notes;
 
-  const emptyList = isEn ? "(no entries)" : "（暂无条目）";
   const parentBlock = `<section class="report-chapter" id="parent-summary"><h2>${escapeHtmlText(isEn ? "Parent Decision Summary" : "家长决策摘要")}</h2><p class="report-lede">${escapeHtmlText(isEn ? "Conclusion scan for family decision-makers (budget, risk, direction)." : "以下为面向家庭决策者的结论速览（预算、风险与方向）。")}</p>${listHtml(
     parentLines,
     false,
-    emptyList
+    isEn ? "(no entries)" : "（暂无条目）"
   )}</section>`;
 
   const actionBlock = `<section class="report-chapter" id="action-plan"><h2>${escapeHtmlText(isEn ? "Student Action Plan (30 / 60 / 90 days)" : "学生行动计划（30 / 60 / 90 天）")}</h2>
-    <h3 class="report-subh">${escapeHtmlText(isEn ? "Next 30 days" : "未来 30 天")}</h3>${listHtml(d30, true, emptyList)}
-    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 31-60" : "第 31–60 天")}</h3>${listHtml(d60, true, emptyList)}
-    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 61-90" : "第 61–90 天")}</h3>${listHtml(d90, true, emptyList)}
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Next 30 days" : "未来 30 天")}</h3>${listHtml(d30, true, isEn ? "(no entries)" : "（暂无条目）")}
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 31-60" : "第 31–60 天")}</h3>${listHtml(d60, true, isEn ? "(no entries)" : "（暂无条目）")}
+    <h3 class="report-subh">${escapeHtmlText(isEn ? "Days 61-90" : "第 61–90 天")}</h3>${listHtml(d90, true, isEn ? "(no entries)" : "（暂无条目）")}
   </section>`;
 
   let citeInner = "";
@@ -216,7 +214,7 @@ export function buildDeliverySectionsHtml(parsed, mergedCitations, options = {})
 
   const glossBlock =
     gloss.length > 0
-      ? `<section class="report-chapter" id="plain-language"><h2>${escapeHtmlText(isEn ? "Term Glossary" : "术语短解")}</h2>${listHtml(gloss, false, emptyList)}</section>`
+      ? `<section class="report-chapter" id="plain-language"><h2>${escapeHtmlText(isEn ? "Term Glossary" : "术语短解")}</h2>${listHtml(gloss, false, isEn ? "(no entries)" : "（暂无条目）")}</section>`
       : "";
 
   const riskBlock = buildRiskItemsSectionHtml(delivery.risk_items, { locale: options.locale });
@@ -259,6 +257,7 @@ export function buildRiskItemsSectionHtml(riskItems, options = {}) {
  * 基于画像与方案生成 HTML（mock，短版、可决策）
  * @param {object} snapshot profile snapshot 对象
  * @param {object} plan 结构化方案
+ * @param {{ locale?: string }} [options]
  */
 export function buildMockHtmlReport(snapshot, plan, options = {}) {
   const locale = normalizeLocale(options.locale);
@@ -477,7 +476,7 @@ export async function generateHtmlReport(snapshot, plan, opts) {
   const timeoutMs = opts.timeoutMs ?? getReportGenerationTimeoutMs();
   const client = new OpenAI({
     apiKey: opts.deepseekApiKey,
-    baseURL: opts.deepseekBaseUrl || "https://api.deepseek.com",
+    baseURL: resolveDeepseekBaseUrl(opts.deepseekBaseUrl),
     timeout: timeoutMs,
     maxRetries: 0,
   });
@@ -498,15 +497,19 @@ export async function generateHtmlReport(snapshot, plan, opts) {
 
   let completion;
   try {
-    completion = await client.chat.completions.create({
-      model: opts.deepseekModel || "deepseek-chat",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      temperature: 0.35,
-      signal: controller.signal,
-    });
+    completion = await client.chat.completions.create(
+      buildDeepseekChatBody({
+        model: resolveDeepseekModel(opts.deepseekModel),
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        thinking: true,
+        reasoningEffort: "high",
+        temperature: 0.35,
+      }),
+      { signal: controller.signal }
+    );
   } catch (e) {
     const aborted =
       e?.name === "AbortError" ||

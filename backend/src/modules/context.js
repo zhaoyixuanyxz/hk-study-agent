@@ -25,15 +25,18 @@ export function createAppContext(store) {
     return user;
   }
 
-  function memoryContextForTurn(userId, userMessage) {
-    const chunks = store.searchSemanticChunks(userId, userMessage, 4);
+  function memoryContextForTurn(userId, userMessage, threadId) {
+    const chunks = store.searchSemanticChunks(userId, userMessage, 4, threadId);
     if (!chunks.length) return "";
     return chunks.map((c) => c.text).join("\n---\n");
   }
 
-  function buildLiveProfileBundle(userId) {
-    const latestRow = store.getLatestProfileSnapshot(userId);
-    const memories = store.listMemoriesByUser(userId);
+  function buildLiveProfileBundle(userId, threadId) {
+    const tid = threadId != null && String(threadId).trim() ? String(threadId).trim() : "";
+    const latestRow = tid
+      ? store.getLatestProfileSnapshot(userId, tid)
+      : store.getLatestProfileSnapshot(userId);
+    const memories = tid ? store.listMemoriesByThread(userId, tid) : store.listMemoriesByUser(userId);
     const memSlice = memories.slice(0, 200);
     const memForPivot = memSlice.map((m) => ({
       kind: m.kind,

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { buildDeepseekChatBody, resolveDeepseekBaseUrl, resolveDeepseekModel } from "./deepseek-client.js";
 import { composeSystemPrompt } from "./promptLayer.js";
 import { assessChatScope, sanitizeExtractionForHkMaster } from "./chat-scope.js";
 
@@ -77,22 +78,25 @@ export async function runProfileExtraction({
 
   const client = new OpenAI({
     apiKey: deepseekApiKey,
-    baseURL: deepseekBaseUrl,
+    baseURL: resolveDeepseekBaseUrl(deepseekBaseUrl),
   });
   const base = composeSystemPrompt("v1");
   const mem = memoryContext ? `\n\n[KNOWN_MEMORY]\n${memoryContext.slice(0, 6000)}` : "";
   const userBlock = `用户说：\n${userMessage}\n\n助手回复：\n${assistantReply}${mem}\n\n请抽取 JSON。`;
 
-  const completion = await client.chat.completions.create({
-    model: deepseekModel,
-    messages: [
-      { role: "system", content: EXTRACTION_SYSTEM },
-      { role: "system", content: base.slice(0, 1500) },
-      { role: "user", content: userBlock },
-    ],
-    temperature: 0.2,
-    max_tokens: 1200,
-  });
+  const completion = await client.chat.completions.create(
+    buildDeepseekChatBody({
+      model: resolveDeepseekModel(deepseekModel),
+      messages: [
+        { role: "system", content: EXTRACTION_SYSTEM },
+        { role: "system", content: base.slice(0, 1500) },
+        { role: "user", content: userBlock },
+      ],
+      thinking: false,
+      temperature: 0.2,
+      max_tokens: 1200,
+    })
+  );
   const raw = completion.choices[0]?.message?.content || "";
   return sanitizeExtractionForHkMaster(normalizeExtraction(parseJson(raw)));
 }

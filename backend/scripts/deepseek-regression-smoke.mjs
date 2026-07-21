@@ -224,9 +224,12 @@ async function runLiveCase(app, headers, threadId, c) {
       method: "POST",
       url: "/api/v1/reports/generate",
       headers: { ...headers, "content-type": "application/json" },
-      payload: JSON.stringify({ plan_id: ctx.livePlanId }),
+      payload: { plan_id: ctx.livePlanId },
     });
-    if (r.statusCode !== 200 || !r.json().ok) return false;
+    if (r.statusCode !== 200 || !r.json().ok) {
+      console.error("live_report status", r.statusCode, String(r.body).slice(0, 400));
+      return false;
+    }
     ctx.liveReport = r.json();
     return Boolean(ctx.liveReport.html);
   }
@@ -247,11 +250,30 @@ async function runLiveCase(app, headers, threadId, c) {
 }
 
 async function main() {
+  // Preserve real key before mock phase clears it (dotenv may not be loaded in this script).
+  const liveKeyFromEnv = (process.env.DEEPSEEK_API_KEY || "").trim();
+  let liveKeyFromFile = "";
+  try {
+    const { readFileSync, existsSync } = await import("node:fs");
+    const { resolve, dirname } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+    const envPath = resolve(root, ".env");
+    if (existsSync(envPath)) {
+      const m = /(?:^|\n)\s*DEEPSEEK_API_KEY\s*=\s*([^\r\n#]+)/.exec(readFileSync(envPath, "utf8"));
+      if (m) liveKeyFromFile = String(m[1] || "").trim().replace(/^["']|["']$/g, "");
+    }
+  } catch {
+    /* ignore */
+  }
+  const preservedLiveKey = liveKeyFromEnv || liveKeyFromFile;
+
   const dir = mkdtempSync(join(tmpdir(), "deepseek-smoke-"));
   ctx.dbPath = join(dir, "db.json");
   writeFileSync(ctx.dbPath, JSON.stringify({ users: [], threads: [], messages: [] }), "utf8");
 
   process.env.DEEPSEEK_API_KEY = "";
+  process.env.DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
   const app = buildApp({ dataFile: ctx.dbPath });
   await app.ready();
 
@@ -285,11 +307,12 @@ async function main() {
 
   await app.close();
 
-  const key = (process.env.DEEPSEEK_API_KEY || "").trim();
+  const key = preservedLiveKey;
   let livePass = 0;
   let liveTotal = 0;
   if (key) {
     process.env.DEEPSEEK_API_KEY = key;
+    process.env.DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
     const liveApp = buildApp({ dataFile: ctx.dbPath });
     await liveApp.ready();
     liveTotal = LIVE_CASES.length;

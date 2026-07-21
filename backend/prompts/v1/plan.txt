@@ -6,7 +6,9 @@ tiers: { reach, match, safety }，每个 tier 含 label, summary, rationale（�
 可选 visuals 对象（数字字段，禁止录取概率/录取%）：
 - tierComparison: { labels: ["冲刺","匹配","保底"], scores: [0-100 相对可行性指数], note }
 - timelineMilestones: [{ label, monthsFromNow }] 未来 0–12 月里程碑
-- benchmarkBars: [{ label, value, max }] 如 GPA 相对位置、材料完整度
+- benchmarkBars: [{ label, value, max }] 如 GPA 相对位置、材料完整度；max 通常为 100
+  · GPA 条的 value 必须是百分制指数：(GPA/4)×100（例：3.0 → 75），禁止填原始 GPA（如 3.0）
+  · 材料完整度等准备度条直接给 0–100
 scores/value 仅为相对可行性或准备度示意，勿输出「录取概率」。
 禁止承诺录取或给出精确概率；disclaimer 须说明仅供参考、不构成录取承诺。
 

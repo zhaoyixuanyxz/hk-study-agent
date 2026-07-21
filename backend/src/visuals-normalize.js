@@ -14,6 +14,24 @@ function clampNum(n, min, max) {
 }
 
 /**
+ * 模型常把原始 GPA（如 3.0/4.0）直接塞进 max=100 的条形图；需换算为百分制指数。
+ * 已是 0–100 准备度的值（>5）保持不变。
+ * @param {string} label
+ * @param {unknown} rawValue
+ * @param {number} max
+ */
+function normalizeBenchmarkBarValue(label, rawValue, max) {
+  const x = Number(rawValue);
+  if (!Number.isFinite(x)) return 0;
+  const isGpaBar = /gpa|绩点|相对位置/i.test(label);
+  // 典型 4.0 制 GPA 落在 (0, 5]；百分制指数通常明显大于 5
+  if (isGpaBar && x > 0 && x <= 5 && max >= 100) {
+    return (x / 4) * 100;
+  }
+  return x;
+}
+
+/**
  * @param {unknown} raw
  */
 export function normalizePlanVisuals(raw) {
@@ -65,7 +83,7 @@ export function normalizePlanVisuals(raw) {
       const max = clampNum(b.max, 1, 100);
       bars.push({
         label,
-        value: clampNum(b.value, 0, max),
+        value: clampNum(normalizeBenchmarkBarValue(label, b.value, max), 0, max),
         max,
       });
       if (bars.length >= 6) break;

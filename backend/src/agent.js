@@ -4,6 +4,7 @@ import {
   filterCitationsAgainstIntelligenceItems,
   normalizeCitations,
 } from "./citation-utils.js";
+import { buildDeepseekChatBody, resolveDeepseekBaseUrl, resolveDeepseekModel } from "./deepseek-client.js";
 import { composeSystemPrompt } from "./promptLayer.js";
 import { assessChatScope, buildScopeRedirectAgentOutput } from "./chat-scope.js";
 import { normalizeLocale } from "./output-locale.js";
@@ -355,7 +356,7 @@ export async function runProfileAgent({
 
   const client = new OpenAI({
     apiKey: deepseekApiKey,
-    baseURL: deepseekBaseUrl,
+    baseURL: resolveDeepseekBaseUrl(deepseekBaseUrl),
   });
   const system = composeSystemPrompt("v1", { locale: loc });
   const mem =
@@ -370,12 +371,15 @@ export async function runProfileAgent({
     { role: "user", content: userMessage },
   ];
 
-  const completion = await client.chat.completions.create({
-    model: deepseekModel,
-    messages,
-    temperature: 0.7,
-    max_tokens: 900,
-  });
+  const completion = await client.chat.completions.create(
+    buildDeepseekChatBody({
+      model: resolveDeepseekModel(deepseekModel),
+      messages,
+      thinking: false,
+      temperature: 0.7,
+      max_tokens: 900,
+    })
+  );
   const raw = completion.choices[0]?.message?.content || "";
   return applyIntelCitationAllowlist(normalizeAgentOutput(parseJson(raw)), intelItems, extKbEntries);
 }
