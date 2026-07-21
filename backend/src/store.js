@@ -7,6 +7,7 @@ import { normalizeLocale } from "./output-locale.js";
 import { ALL_STRUCTURED_FACT_KEYS, buildPlanInputView } from "./plan-input-service.js";
 import { buildProfileSnapshot } from "./profile-service.js";
 import { passesExtractionQuality } from "./intelligence/structured-extract.js";
+import { isUrlOnOfficialAllowlist } from "./intelligence/host-allowlist.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -188,6 +189,7 @@ export const INTELLIGENCE_COLLECTION_KEYS = [
   "intelligenceCollectionRuns",
   "intelligenceFeedUrls",
   "intelligenceReviewerEmails",
+  "intelligenceCrawlCandidates",
 ];
 
 /**
@@ -670,7 +672,21 @@ export function createStore(dataFile) {
     },
 
     /**
-     * 同一 userId+key 只保留一条记录；kind 按优先级升级（confirmed > candidate > preference > insight）
+     * 仅返回指定会话的建档记忆（会话级隔离）
+     * @param {string} userId
+     * @param {string} threadId
+     */
+    listMemoriesByThread(userId, threadId) {
+      const db = load();
+      const tid = String(threadId || "").trim();
+      if (!tid) return [];
+      return db.profileMemories
+        .filter((m) => m.userId === userId && String(m.threadId || "") === tid)
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    },
+
+    /**
+     * 同一 userId+key+threadId 只保留一条记录；kind 按优先级升级（confirmed > candidate > preference > insight）
      * @param {object} rec
      */
     upsertMemory(rec) {
@@ -678,7 +694,13 @@ export function createStore(dataFile) {
       const now = new Date().toISOString();
       const order = { confirmed: 4, candidate: 3, preference: 2, insight: 1 };
       const norm = (s) => String(s ?? "").trim();
-      const existing = db.profileMemories.find((m) => m.userId === rec.userId && m.key === rec.key);
+      const tid = rec.threadId ? String(rec.threadId) : null;
+      const existing = db.profileMemories.find(
+        (m) =>
+          m.userId === rec.userId &&
+          m.key === rec.key &&
+          (m.threadId ? String(m.threadId) : null) === tid
+      );
       if (existing) {
         const incoming = order[rec.kind] || 0;
         const cur = order[existing.kind] || 0;
@@ -815,10 +837,13 @@ export function createStore(dataFile) {
 
     /**
      * @param {string} userId
+     * @param {string} [threadId] 若提供则只取该会话快照
      */
-    getLatestProfileSnapshot(userId) {
+    getLatestProfileSnapshot(userId, threadId) {
       const db = load();
-      const list = db.profileSnapshots.filter((s) => s.userId === userId);
+      const tid = threadId != null && String(threadId).trim() ? String(threadId).trim() : "";
+      let list = db.profileSnapshots.filter((s) => s.userId === userId);
+      if (tid) list = list.filter((s) => String(s.threadId || "") === tid);
       if (!list.length) return null;
       return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
     },
@@ -894,12 +919,16 @@ export function createStore(dataFile) {
      * @param {string} userId
      * @param {string} query
      * @param {number} limit
+     * @param {string} [threadId] 若提供则只检索该会话语义块
      */
-    searchSemanticChunks(userId, query, limit = 5) {
+    searchSemanticChunks(userId, query, limit = 5, threadId) {
       const db = load();
       const qWords = tokenizeForRecall(query);
       if (!qWords.length) return [];
-      const chunks = db.semanticMemoryChunks.filter((c) => c.userId === userId);
+      const tid = threadId != null && String(threadId).trim() ? String(threadId).trim() : "";
+      const chunks = db.semanticMemoryChunks.filter(
+        (c) => c.userId === userId && (!tid || String(c.threadId || "") === tid)
+      );
       const scored = chunks
         .map((c) => ({
           chunk: c,
@@ -1414,6 +1443,90 @@ export function createStore(dataFile) {
       const db = load();
       ensureIntelligenceCollections(db);
       return db.intelligenceFeedUrls.slice();
+    },
+
+    /**
+     * @param {object} raw
+     * @returns {{ row: object, created: boolean }}
+     */
+    upsertCrawlCandidate(raw) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const url = String(raw.canonicalUrl || raw.url || "").trim();
+      if (!url || !isUrlOnOfficialAllowlist(url)) return { row: null, created: false };
+      const now = new Date().toISOString();
+      const key = url.toLowerCase();
+      let idx = db.intelligenceCrawlCandidates.findIndex(
+        (x) => String(x.canonicalUrl || "").trim().toLowerCase() === key
+      );
+      if (idx >= 0) {
+        const prev = db.intelligenceCrawlCandidates[idx];
+        if (prev.status === "approved" || prev.status === "rejected") {
+          return { row: prev, created: false };
+        }
+        const row = {
+          ...prev,
+          ...raw,
+          id: prev.id,
+          canonicalUrl: url,
+          updatedAt: now,
+          status: prev.status || "pending",
+        };
+        db.intelligenceCrawlCandidates[idx] = row;
+        save(db);
+        return { row, created: false };
+      }
+      const row = {
+        id: raw.id || cryptoRandomId(),
+        feedId: raw.feedId || null,
+        canonicalUrl: url,
+        schoolId: raw.schoolId || null,
+        sourceId: raw.sourceId || null,
+        infoType: raw.infoType || "admission",
+        reason: String(raw.reason || "").slice(0, 400),
+        seedUrl: raw.seedUrl || null,
+        status: "pending",
+        discoveredAt: now,
+        decidedAt: null,
+        decidedBy: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      db.intelligenceCrawlCandidates.push(row);
+      save(db);
+      return { row, created: true };
+    },
+
+    /**
+     * @param {{ status?: string, limit?: number }} [opts]
+     */
+    listCrawlCandidates(opts = {}) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      let list = db.intelligenceCrawlCandidates.slice();
+      const status = String(opts.status || "").trim();
+      if (status) list = list.filter((x) => x.status === status);
+      const limit = Math.min(200, Math.max(1, Number(opts.limit) || 100));
+      return list.sort((a, b) => String(b.discoveredAt || "").localeCompare(String(a.discoveredAt || ""))).slice(0, limit);
+    },
+
+    /**
+     * @param {string} candidateId
+     * @param {"approve"|"reject"} decision
+     * @param {string} [reviewerEmail]
+     */
+    decideCrawlCandidate(candidateId, decision, reviewerEmail) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const row = db.intelligenceCrawlCandidates.find((x) => x.id === candidateId);
+      if (!row) return null;
+      const now = new Date().toISOString();
+      row.status = decision === "approve" ? "approved" : "rejected";
+      row.decidedAt = now;
+      row.decidedBy = reviewerEmail || null;
+      row.updatedAt = now;
+      save(db);
+      return row;
     },
   };
 }

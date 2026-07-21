@@ -3,6 +3,7 @@ import {
   generateStructuredPlan,
   getPlanGenerationTimeoutMs,
 } from "../planning-service.js";
+import { DEFAULT_DEEPSEEK_MODEL, resolveDeepseekBaseUrl } from "../deepseek-client.js";
 import { recordPlanGenerateRequest, getPlanGenerateMetricsSnapshot } from "../plan-generation-metrics.js";
 import { buildReportReadiness } from "../report-readiness.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
@@ -20,7 +21,18 @@ export function registerPlanRoutes(app, ctx) {
     const started = Date.now();
     const user = await auth(request);
     const body = request.body && typeof request.body === "object" ? request.body : {};
-    const latest = store.getLatestProfileSnapshot(user.id);
+
+    let thread = null;
+    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
+    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
+    if (!thread) {
+      const threads = store.listThreadsByUser(user.id);
+      thread = threads[0] || null;
+    }
+    const locale = resolveThreadLocale(thread);
+    const latest = thread
+      ? store.getLatestProfileSnapshot(user.id, thread.id)
+      : store.getLatestProfileSnapshot(user.id);
     const pre = checkPlanGenerationPreconditions(latest);
     if (!pre.ok) {
       recordPlanGenerateRequest({
@@ -50,20 +62,11 @@ export function registerPlanRoutes(app, ctx) {
       limit: 12,
     });
 
-    let thread = null;
-    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
-    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
-    if (!thread) {
-      const threads = store.listThreadsByUser(user.id);
-      thread = threads[0] || null;
-    }
-    const locale = resolveThreadLocale(thread);
-
     const gen = await generateStructuredPlan(piv, {
       useMock,
       deepseekApiKey: key,
-      deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
-      deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+      deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
+      deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
       timeoutMs,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,

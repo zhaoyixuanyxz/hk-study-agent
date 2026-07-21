@@ -4,6 +4,7 @@ import {
   generateHtmlReport,
   getReportGenerationTimeoutMs,
 } from "../report-service.js";
+import { DEFAULT_DEEPSEEK_MODEL, resolveDeepseekBaseUrl } from "../deepseek-client.js";
 import { renderHtmlToPdf } from "../pdf-service.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
 import { resolveThreadLocale } from "../output-locale.js";
@@ -20,7 +21,18 @@ export function registerReportRoutes(app, ctx) {
     const body = request.body || {};
     const planIdHint = body.plan_id ? String(body.plan_id).trim() : "";
 
-    const latest = store.getLatestProfileSnapshot(user.id);
+    let thread = null;
+    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
+    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
+    if (!thread) {
+      const threads = store.listThreadsByUser(user.id);
+      thread = threads[0] || null;
+    }
+    const locale = resolveThreadLocale(thread);
+
+    const latest = thread
+      ? store.getLatestProfileSnapshot(user.id, thread.id)
+      : store.getLatestProfileSnapshot(user.id);
     let planRow = null;
     if (planIdHint) {
       planRow = store.getPlanResult(planIdHint, user.id);
@@ -59,20 +71,11 @@ export function registerReportRoutes(app, ctx) {
       limit: 12,
     });
 
-    let thread = null;
-    const threadIdHint = body.thread_id ? String(body.thread_id).trim() : "";
-    if (threadIdHint) thread = store.getThread(threadIdHint, user.id);
-    if (!thread) {
-      const threads = store.listThreadsByUser(user.id);
-      thread = threads[0] || null;
-    }
-    const locale = resolveThreadLocale(thread);
-
     const gen = await generateHtmlReport(latest.snapshot, planRow.plan, {
       useMock,
       deepseekApiKey: key,
-      deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
-      deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+      deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
+      deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
       timeoutMs,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,

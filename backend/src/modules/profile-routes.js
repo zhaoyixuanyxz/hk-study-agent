@@ -10,7 +10,8 @@ export function registerProfileRoutes(app, ctx) {
 
   app.get("/api/v1/profile", async (request) => {
     const user = await auth(request);
-    const bundle = buildLiveProfileBundle(user.id);
+    const threadId = request.query?.thread_id ? String(request.query.thread_id).trim() : "";
+    const bundle = buildLiveProfileBundle(user.id, threadId || undefined);
     return {
       snapshot: bundle.snapshot,
       plan_input_view: bundle.plan_input_view,
@@ -23,7 +24,8 @@ export function registerProfileRoutes(app, ctx) {
 
   app.get("/api/v1/profile/snapshot", async (request) => {
     const user = await auth(request);
-    const bundle = buildLiveProfileBundle(user.id);
+    const threadId = request.query?.thread_id ? String(request.query.thread_id).trim() : "";
+    const bundle = buildLiveProfileBundle(user.id, threadId || undefined);
     if (!bundle.snapshot) {
       return {
         snapshot: null,
@@ -74,7 +76,8 @@ export function registerProfileRoutes(app, ctx) {
 
   app.get("/api/v1/profile/plan-input", async (request) => {
     const user = await auth(request);
-    const bundle = buildLiveProfileBundle(user.id);
+    const threadId = request.query?.thread_id ? String(request.query.thread_id).trim() : "";
+    const bundle = buildLiveProfileBundle(user.id, threadId || undefined);
     return {
       plan_input_view: bundle.plan_input_view,
       snapshot_version: bundle.snapshot_version,
@@ -83,7 +86,10 @@ export function registerProfileRoutes(app, ctx) {
 
   app.get("/api/v1/profile/memories", async (request) => {
     const user = await auth(request);
-    const memories = store.listMemoriesByUser(user.id);
+    const threadId = request.query?.thread_id ? String(request.query.thread_id).trim() : "";
+    const memories = threadId
+      ? store.listMemoriesByThread(user.id, threadId)
+      : store.listMemoriesByUser(user.id);
     return memories.map((m) => ({
       id: m.id,
       kind: m.kind,

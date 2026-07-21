@@ -16,8 +16,8 @@ import { buildPlanInputView } from "./plan-input-service.js";
  * @param {string} ctx.deepseekModel
  */
 export async function runPhase2Pipeline(store, ctx) {
-  const memCtx = buildMemoryContext(store, ctx.userId, ctx.userMessage);
-  const latestSnap = store.getLatestProfileSnapshot(ctx.userId);
+  const memCtx = buildMemoryContext(store, ctx.userId, ctx.userMessage, ctx.threadId);
+  const latestSnap = store.getLatestProfileSnapshot(ctx.userId, ctx.threadId);
 
   const extracted = await runProfileExtraction({
     userMessage: ctx.userMessage,
@@ -32,7 +32,7 @@ export async function runPhase2Pipeline(store, ctx) {
 
   mergeExtractionIntoStore(store, ctx.userId, ctx.threadId, extracted);
 
-  const memories = store.listMemoriesByUser(ctx.userId);
+  const memories = store.listMemoriesByThread(ctx.userId, ctx.threadId);
   const threadSum = store.getThreadSummary(ctx.userId, ctx.threadId);
   let summaryText = threadSum?.summary || "";
   if (extracted.summary_delta) {
@@ -74,8 +74,11 @@ export async function runPhase2Pipeline(store, ctx) {
  * @param {string|null} [sourceThreadId] 写入快照的会话归属（如由该会话内确认事实触发）
  */
 export function refreshUserProfileSnapshot(store, userId, sourceThreadId = null) {
-  const memories = store.listMemoriesByUser(userId);
-  const last = store.getLatestProfileSnapshot(userId);
+  const tid = sourceThreadId ? String(sourceThreadId) : null;
+  const memories = tid ? store.listMemoriesByThread(userId, tid) : store.listMemoriesByUser(userId);
+  const last = tid
+    ? store.getLatestProfileSnapshot(userId, tid)
+    : store.getLatestProfileSnapshot(userId);
   const gapsFromAgent = last?.snapshot?.gaps || [];
   const summaryText = last?.snapshot?.summary || "";
 
@@ -100,8 +103,8 @@ export function refreshUserProfileSnapshot(store, userId, sourceThreadId = null)
   return { snapshot: snap, planInputView: planInput };
 }
 
-function buildMemoryContext(store, userId, query) {
-  const chunks = store.searchSemanticChunks(userId, query, 4);
+function buildMemoryContext(store, userId, query, threadId) {
+  const chunks = store.searchSemanticChunks(userId, query, 4, threadId);
   if (!chunks.length) return "";
   return chunks.map((c) => c.text).join("\n---\n");
 }

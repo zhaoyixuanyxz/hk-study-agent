@@ -152,8 +152,8 @@ export function registerChatRoutes(app, ctx) {
     const historyBefore = store.openaiHistory(t.id).slice(0, -1);
     const key = (process.env.DEEPSEEK_API_KEY || "").trim();
     const useMock = !key;
-    const memCtx = memoryContextForTurn(user.id, content);
-    const latestSnap = store.getLatestProfileSnapshot(user.id);
+    const memCtx = memoryContextForTurn(user.id, content, t.id);
+    const latestSnap = store.getLatestProfileSnapshot(user.id, t.id);
     const intelPack = buildCombinedIntelContext(store, {
       userMessage: content,
       snapshot: latestSnap?.snapshot,
@@ -211,8 +211,8 @@ export function registerChatRoutes(app, ctx) {
     const planReady = phase2?.planInputView?.readiness?.ready === true;
     const readiness_for_plan = planReady && agentOut.readiness_for_profile;
 
-    const snapForProgress = phase2?.snapshot || store.getLatestProfileSnapshot(user.id)?.snapshot || null;
-    const pivForProgress = phase2?.planInputView || store.getLatestProfileSnapshot(user.id)?.planInputView || null;
+    const snapForProgress = phase2?.snapshot || store.getLatestProfileSnapshot(user.id, t.id)?.snapshot || null;
+    const pivForProgress = phase2?.planInputView || store.getLatestProfileSnapshot(user.id, t.id)?.planInputView || null;
     const profile_progress =
       snapForProgress && pivForProgress ? buildProfileProgress(snapForProgress, pivForProgress) : null;
     const report_readiness =
