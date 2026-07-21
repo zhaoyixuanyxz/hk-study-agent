@@ -13,6 +13,7 @@ export function registerHistoryRoutes(app, ctx) {
       thread_id: t.id,
       pinned: t.pinned === true,
       orchestration_state: t.orchestrationState,
+      locale: t.locale === "en" ? "en" : "zh",
       created_at: t.createdAt,
       updated_at: t.updatedAt,
     }));

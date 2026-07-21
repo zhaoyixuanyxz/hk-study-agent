@@ -1,4 +1,5 @@
 import { refreshUserProfileSnapshot } from "../phase2-pipeline.js";
+import { normalizeLocale, resolveThreadLocale } from "../output-locale.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -60,11 +61,13 @@ export function registerProfileRoutes(app, ctx) {
       });
     }
     const removed = store.purgeUserStudyArchive(user.id);
-    const t = store.createThread(user.id);
+    const locale = normalizeLocale(body.locale);
+    const t = store.createThread(user.id, { locale });
     return {
       ok: true,
       thread_id: t.id,
       orchestration_state: t.orchestrationState,
+      locale: resolveThreadLocale(t),
       removed,
     };
   });

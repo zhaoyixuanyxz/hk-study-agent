@@ -1,10 +1,12 @@
 import { runProfileAgent } from "../agent.js";
 import { assessChatScope } from "../chat-scope.js";
+import { DEFAULT_DEEPSEEK_MODEL, resolveDeepseekBaseUrl } from "../deepseek-client.js";
 import { nextOrchestrationState } from "../orchestrator.js";
 import { runPhase2Pipeline } from "../phase2-pipeline.js";
 import { buildProfileProgress } from "../profile-progress.js";
 import { buildReportReadiness } from "../report-readiness.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
+import { normalizeLocale, resolveThreadLocale } from "../output-locale.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -15,8 +17,14 @@ export function registerChatRoutes(app, ctx) {
 
   app.post("/api/v1/threads", async (request) => {
     const user = await auth(request);
-    const t = store.createThread(user.id);
-    return { thread_id: t.id, orchestration_state: t.orchestrationState };
+    const body = request.body && typeof request.body === "object" ? request.body : {};
+    const locale = normalizeLocale(body.locale);
+    const t = store.createThread(user.id, { locale });
+    return {
+      thread_id: t.id,
+      orchestration_state: t.orchestrationState,
+      locale: resolveThreadLocale(t),
+    };
   });
 
   app.get("/api/v1/threads/:threadId", async (request) => {
@@ -33,6 +41,7 @@ export function registerChatRoutes(app, ctx) {
       id: t.id,
       pinned: t.pinned === true,
       orchestration_state: t.orchestrationState,
+      locale: resolveThreadLocale(t),
       updated_at: t.updatedAt,
       created_at: t.createdAt,
       messages: messages.map((m) => {
@@ -51,6 +60,12 @@ export function registerChatRoutes(app, ctx) {
   app.patch("/api/v1/threads/:threadId", async (request, reply) => {
     const user = await auth(request);
     const body = request.body && typeof request.body === "object" ? request.body : {};
+    if (Object.prototype.hasOwnProperty.call(body, "locale")) {
+      return reply.status(409).send({
+        code: "locale_locked",
+        message: "会话语言已锁定，请新建会话以切换语言",
+      });
+    }
     if (typeof body.pinned !== "boolean") {
       return reply.status(400).send({ code: "bad_request", message: "body.pinned 必须为布尔值" });
     }
@@ -153,8 +168,8 @@ export function registerChatRoutes(app, ctx) {
       historyOpenai: historyBefore,
       useMock,
       deepseekApiKey: key,
-      deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
-      deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+      deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
+      deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
       memoryContext: memCtx,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
@@ -185,8 +200,8 @@ export function registerChatRoutes(app, ctx) {
           gapsFromAgent: agentOut.gaps || [],
           useMock,
           deepseekApiKey: key,
-          deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
-          deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+          deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
+          deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
         });
       } catch (e) {
         request.log.error(e);
