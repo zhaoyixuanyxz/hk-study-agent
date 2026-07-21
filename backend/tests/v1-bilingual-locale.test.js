@@ -116,3 +116,25 @@ test("history lists locale", async () => {
   const body = JSON.parse(r.body);
   assert.equal(body.threads[0].locale, "en");
 });
+
+test("POST /profile/full-reset with confirm:true and locale=en returns locale=en", async () => {
+  const app = await boot();
+  const { token } = JSON.parse((await app.inject({ method: "POST", url: "/api/v1/users/register" })).body);
+  await app.inject({
+    method: "POST",
+    url: "/api/v1/threads",
+    headers: { ...headers(token), "content-type": "application/json" },
+    payload: JSON.stringify({ locale: "zh" }),
+  });
+  const r = await app.inject({
+    method: "POST",
+    url: "/api/v1/profile/full-reset",
+    headers: { ...headers(token), "content-type": "application/json" },
+    payload: JSON.stringify({ confirm: true, locale: "en" }),
+  });
+  assert.equal(r.statusCode, 200, r.body);
+  const body = JSON.parse(r.body);
+  assert.equal(body.ok, true);
+  assert.equal(body.locale, "en");
+  assert.ok(body.thread_id, "thread_id should be returned");
+});

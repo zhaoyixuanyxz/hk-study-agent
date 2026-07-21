@@ -1,4 +1,5 @@
 import { reportShareStatus } from "../store.js";
+import { resolveThreadLocale } from "../output-locale.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -13,7 +14,7 @@ export function registerHistoryRoutes(app, ctx) {
       thread_id: t.id,
       pinned: t.pinned === true,
       orchestration_state: t.orchestrationState,
-      locale: t.locale === "en" ? "en" : "zh",
+      locale: resolveThreadLocale(t),
       created_at: t.createdAt,
       updated_at: t.updatedAt,
     }));

@@ -7,7 +7,6 @@ import { normalizeLocale } from "./output-locale.js";
 import { ALL_STRUCTURED_FACT_KEYS, buildPlanInputView } from "./plan-input-service.js";
 import { buildProfileSnapshot } from "./profile-service.js";
 import { passesExtractionQuality } from "./intelligence/structured-extract.js";
-import { isUrlOnOfficialAllowlist } from "./intelligence/host-allowlist.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -189,7 +188,6 @@ export const INTELLIGENCE_COLLECTION_KEYS = [
   "intelligenceCollectionRuns",
   "intelligenceFeedUrls",
   "intelligenceReviewerEmails",
-  "intelligenceCrawlCandidates",
 ];
 
 /**
@@ -1416,90 +1414,6 @@ export function createStore(dataFile) {
       const db = load();
       ensureIntelligenceCollections(db);
       return db.intelligenceFeedUrls.slice();
-    },
-
-    /**
-     * @param {object} raw
-     * @returns {{ row: object, created: boolean }}
-     */
-    upsertCrawlCandidate(raw) {
-      const db = load();
-      ensureIntelligenceCollections(db);
-      const url = String(raw.canonicalUrl || raw.url || "").trim();
-      if (!url || !isUrlOnOfficialAllowlist(url)) return { row: null, created: false };
-      const now = new Date().toISOString();
-      const key = url.toLowerCase();
-      let idx = db.intelligenceCrawlCandidates.findIndex(
-        (x) => String(x.canonicalUrl || "").trim().toLowerCase() === key
-      );
-      if (idx >= 0) {
-        const prev = db.intelligenceCrawlCandidates[idx];
-        if (prev.status === "approved" || prev.status === "rejected") {
-          return { row: prev, created: false };
-        }
-        const row = {
-          ...prev,
-          ...raw,
-          id: prev.id,
-          canonicalUrl: url,
-          updatedAt: now,
-          status: prev.status || "pending",
-        };
-        db.intelligenceCrawlCandidates[idx] = row;
-        save(db);
-        return { row, created: false };
-      }
-      const row = {
-        id: raw.id || cryptoRandomId(),
-        feedId: raw.feedId || null,
-        canonicalUrl: url,
-        schoolId: raw.schoolId || null,
-        sourceId: raw.sourceId || null,
-        infoType: raw.infoType || "admission",
-        reason: String(raw.reason || "").slice(0, 400),
-        seedUrl: raw.seedUrl || null,
-        status: "pending",
-        discoveredAt: now,
-        decidedAt: null,
-        decidedBy: null,
-        createdAt: now,
-        updatedAt: now,
-      };
-      db.intelligenceCrawlCandidates.push(row);
-      save(db);
-      return { row, created: true };
-    },
-
-    /**
-     * @param {{ status?: string, limit?: number }} [opts]
-     */
-    listCrawlCandidates(opts = {}) {
-      const db = load();
-      ensureIntelligenceCollections(db);
-      let list = db.intelligenceCrawlCandidates.slice();
-      const status = String(opts.status || "").trim();
-      if (status) list = list.filter((x) => x.status === status);
-      const limit = Math.min(200, Math.max(1, Number(opts.limit) || 100));
-      return list.sort((a, b) => String(b.discoveredAt || "").localeCompare(String(a.discoveredAt || ""))).slice(0, limit);
-    },
-
-    /**
-     * @param {string} candidateId
-     * @param {"approve"|"reject"} decision
-     * @param {string} [reviewerEmail]
-     */
-    decideCrawlCandidate(candidateId, decision, reviewerEmail) {
-      const db = load();
-      ensureIntelligenceCollections(db);
-      const row = db.intelligenceCrawlCandidates.find((x) => x.id === candidateId);
-      if (!row) return null;
-      const now = new Date().toISOString();
-      row.status = decision === "approve" ? "approved" : "rejected";
-      row.decidedAt = now;
-      row.decidedBy = reviewerEmail || null;
-      row.updatedAt = now;
-      save(db);
-      return row;
     },
   };
 }

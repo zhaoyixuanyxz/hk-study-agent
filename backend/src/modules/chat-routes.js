@@ -1,6 +1,5 @@
 import { runProfileAgent } from "../agent.js";
 import { assessChatScope } from "../chat-scope.js";
-import { DEFAULT_DEEPSEEK_MODEL, resolveDeepseekBaseUrl } from "../deepseek-client.js";
 import { nextOrchestrationState } from "../orchestrator.js";
 import { runPhase2Pipeline } from "../phase2-pipeline.js";
 import { buildProfileProgress } from "../profile-progress.js";
@@ -168,8 +167,8 @@ export function registerChatRoutes(app, ctx) {
       historyOpenai: historyBefore,
       useMock,
       deepseekApiKey: key,
-      deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
-      deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
+      deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
+      deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
       memoryContext: memCtx,
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
@@ -200,8 +199,8 @@ export function registerChatRoutes(app, ctx) {
           gapsFromAgent: agentOut.gaps || [],
           useMock,
           deepseekApiKey: key,
-          deepseekBaseUrl: resolveDeepseekBaseUrl(process.env.DEEPSEEK_BASE_URL),
-          deepseekModel: process.env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
+          deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
+          deepseekModel: process.env.DEEPSEEK_MODEL || "deepseek-chat",
         });
       } catch (e) {
         request.log.error(e);
