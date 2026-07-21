@@ -6,6 +6,12 @@ import { computeDedupeHash, normalizeIntelligenceItem } from "./normalization-se
 import { loadSourcesRegistry } from "./source-registry.js";
 import { runRealCrawl } from "./real-crawler.js";
 import { buildCrawlFeeds } from "./crawl-registry.js";
+import { isLlmSelectEnabled, selectFeedsForCrawl, getSelectMaxFeeds } from "./crawl-select.js";
+import {
+  approvedCandidatesToFeeds,
+  isLlmDiscoverEnabled,
+  runCrawlDiscover,
+} from "./crawl-discover.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "..", "data", "intelligence");
@@ -75,8 +81,34 @@ function mockIngestFromFeed(feed) {
 }
 
 /**
+ * 可爬名单 = 注册表/feed 文件 ∪ 已批准发现候选（未批准候选不在此列）。
  * @param {ReturnType<import("../store.js").createStore>} store
- * @param {{ fetchEnabled?: boolean, maxFetch?: number }} [opts]
+ */
+export function buildCrawlableFeedPool(store) {
+  const fileFeeds = loadFeedUrlsFile().feeds;
+  const base = fileFeeds.length ? fileFeeds : buildCrawlFeeds();
+  const byId = new Map();
+  for (const f of base) {
+    if (f?.id) byId.set(String(f.id), f);
+  }
+  const approved = approvedCandidatesToFeeds(store.listCrawlCandidates({ status: "approved", limit: 200 }));
+  for (const f of approved) {
+    if (f?.id && !byId.has(String(f.id))) byId.set(String(f.id), f);
+  }
+  return [...byId.values()];
+}
+
+/**
+ * @param {ReturnType<import("../store.js").createStore>} store
+ * @param {{
+ *   fetchEnabled?: boolean,
+ *   maxFetch?: number,
+ *   respectPreflight?: boolean,
+ *   llmSelect?: boolean,
+ *   discover?: boolean,
+ *   discoverOnly?: boolean,
+ *   fetchImpl?: typeof fetch,
+ * }} [opts]
  */
 export async function runIngestion(store, opts = {}) {
   const crawlMode = String(process.env.INTELLIGENCE_CRAWL_MODE || "real").toLowerCase();
@@ -84,15 +116,70 @@ export async function runIngestion(store, opts = {}) {
     opts.fetchEnabled ?? (process.env.INTELLIGENCE_FETCH === "1" || process.env.INTELLIGENCE_FETCH === "true");
 
   if (fetchEnabled && crawlMode !== "legacy") {
-    const feeds = loadFeedUrlsFile().feeds;
-    const registryFeeds = feeds.length ? feeds : buildCrawlFeeds();
+    let discoverResult = null;
+    if (isLlmDiscoverEnabled(opts) || opts.discoverOnly) {
+      discoverResult = await runCrawlDiscover(store, {
+        fetchImpl: opts.fetchImpl,
+        useLlm: Boolean(String(process.env.DEEPSEEK_API_KEY || "").trim()),
+        deepseekApiKey: process.env.DEEPSEEK_API_KEY,
+      });
+    }
+    if (opts.discoverOnly) {
+      return {
+        run: null,
+        itemsIngested: 0,
+        itemsUpdated: 0,
+        itemsSkippedQuality: 0,
+        skippedPreflight: 0,
+        skippedFeeds: [],
+        fetchEnabled: true,
+        fetchCount: 0,
+        errors: discoverResult?.errors || [],
+        mode: "discover_only",
+        discover: discoverResult,
+        select: null,
+      };
+    }
+
+    const pool = buildCrawlableFeedPool(store);
+    const maxFetch = Math.min(
+      56,
+      Math.max(1, Number(opts.maxFetch || process.env.INTELLIGENCE_FETCH_MAX || getSelectMaxFeeds()))
+    );
+    let selectedFeeds = pool;
+    let selectMeta = { mode: "all", reasons: [] };
+    if (isLlmSelectEnabled(opts)) {
+      const publishedOrAny = store.listIntelligenceItems({ publishedOnly: false, limit: 500 });
+      selectMeta = await selectFeedsForCrawl(pool, {
+        max: Math.min(maxFetch, getSelectMaxFeeds()),
+        items: publishedOrAny,
+        useLlm: Boolean(String(process.env.DEEPSEEK_API_KEY || "").trim()),
+        deepseekApiKey: process.env.DEEPSEEK_API_KEY,
+      });
+      selectedFeeds = selectMeta.feeds;
+    } else {
+      selectedFeeds = pool.slice(0, maxFetch);
+      selectMeta = { mode: "truncated", reasons: ["llm_select_off"] };
+    }
+
     const respectPreflight = opts.respectPreflight !== false;
-    return runRealCrawl(store, {
+    const crawl = await runRealCrawl(store, {
       ...opts,
       fetchEnabled: true,
-      feeds: registryFeeds,
+      feeds: selectedFeeds,
+      maxFetch,
       respectPreflight,
     });
+    return {
+      ...crawl,
+      select: {
+        mode: selectMeta.mode,
+        reasons: selectMeta.reasons,
+        feed_ids: selectedFeeds.map((f) => f.id),
+        pool_size: pool.length,
+      },
+      discover: discoverResult,
+    };
   }
   const maxFetch = Math.min(50, Math.max(1, Number(opts.maxFetch || process.env.INTELLIGENCE_FETCH_MAX || DEFAULT_MAX_FETCH)));
   const ks = createKnowledgeStore(store);

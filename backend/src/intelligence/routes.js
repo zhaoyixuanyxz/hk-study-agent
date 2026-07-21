@@ -124,6 +124,7 @@ export function registerIntelligenceRoutes(app, deps) {
         pending_review: store.listIntelligenceItemsByReviewStatus({ reviewStatus: "pending_review", limit: 500 })
           .length,
         published: store.listIntelligenceItems({ publishedOnly: true, limit: 5000 }).length,
+        crawl_candidates_pending: store.listCrawlCandidates({ status: "pending", limit: 500 }).length,
       },
     };
   });
@@ -170,7 +171,21 @@ export function registerIntelligenceRoutes(app, deps) {
     assertReviewer(store, user);
     const body = request.body && typeof request.body === "object" ? request.body : {};
     const respectPreflight = body.respect_preflight !== false && body.respectPreflight !== false;
-    const result = await runIngestion(store, { respectPreflight });
+    const discoverOnly = body.discover_only === true || body.discoverOnly === true;
+    const discover =
+      body.discover === true || body.discover === "1" || process.env.INTELLIGENCE_LLM_DISCOVER === "1";
+    const llmSelect =
+      body.llm_select !== false &&
+      body.llmSelect !== false &&
+      String(process.env.INTELLIGENCE_LLM_SELECT ?? "1") !== "0";
+    const maxFeeds = body.max_feeds ?? body.maxFeeds;
+    const result = await runIngestion(store, {
+      respectPreflight,
+      llmSelect,
+      discover: discoverOnly ? false : discover,
+      discoverOnly,
+      maxFetch: maxFeeds != null ? Number(maxFeeds) : undefined,
+    });
     return {
       ok: true,
       items_ingested: result.itemsIngested,
@@ -180,7 +195,55 @@ export function registerIntelligenceRoutes(app, deps) {
       skipped_feeds: result.skippedFeeds ?? [],
       run_id: result.run?.id,
       fetch_enabled: result.fetchEnabled,
+      mode: result.mode,
+      select: result.select || null,
+      discover: result.discover
+        ? { created: result.discover.created, errors: (result.discover.errors || []).slice(0, 5) }
+        : null,
       errors: (result.errors || []).slice(0, 10),
+    };
+  });
+
+  app.get("/api/v1/intelligence/admin/crawl-candidates", async (request) => {
+    const user = await auth(request);
+    assertReviewer(store, user);
+    const status = String(request.query?.status || "pending").trim();
+    const rows = store.listCrawlCandidates({ status: status === "all" ? "" : status, limit: 100 });
+    return {
+      items: rows.map((c) => ({
+        candidate_id: c.id,
+        feed_id: c.feedId,
+        url: c.canonicalUrl,
+        school_id: c.schoolId,
+        source_id: c.sourceId,
+        info_type: c.infoType,
+        reason: c.reason,
+        status: c.status,
+        seed_url: c.seedUrl,
+        discovered_at: c.discoveredAt,
+      })),
+    };
+  });
+
+  app.post("/api/v1/intelligence/admin/crawl-candidates/decide", async (request, reply) => {
+    const user = await auth(request);
+    assertReviewer(store, user);
+    const body = request.body && typeof request.body === "object" ? request.body : {};
+    const candidateId = String(body.candidate_id || body.candidateId || "").trim();
+    const decision = String(body.decision || "").trim();
+    if (!candidateId || !["approve", "reject"].includes(decision)) {
+      return reply.status(400).send({ code: "bad_request", message: "candidate_id 与 decision(approve|reject) 必填" });
+    }
+    const row = store.decideCrawlCandidate(candidateId, decision, user.email);
+    if (!row) {
+      return reply.status(404).send({ code: "not_found", message: "候选不存在" });
+    }
+    return {
+      ok: true,
+      candidate_id: row.id,
+      status: row.status,
+      feed_id: row.feedId,
+      url: row.canonicalUrl,
     };
   });
 

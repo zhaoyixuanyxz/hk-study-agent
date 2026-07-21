@@ -271,19 +271,47 @@ export async function runAdminPreflightUrls() {
 export async function runAdminSafeCollect() {
   const status = el("admin-intel-status");
   const btn = el("admin-intel-collect");
-  if (status) status.textContent = "安全采集中（跳过探活失败链接，不覆盖劣质正文）…";
+  if (status) status.textContent = "安全采集中（LLM/启发式选题，跳过探活失败链接）…";
   if (btn) btn.disabled = true;
   try {
     const data = await api("/api/v1/intelligence/admin/collect", {
       method: "POST",
-      body: { respect_preflight: true },
+      body: { respect_preflight: true, llm_select: true, discover: false },
     });
     const { formatAdminCollectResult } = await import("../copy.js");
-    if (status) status.textContent = formatAdminCollectResult(data);
+    let msg = formatAdminCollectResult(data);
+    if (data.select?.feed_ids?.length) {
+      msg += `；本轮选题 ${data.select.feed_ids.length} 条（${data.select.mode || ""}）`;
+    }
+    if (status) status.textContent = msg;
     track("admin_intel_collect", {
       ingested: data.items_ingested,
       skipped_preflight: data.skipped_preflight,
+      select_mode: data.select?.mode,
     });
+    await loadAdminIntelligencePage();
+    return data;
+  } catch (e) {
+    if (status) status.textContent = String(e.message || e);
+    throw e;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+export async function runAdminDiscover() {
+  const status = el("admin-intel-status");
+  const btn = el("admin-intel-discover");
+  if (status) status.textContent = "同域发现中（仅写候选池，不爬未批准 URL）…";
+  if (btn) btn.disabled = true;
+  try {
+    const data = await api("/api/v1/intelligence/admin/collect", {
+      method: "POST",
+      body: { discover_only: true },
+    });
+    const n = data.discover?.created ?? 0;
+    if (status) status.textContent = `发现完成：新增候选 ${n} 条（需先批准 URL 才会进入可爬名单）`;
+    track("admin_intel_discover", { created: n });
     await loadAdminIntelligencePage();
     return data;
   } catch (e) {
@@ -299,6 +327,7 @@ export async function loadAdminIntelligencePage() {
   const queueBox = el("admin-intel-queue");
   const statsBox = el("admin-intel-stats");
   const sourcesBox = el("admin-intel-sources");
+  const candBox = el("admin-intel-candidates");
   if (status) status.textContent = "加载运营后台…";
   try {
     await loadAdminPreflightSummary();
@@ -306,6 +335,7 @@ export async function loadAdminIntelligencePage() {
     if (statsBox) {
       statsBox.innerHTML = `<p>待审核：<strong>${ws.stats?.pending_review ?? 0}</strong></p>
         <p>已上线：<strong>${ws.stats?.published ?? 0}</strong></p>
+        <p>发现候选待批：<strong>${ws.stats?.crawl_candidates_pending ?? 0}</strong></p>
         <p>审核员：${(ws.reviewers || []).map(escapeHtml).join(", ") || "（环境变量配置）"}</p>`;
     }
     if (sourcesBox) {
@@ -317,6 +347,47 @@ export async function loadAdminIntelligencePage() {
         .join("");
       sourcesBox.innerHTML = `<p><strong>来源白名单</strong></p><ul>${srcLines}</ul>
         <p><strong>采集 URL</strong></p><ul>${feedLines || "<li>暂无</li>"}</ul>`;
+    }
+    if (candBox) {
+      const candRes = await api("/api/v1/intelligence/admin/crawl-candidates?status=pending");
+      const cands = candRes.items || [];
+      candBox.innerHTML = cands.length
+        ? cands
+            .map(
+              (c) => `<div class="admin-queue-row" data-candidate-id="${escapeHtml(c.candidate_id)}">
+              <div><strong>${escapeHtml(c.school_id || "")} · ${escapeHtml(c.info_type || "")}</strong>
+                <p><a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.url)}</a></p>
+                <p class="meta">${escapeHtml(c.reason || "")}</p></div>
+              <div class="admin-queue-actions">
+                <button type="button" class="btn btn-primary btn-tiny btn-cand-approve" data-id="${escapeHtml(c.candidate_id)}">批准 URL</button>
+                <button type="button" class="btn btn-ghost btn-tiny btn-cand-reject" data-id="${escapeHtml(c.candidate_id)}">拒绝</button>
+              </div>
+            </div>`
+            )
+            .join("")
+        : '<p class="placeholder">暂无待批发现候选。可点击「发现同域链接」。</p>';
+      candBox.querySelectorAll(".btn-cand-approve").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!id) return;
+          await api("/api/v1/intelligence/admin/crawl-candidates/decide", {
+            method: "POST",
+            body: { candidate_id: id, decision: "approve" },
+          });
+          loadAdminIntelligencePage();
+        });
+      });
+      candBox.querySelectorAll(".btn-cand-reject").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!id) return;
+          await api("/api/v1/intelligence/admin/crawl-candidates/decide", {
+            method: "POST",
+            body: { candidate_id: id, decision: "reject" },
+          });
+          loadAdminIntelligencePage();
+        });
+      });
     }
     const queueRes = await api("/api/v1/intelligence/review/queue?status=pending_review");
     const items = queueRes.items || [];

@@ -27,19 +27,25 @@ describe("real crawl structured extract", () => {
     assert.ok(passesExtractionQuality(text, structured));
   });
 
-  it("buildItemFromCrawl produces auto_published official item", () => {
+  it("buildItemFromCrawl defaults to pending_review when auto-publish off", () => {
+    const prev = process.env.INTELLIGENCE_AUTO_PUBLISH;
+    process.env.INTELLIGENCE_AUTO_PUBLISH = "0";
     const item = buildItemFromCrawl(
       { id: "hku-tuition", url: "https://www.hku.hk/fees", sourceId: "hku-official", schoolIds: ["hku"], infoType: "tuition" },
       { html: SAMPLE_HTML, finalUrl: "https://www.hku.hk/fees" }
     );
     assert.equal(item.sourceId, "hku-official");
-    assert.equal(item.reviewStatus, "auto_published");
+    assert.equal(item.reviewStatus, "pending_review");
     assert.ok(item.structured?.fees?.length);
     assert.ok(item.contentHash);
     assert.ok(item.locale?.contentText?.length > 50);
+    if (prev == null) delete process.env.INTELLIGENCE_AUTO_PUBLISH;
+    else process.env.INTELLIGENCE_AUTO_PUBLISH = prev;
   });
 
-  it("runRealCrawl upserts with mock fetch", async () => {
+  it("runRealCrawl upserts pending_review with mock fetch", async () => {
+    const prev = process.env.INTELLIGENCE_AUTO_PUBLISH;
+    process.env.INTELLIGENCE_AUTO_PUBLISH = "0";
     const dir = mkdtempSync(join(tmpdir(), "crawl-test-"));
     const dbPath = join(dir, "db.json");
     const store = createStore(dbPath);
@@ -65,8 +71,12 @@ describe("real crawl structured extract", () => {
     });
     assert.equal(result.fetchCount, 1);
     assert.ok(result.itemsIngested + result.itemsUpdated >= 1);
-    const items = store.listIntelligenceItems({ publishedOnly: true, limit: 10 });
-    assert.ok(items.some((i) => i.feedId === "hku-tuition"));
+    const pending = store.listIntelligenceItemsByReviewStatus({ reviewStatus: "pending_review", limit: 10 });
+    assert.ok(pending.some((i) => i.feedId === "hku-tuition"));
+    const published = store.listIntelligenceItems({ publishedOnly: true, limit: 10 });
+    assert.equal(published.some((i) => i.feedId === "hku-tuition"), false);
+    if (prev == null) delete process.env.INTELLIGENCE_AUTO_PUBLISH;
+    else process.env.INTELLIGENCE_AUTO_PUBLISH = prev;
     rmSync(dir, { recursive: true, force: true });
   });
 });

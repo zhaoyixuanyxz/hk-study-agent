@@ -32,6 +32,19 @@ test("V3-VIS normalizePlanVisuals round-trip", () => {
   assert.ok(norm?.timelineMilestones?.length >= 2);
 });
 
+test("V3-VIS normalizePlanVisuals rescales raw GPA bar to /4 percent index", () => {
+  const norm = normalizePlanVisuals({
+    benchmarkBars: [
+      { label: "GPA相对位置 (/4.0)", value: 3, max: 100 },
+      { label: "申请材料完整度预估", value: 70, max: 100 },
+      { label: "GPA 相对位置", value: 75, max: 100 },
+    ],
+  });
+  assert.equal(norm?.benchmarkBars?.[0]?.value, 75);
+  assert.equal(norm?.benchmarkBars?.[1]?.value, 70);
+  assert.equal(norm?.benchmarkBars?.[2]?.value, 75);
+});
+
 test("V3-VIS buildMockStructuredPlan includes visuals", () => {
   const plan = buildMockStructuredPlan(readyPiv, []);
   assert.ok(plan.visuals?.tierComparison);

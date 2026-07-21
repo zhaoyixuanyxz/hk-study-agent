@@ -53,9 +53,17 @@ export function buildItemFromCrawl(feed, page) {
   const contentHash = computeContentHash(text);
   const source = getSourceById(feed.sourceId);
   const qualityOk = passesExtractionQuality(text, structured);
-  const reviewStatus =
-    source?.tier === "official" && qualityOk ? "auto_published" : qualityOk ? "approved" : "pending_review";
-
+  const autoPublish =
+    String(process.env.INTELLIGENCE_AUTO_PUBLISH || "0").trim() === "1" ||
+    String(process.env.INTELLIGENCE_AUTO_PUBLISH || "").toLowerCase() === "true";
+  let reviewStatus = "pending_review";
+  if (qualityOk && autoPublish) {
+    reviewStatus = source?.tier === "official" ? "auto_published" : "approved";
+  } else if (!qualityOk) {
+    reviewStatus = "pending_review";
+  } else {
+    reviewStatus = "pending_review";
+  }
   const { schools } = loadSchoolsRegistry();
   const school = schools.find((s) => s.id === schoolId);
   const titleZh =
