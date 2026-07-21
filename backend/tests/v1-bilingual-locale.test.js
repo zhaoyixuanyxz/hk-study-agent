@@ -190,3 +190,20 @@ test("mock plan uses Chinese labels by default", () => {
   assert.equal(plan.tiers.match.label, "匹配");
   assert.equal(plan.tiers.safety.label, "保底");
 });
+
+import { buildMockHtmlReport } from "../src/report-service.js";
+
+test("mock report uses English chapter titles when locale=en", () => {
+  const report = buildMockHtmlReport({}, { tiers: {} }, { locale: "en" });
+  assert.ok(report);
+  assert.equal(report.title, "Study Application Planning Report (auto-generated)");
+  assert.equal(report.chapters[0].title, "Overview & Executive Summary");
+  assert.equal(report.chapters[4].title, "Risk, Budget & Timeline");
+  assert.match(report.html, /Parent Decision Summary/);
+  assert.match(report.html, /Student Action Plan \(30 \/ 60 \/ 90 days\)/);
+  assert.match(report.html, /Risk Dashboard/);
+  for (const ch of report.chapters) {
+    assert.doesNotMatch(ch.title, /第.*章/);
+    assert.doesNotMatch(ch.title, /概述|画像|免责声明/);
+  }
+});
