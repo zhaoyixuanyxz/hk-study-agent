@@ -5,7 +5,6 @@ import { el } from "./lib/dom.js";
 import {
   loadAdminIntelligencePage,
   loadIntelligencePage,
-  runAdminDiscover,
   runAdminPreflightUrls,
   runAdminSafeCollect,
 } from "./pages/intelligence.js";
@@ -34,7 +33,6 @@ el("intel-search-form")?.addEventListener("submit", (ev) => {
 
 el("refresh-admin-intel")?.addEventListener("click", () => loadAdminIntelligencePage());
 el("admin-intel-preflight")?.addEventListener("click", () => runAdminPreflightUrls());
-el("admin-intel-discover")?.addEventListener("click", () => runAdminDiscover());
 el("admin-intel-collect")?.addEventListener("click", () => runAdminSafeCollect());
 
 document.querySelectorAll(".nav-link").forEach((a) => {
