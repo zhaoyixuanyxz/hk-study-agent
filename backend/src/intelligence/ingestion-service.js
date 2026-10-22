@@ -6,6 +6,7 @@ import { computeDedupeHash, normalizeIntelligenceItem } from "./normalization-se
 import { loadSourcesRegistry } from "./source-registry.js";
 import { runRealCrawl } from "./real-crawler.js";
 import { buildCrawlFeeds } from "./crawl-registry.js";
+import { resolveCollectionTrigger } from "./collection-trigger.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "..", "data", "intelligence");
@@ -154,6 +155,7 @@ export async function runIngestion(store, opts = {}) {
     errorMessage: errors.length ? errors.slice(0, 3).join("; ") : null,
     startedAt,
     finishedAt,
+    trigger: resolveCollectionTrigger(process.env),
   });
 
   return { run, itemsIngested, fetchEnabled, errors };

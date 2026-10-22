@@ -1302,9 +1302,12 @@ export function createStore(dataFile) {
       ensureIntelligenceCollections(db);
       const id = cryptoRandomId();
       const now = new Date().toISOString();
+      const triggerRaw = run.trigger != null ? String(run.trigger).trim() : "";
+      const trigger = triggerRaw === "scheduler" ? "scheduler" : "manual";
       const row = {
         id,
         status: String(run.status || "completed").slice(0, 40),
+        trigger,
         itemsIngested: Number(run.itemsIngested) || 0,
         errorMessage: run.errorMessage != null ? String(run.errorMessage).slice(0, 500) : null,
         startedAt: String(run.startedAt || now),
@@ -1314,6 +1317,19 @@ export function createStore(dataFile) {
       db.intelligenceCollectionRuns.push(row);
       save(db);
       return row;
+    },
+
+    /**
+     * @param {{ limit?: number }} [opts]
+     */
+    listIntelligenceCollectionRuns(opts = {}) {
+      const db = load();
+      ensureIntelligenceCollections(db);
+      const limit = Math.min(5000, Math.max(1, Number(opts.limit) || 500));
+      return db.intelligenceCollectionRuns
+        .slice()
+        .sort((a, b) => new Date(b.finishedAt || 0) - new Date(a.finishedAt || 0))
+        .slice(0, limit);
     },
 
     /**

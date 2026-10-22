@@ -76,11 +76,22 @@ PRODUCTION_BASE_URL=https://YOUR_DOMAIN node scripts/production-smoke.mjs
 
 ## 8. 情报每日采集（cron）
 
+装在 **API 所在服务器**（不要装在操作者 Windows 本机）。时区 `Asia/Hong_Kong`。正常路径是调度器触发；操作者在终端无 `COLLECTION_TRIGGER=scheduler` 的手工跑记为 `manual`，不计入 7 日门禁。
+
+在放置 `docker-compose.prod.yml` 的仓库根目录执行（把 `/path/to/repo` 换成真实路径）：
+
 ```bash
-0 6 * * * cd /path/to/repo/backend && INTELLIGENCE_FETCH=1 INTELLIGENCE_FETCH_MAX=56 npm run intelligence:daily >> /var/log/intel-daily.log 2>&1
+CRON_TZ=Asia/Hong_Kong
+0 6 * * * cd /path/to/repo && docker compose -f docker-compose.prod.yml exec -T -e INTELLIGENCE_FETCH=1 -e INTELLIGENCE_FETCH_MAX=56 -e COLLECTION_TRIGGER=scheduler api npm run intelligence:daily >> /var/log/intel-daily.log 2>&1
 ```
 
-首次部署前执行 `npm run intelligence:sync-feeds` 生成 `backend/data/intelligence/*.json`。
+说明：
+
+- 必须进正在跑的 `api` 容器，才能写到卷 `app-data` 里的同一份数据。
+- `COLLECTION_TRIGGER=scheduler` 不可省略，否则批次记为 `manual`。
+- 容器未启动时本轮不写批次，该日门禁缺一天；不要用无标记的手工跑冒充调度。
+
+首次部署前仍执行 `npm run intelligence:sync-feeds`（或容器内等价命令）生成 `backend/data/intelligence/*.json`。
 
 ## 9. Postgres 预留
 

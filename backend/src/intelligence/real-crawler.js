@@ -12,6 +12,7 @@ import { normalizeIntelligenceItem } from "./normalization-service.js";
 import { getSourceById } from "./source-registry.js";
 import { loadSchoolsRegistry } from "./source-registry.js";
 import { getFailedFeedIdSet, loadPreflightLast } from "./url-preflight.js";
+import { resolveCollectionTrigger } from "./collection-trigger.js";
 
 const FETCH_TIMEOUT_MS = 20_000;
 
@@ -156,6 +157,7 @@ export async function runRealCrawl(store, opts = {}) {
     errorMessage: errors.length ? errors.slice(0, 5).join("; ") : null,
     startedAt,
     finishedAt,
+    trigger: resolveCollectionTrigger(process.env),
   });
 
   return {
