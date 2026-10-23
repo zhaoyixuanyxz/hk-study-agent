@@ -9,6 +9,7 @@
     "test": "node --test tests/api.test.js",
     "test:us4-collection": "node --test tests/us4-scheduled-collection.test.js",
     "test:us1-fact-check": "node --test tests/us1-fact-check-dates.test.js",
+    "test:us2-parent-share": "node --test tests/us2-parent-share-states.test.js",
     "test:us3-report-expiry": "node --test tests/us3-report-expiry.test.js",
     "verify:p0": "node scripts/verify-v1-p0.mjs",
     "verify:v1-p1": "node scripts/verify-v1-p1.mjs",
