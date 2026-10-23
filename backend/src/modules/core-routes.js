@@ -1,4 +1,15 @@
 import { escapeHtmlAttr } from "./context.js";
+import { hongKongCalendarDate } from "../intelligence/collection-trigger.js";
+import {
+  presentReportHtmlForAsOf,
+  factContentFingerprint,
+  itemSummary,
+} from "../intelligence/fact-check-table.js";
+import {
+  evaluateReportFreshness,
+  renderClosedOrInvalidShareHtml,
+  renderExpiredShareHtml,
+} from "../intelligence/report-freshness.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -16,11 +27,43 @@ export function registerCoreRoutes(app, ctx) {
       return reply
         .status(404)
         .type("text/html; charset=utf-8")
-        .send(
-          "<!DOCTYPE html><html lang=\"zh-Hans\"><head><meta charset=\"utf-8\"/><title>报告不可用</title></head><body><p>分享链接已关闭或无效。</p></body></html>"
-        );
+        .send(renderClosedOrInvalidShareHtml());
     }
+
+    const asOfDate = hongKongCalendarDate(new Date().toISOString());
+    const latest = store.getLatestProfileSnapshot(row.userId);
+    let freshness;
+    try {
+      freshness = evaluateReportFreshness({
+        report: row,
+        latestSnapshotId: latest?.id || null,
+        asOfDate,
+        getItem: (itemId) => {
+          const item = store.getIntelligenceItem(itemId);
+          if (!item) return null;
+          const summary = itemSummary(item);
+          return {
+            fetchedAt: item.fetchedAt,
+            summary,
+            contentFingerprint: factContentFingerprint(summary),
+          };
+        },
+      });
+    } catch (err) {
+      request.log?.error?.(err);
+      freshness = { fresh: false, reason: "eval_error" };
+    }
+
+    if (!freshness.fresh) {
+      return reply.type("text/html; charset=utf-8").send(renderExpiredShareHtml());
+    }
+
     store.incrementReportShareView(row.id);
+    const presented = presentReportHtmlForAsOf({
+      html: row.html,
+      factCheckRows: row.factCheckRows || [],
+      asOfDate,
+    });
     const title = escapeHtmlAttr((row.title && String(row.title).trim()) || "留学规划报告");
     const banner = `<div class="share-privacy-banner" role="alert" style="background:#fff3cd;border:1px solid #856404;padding:12px 14px;margin-bottom:16px;font-family:system-ui,sans-serif;font-size:14px;line-height:1.55;color:#333"><strong>隐私提示：</strong>本页含个人留学申请相关信息，仅供受邀阅读；请勿转发给无关第三方。</div>`;
     const doc = `<!DOCTYPE html>
@@ -36,7 +79,7 @@ export function registerCoreRoutes(app, ctx) {
   a { color: #1565c0; }
 </style>
 </head>
-<body>${banner}${row.html}</body>
+<body>${banner}${presented.html}</body>
 </html>`;
     return reply.type("text/html; charset=utf-8").send(doc);
   });

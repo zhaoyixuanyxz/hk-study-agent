@@ -6,6 +6,13 @@ import {
 } from "../report-service.js";
 import { renderHtmlToPdf } from "../pdf-service.js";
 import { buildCombinedIntelContext } from "../intelligence/intelContextPack.js";
+import { hongKongCalendarDate } from "../intelligence/collection-trigger.js";
+import {
+  presentReportHtmlForAsOf,
+  factContentFingerprint,
+  itemSummary,
+} from "../intelligence/fact-check-table.js";
+import { evaluateReportFreshness } from "../intelligence/report-freshness.js";
 
 /**
  * @param {import("fastify").FastifyInstance} app
@@ -67,6 +74,8 @@ export function registerReportRoutes(app, ctx) {
       intelContextText: intelPack.text,
       intelItems: intelPack.items,
       extKbEntries: intelPack.extKbEntries,
+      collectionRuns: store.listIntelligenceCollectionRuns({ limit: 500 }),
+      asOfDate: hongKongCalendarDate(new Date().toISOString()),
     });
 
     if (!gen.ok) {
@@ -91,6 +100,7 @@ export function registerReportRoutes(app, ctx) {
       visuals: gen.report.visuals || null,
       chapterCount: 7,
       wordCount: gen.report.wordCount,
+      factCheckRows: Array.isArray(gen.report.factCheckRows) ? gen.report.factCheckRows : [],
     });
 
     return {
@@ -198,6 +208,28 @@ export function registerReportRoutes(app, ctx) {
       err.payload = { code: "report_not_found", message: "报告不存在或无权访问" };
       throw err;
     }
+    const asOfDate = hongKongCalendarDate(new Date().toISOString());
+    const presented = presentReportHtmlForAsOf({
+      html: r.html,
+      factCheckRows: r.factCheckRows || [],
+      asOfDate,
+    });
+    const latest = store.getLatestProfileSnapshot(user.id);
+    const freshness = evaluateReportFreshness({
+      report: r,
+      latestSnapshotId: latest?.id || null,
+      asOfDate,
+      getItem: (itemId) => {
+        const item = store.getIntelligenceItem(itemId);
+        if (!item) return null;
+        const summary = itemSummary(item);
+        return {
+          fetchedAt: item.fetchedAt,
+          summary,
+          contentFingerprint: factContentFingerprint(summary),
+        };
+      },
+    });
     return {
       ok: true,
       report_id: r.id,
@@ -218,8 +250,10 @@ export function registerReportRoutes(app, ctx) {
         reportShareStatus(r) === "active" && r.share?.token
           ? `/api/v1/public/reports/${encodeURIComponent(r.share.token)}`
           : null,
-      html: r.html,
+      html: presented.html,
+      fact_check_rows: presented.rows,
       visuals: r.visuals || null,
+      freshness,
     };
   });
 }
