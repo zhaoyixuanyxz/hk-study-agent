@@ -227,6 +227,7 @@ export function normalizeReportResultInPlace(r) {
   if (r.title == null) r.title = "";
   else r.title = String(r.title);
   if (!Array.isArray(r.citations)) r.citations = [];
+  if (!Array.isArray(r.factCheckRows)) r.factCheckRows = [];
   if (!r.share || typeof r.share !== "object") r.share = defaultReportShare();
   else {
     const s = r.share;
@@ -999,6 +1000,7 @@ export function createStore(dataFile) {
         visuals: row.visuals && typeof row.visuals === "object" ? row.visuals : null,
         chapterCount: row.chapterCount ?? 7,
         wordCount: row.wordCount ?? 0,
+        factCheckRows: Array.isArray(row.factCheckRows) ? row.factCheckRows : [],
         createdAt: now,
         share: defaultReportShare(),
       };

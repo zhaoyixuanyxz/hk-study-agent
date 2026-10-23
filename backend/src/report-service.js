@@ -5,6 +5,11 @@ import {
 } from "./citation-utils.js";
 import { loadPromptText } from "./promptLayer.js";
 import { buildMockReportVisuals, normalizeReportVisuals } from "./visuals-normalize.js";
+import {
+  buildFactCheckTable,
+  injectFactCheckIntoReportHtml,
+} from "./intelligence/fact-check-table.js";
+import { hongKongCalendarDate } from "./intelligence/collection-trigger.js";
 
 export const REPORT_RESULT_SCHEMA_VERSION = "2.0";
 
@@ -381,8 +386,22 @@ function parseReportJson(content) {
  *   intelContextText?: string,
  *   intelItems?: object[],
  *   extKbEntries?: object[],
+ *   collectionRuns?: object[],
+ *   asOfDate?: string,
  * }} opts
  */
+function attachFactCheckToReport(report, opts) {
+  const fact = buildFactCheckTable({
+    items: opts.intelItems || [],
+    runs: opts.collectionRuns || [],
+    asOfDate: opts.asOfDate || hongKongCalendarDate(new Date().toISOString()),
+  });
+  report.html = injectFactCheckIntoReportHtml(report.html, fact.tableHtml);
+  report.factCheckRows = fact.rows;
+  report.wordCount = countReportTextChars(report.html);
+  return report;
+}
+
 export async function generateHtmlReport(snapshot, plan, opts) {
   const baseCites = planCitations(plan);
   const intelItems = opts.intelItems || [];
@@ -393,6 +412,7 @@ export async function generateHtmlReport(snapshot, plan, opts) {
     let cites = normalizeCitations([...(report.citations || []), ...baseCites], 12);
     cites = filterCitationsAgainstCombinedSources(cites, intelItems, extKbEntries);
     report.citations = cites;
+    attachFactCheckToReport(report, opts);
     return { ok: true, report };
   }
 
@@ -408,7 +428,7 @@ export async function generateHtmlReport(snapshot, plan, opts) {
     loadPromptText("report.txt") ||
     "你是留学规划顾问写作助手。只输出一个 JSON 对象，不要 markdown。";
 
-  let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组；补充引用时 itemId 与 url 须来自下方情报上下文，不要编造失效链接。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
+  let user = `请基于以下画像快照（snapshot）与方案（plan，结构化 JSON）撰写 JSON 报告。方案内 plan.citations 若有条目，应择优纳入 citations 数组；补充引用时 itemId 与 url 须来自下方情报上下文，不要编造失效链接。学费与申请截止日期的正式数字仅以报告中「学费与截止日期核对」表为准；章节正文不要写可当真的具体学费金额或截止日期数字。\n\nsnapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nplan:\n${JSON.stringify(plan, null, 2)}`;
   if (opts.intelContextText && String(opts.intelContextText).trim()) {
     user += `\n\n${String(opts.intelContextText).slice(0, 8000)}`;
   }
@@ -503,17 +523,16 @@ export async function generateHtmlReport(snapshot, plan, opts) {
   const disclaimer =
     String(parsed.disclaimer || "").trim() || String(plan.disclaimer || DEFAULT_REPORT_DISCLAIMER);
 
-  return {
-    ok: true,
-    report: {
-      schemaVersion: String(parsed.schemaVersion || REPORT_RESULT_SCHEMA_VERSION),
-      title: String(parsed.title || "留学申请规划报告（自动生成）"),
-      chapters,
-      html,
-      wordCount,
-      disclaimer,
-      citations: mergedCitations,
-      visuals: deliveryNorm?.visuals || null,
-    },
+  const report = {
+    schemaVersion: String(parsed.schemaVersion || REPORT_RESULT_SCHEMA_VERSION),
+    title: String(parsed.title || "留学申请规划报告（自动生成）"),
+    chapters,
+    html,
+    wordCount,
+    disclaimer,
+    citations: mergedCitations,
+    visuals: deliveryNorm?.visuals || null,
   };
+  attachFactCheckToReport(report, opts);
+  return { ok: true, report };
 }
